@@ -203,10 +203,10 @@ def run_with_keyboard(trial_index):
     vis.start_simulation_with_keyboard(trial_index)
 
 def run_from_data():
-    working_dir = 'data/tmp'
-    generation = '100'
-    trial_index = 1
-    genotype_index = 0
+    working_dir = 'data/dyadic_exp'
+    generation = '005'
+    trial_index = 0
+    genotype_index = 50
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
     sim = Simulation.load_from_file(sim_json_filepath)
