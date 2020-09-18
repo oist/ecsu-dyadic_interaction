@@ -48,7 +48,7 @@ def plot_behavior(trial_data):
                     label='Tracker position')
         # ax.set_xlim(0, trial_data['env_width'])
         # ax.set_ylim(0, trial_data['env_height'])
-        # ax.set_aspect('equal')
+        ax.set_aspect('equal')
         handles, labels = ax.get_legend_handles_labels()
     # fig.legend(handles, labels, loc='upper right')
     # plt.legend()
@@ -128,29 +128,29 @@ def plot_simultation_results():
     # plot_motor_output(trial_data)
 
 
-def run_random_agent():
+def plot_random_simulation_results():
 
     genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
     gen_size = gen_structure.get_genotype_size(genotype_structure)
-    random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size)
+    random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size*2) # pairs of agents in a single genotype
 
     sim = Simulation(
         genotype_structure=genotype_structure,
         agent_body_radius=4,
         agents_pair_initial_distance=20,
         agent_sensors_divergence_angle=np.radians(45),  # angle between sensors and axes of symmetry
-        brain_state_range=(0., 0.5),
         brain_step_size=0.1,
-        num_trials=4,
         trial_duration=200,  # the brain would iterate trial_duration/brain_step_size number of time
         num_cores=1
     )
 
     trial_data = {}
-    sim.compute_performance(random_genotype, trial_data)
+    random_seed = np.random.randint(10000)
+    perf = sim.compute_performance(random_genotype, random_seed, trial_data)
+    print("random perf: {}".format(perf))
 
     plot_behavior(trial_data)
 
 if __name__ == "__main__":
     plot_simultation_results()
-    # run_random_agent()
+    # plot_random_simulation_results()

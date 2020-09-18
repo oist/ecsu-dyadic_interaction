@@ -205,7 +205,7 @@ def run_with_keyboard(trial_index):
 def run_from_data():
     working_dir = 'data/tmp'
     generation = '100'
-    trial_index = 0
+    trial_index = 1
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
@@ -231,16 +231,14 @@ def run_from_data():
 def run_random_agent():
     genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE
     gen_size = gen_structure.get_genotype_size(genotype_structure)
-    random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size*2)
+    random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size*2) # pairs of agents in a single genotype
 
     sim = Simulation(
         genotype_structure=genotype_structure,
         agent_body_radius=4,
         agents_pair_initial_distance=20,
         agent_sensors_divergence_angle=np.radians(45),  # angle between sensors and axes of symmetry
-        brain_state_range=(0., 0.5),
         brain_step_size=0.1,
-        num_trials=4,
         trial_duration=200,  # the brain would iterate trial_duration/brain_step_size number of time
         num_cores=1
     )

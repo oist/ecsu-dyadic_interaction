@@ -51,7 +51,7 @@ class AgentNetwork:
             random_seed=random_seed,
             num_neurons=num_brain_neurons,
             step_size=brain_step_size,
-            states=brain_state_range,
+            states=np.array([0.,0.]), # states are initialized with zeros
             **brain_params
         )
 

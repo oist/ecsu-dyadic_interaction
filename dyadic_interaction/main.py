@@ -20,8 +20,7 @@ def run_experiment(folder_path, num_cores):
 
     population_size = 96
     max_generation = 500
-    num_trials = 4
-    trial_duration = 10 #200
+    trial_duration = 200
     genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
     
@@ -33,9 +32,7 @@ def run_experiment(folder_path, num_cores):
         agent_body_radius=4,
         agents_pair_initial_distance=20,
         agent_sensors_divergence_angle=np.radians(45),  # angle between sensors and axes of symmetry
-        brain_state_range=(0., 0.5), # TODO: check
         brain_step_size=0.1,
-        num_trials=num_trials,
         trial_duration=trial_duration,  # the brain would iterate trial_duration/brain_step_size number of time
         num_cores=num_cores
     )
@@ -46,10 +43,11 @@ def run_experiment(folder_path, num_cores):
     evo = Evolution(
         random_seed=random_seed,
         population_size=population_size,
-        genotype_size=2*genotype_size, # two agents per genotype
+        genotype_size=genotype_size*2, # two agents per genotype
         evaluation_function=sim.evaluate,
-        fitness_normalization_mode='RANK', # 'FPS', 'RANK', 'SIGMA' -> NO NORMALIZATION
-        selection_mode='RWS', # RWS, SUS
+        fitness_normalization_mode='NONE', # 'NONE', FPS', 'RANK', 'SIGMA' -> NO NORMALIZATION
+        selection_mode='UNIFORM', # 'UNIFORM', 'RWS', 'SUS'
+        reproduce_from_elite=True,
         reproduction_mode='GENETIC_ALGORITHM',  # 'HILL_CLIMBING',  'GENETIC_ALGORITHM'
         mutation_variance=0.1, # mutation noice with variance 0.1
         elitist_fraction=0.04, # elite fraction of the top 4% solutions

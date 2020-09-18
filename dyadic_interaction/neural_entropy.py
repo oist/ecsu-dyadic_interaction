@@ -22,28 +22,27 @@ def get_norm_entropy(brain_output):
     return norm_entropy
 
 
-def test_neural_entropy_random(num_data_points = 2000):    
+def test_neural_entropy_random():    
+    num_data_points = 1000 * BINS * BINS
     brain_output = np.random.rand(num_data_points, 2)
     norm_entropy = get_norm_entropy(brain_output)
     print("Norm entropy on random data: {}".format(norm_entropy))
     
-def test_neural_entropy_single(num_data_points = 2000):    
+def test_neural_entropy_single():   
+    num_data_points = BINS * BINS 
     brain_output = np.ones((num_data_points, 2))
     norm_entropy = get_norm_entropy(brain_output)
     print("Norm entropy on singleton data: {}".format(norm_entropy))
 
-def test_neural_entropy_uniform(num_data_points = 20000):    
-    # num_data_points = 100
-    # BINS = 10
-    brain_output = np.zeros((num_data_points, 2))
-    data_per_bin = int(num_data_points / (BINS*BINS))
-    # print("data_per_bin: {}".format(data_per_bin))
-    assert data_per_bin > 0
+def test_neural_entropy_uniform():
+    data_per_bin = 10
+    num_data_points = data_per_bin * BINS * BINS
+    brain_output = np.zeros((num_data_points, 2))    
     row = 0
     for i in range(BINS):
         for j in range(BINS):
             for _ in range(data_per_bin):
-                brain_output[row,:] = [i/100,j/100]
+                brain_output[row,:] = [i/100+0.0001,j/100+0.0001]
                 row += 1
     # print(brain_output)
     norm_entropy = get_norm_entropy(brain_output)
@@ -53,4 +52,4 @@ def test_neural_entropy_uniform(num_data_points = 20000):
 if __name__ == "__main__":
     test_neural_entropy_random()
     test_neural_entropy_single()
-    test_neural_entropy_uniform(20000)
+    test_neural_entropy_uniform()

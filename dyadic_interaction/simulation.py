@@ -28,9 +28,8 @@ class Simulation:
     agent_body_radius: int = 4
     agents_pair_initial_distance: int = 20
     agent_sensors_divergence_angle: float = np.radians(45)  # angle between sensors and axes of symmetry
-    brain_state_range: Tuple[float, float] = (0., 0.5)
     brain_step_size: float = 0.1
-    num_trials: int = 4
+    num_trials: int = 4 # hard coded
     trial_duration: int = 200
     num_cores: int = 1
     timeit: bool = False
@@ -55,7 +54,6 @@ class Simulation:
                     self.num_brain_neurons,
                     self.brain_step_size,
                     self.genotype_structure,
-                    self.brain_state_range
                 )
             )
             self.agents_pair_body.append(
