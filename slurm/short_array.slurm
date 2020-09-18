@@ -26,4 +26,4 @@ python -m dyadic_interaction.main --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --c
 rsync -avq $tempdir deigo:/bucket/FroeseU/fede/
 
 # Clean up by removing our temporary directory
-rm -r $tempdir*
+rm -r $tempdir
