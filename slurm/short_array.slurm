@@ -18,7 +18,7 @@ tempdir=/flash/FroeseU/dyadic_exp
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
 source env/bin/activate
-python -m dyadic_interaction.main --dir $tempdir_${SLURM_ARRAY_TASK_ID} --seed ${SLURM_ARRAY_TASK_ID} --cores 96
+python -m dyadic_interaction.main --dir ${tempdir}_${SLURM_ARRAY_TASK_ID} --seed ${SLURM_ARRAY_TASK_ID} --cores 96
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
