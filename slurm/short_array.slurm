@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=short
-#SBATCH --time=1:30:00
+#SBATCH --time=1:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=24G
@@ -23,7 +23,7 @@ python -m dyadic_interaction.main --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --c
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
-rsync -avq $tempdir deigo:/bucket/FroeseU/fede/
+rsync -avq $tempdir deigo:/bucket/FroeseU/fede/tmp_exp/
 
 # Clean up by removing our temporary directory
 rm -r $tempdir
