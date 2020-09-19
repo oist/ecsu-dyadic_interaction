@@ -14,13 +14,10 @@ from pyevolver import utils
 import argparse
 from pytictoc import TicToc
 
-def run_experiment(seed, folder_path, num_cores):
+def run_experiment(seed, folder_path, num_cores, population_size=96, max_generation=500, trial_duration=200):
 
     random_seed = seed
 
-    population_size = 96
-    max_generation = 500
-    trial_duration = 200
     genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
     
@@ -72,12 +69,16 @@ if __name__ == "__main__":
     parser.add_argument('--dir', type=str, default='./data/tmp', help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')    
     parser.add_argument('--seed', type=int, default=0, help='Random seed')    
+    parser.add_argument('--popsize', type=int, default=96, help='Population size')    
+    parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
+    parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
 
     args = parser.parse_args()
 
     t = TicToc()
     t.tic()
 
-    run_experiment(args.seed, args.dir, args.cores)
+    run_experiment(args.seed, args.dir, args.cores,
+        args.popsize, args.num_gen, args.trial_duration)
 
     print('Ellapsed time: {}'.format(t.tocvalue()))

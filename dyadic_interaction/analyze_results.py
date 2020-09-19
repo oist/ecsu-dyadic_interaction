@@ -10,7 +10,12 @@ def analyze_histo_entropy():
         evo_file = os.path.join(base_dir, exp, 'evo_500.json')
         with open(evo_file) as f_in:
             exp_evo_data = json.load(f_in)
-            last_best_performance = exp_evo_data['best_performances'][-1]
+            gen_best_perf = exp_evo_data['best_performances']
+            
+            # make sure it's monotonic increasing(otherwise there is a bug)
+            assert all(gen_best_perf[i] <= gen_best_perf[i+1] for i in range(len(gen_best_perf)-1))
+            
+            last_best_performance = gen_best_perf[-1]
             print('{} {:.3f}'.format(exp, last_best_performance))
             best_exp_performance.append(last_best_performance)
     plt.plot(best_exp_performance, label='Best')
