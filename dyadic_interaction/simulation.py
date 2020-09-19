@@ -114,7 +114,7 @@ class Simulation:
         return sim
 
 
-    def compute_performance(self, genotypes_pair, random_seed, data_record=None):
+    def compute_performance(self, genotypes_pair, data_record=None):
         '''
         Main function to compute performace
         
@@ -147,7 +147,6 @@ class Simulation:
 
         self.timing.add_time('SIM_2_init_data', tim)
 
-        rand_seed_pairs = RandomState(random_seed).randint(0, 2 ** 32, 2)
         data_point_i = 0        
 
         # do experiment
@@ -160,7 +159,6 @@ class Simulation:
             
             for a in range(2):
                 # set initial state in specified range and compute output
-                self.agents_pair_net[a].brain.set_random_seed(rand_seed_pairs[a])
                 self.agents_pair_net[a].brain.states = np.array([0., 0.]) # stats initialized with zeros
                 self.timing.add_time('SIM_3_reinitialize_states', tim)
             
@@ -261,9 +259,10 @@ class Simulation:
     '''
     POPULATION EVALUATION FUNCTION
     '''
-    def evaluate(self, population, random_seeds):
+    def evaluate(self, population, random_seeds):        
         population_size = len(population)
         assert population_size == len(random_seeds)
+        # we are not using random seeeds because behaviour of agents is fully deterministic (with not randomality)
         if self.num_cores > 1:
             # run parallel job
             assert population_size % self.num_cores == 0, \
@@ -272,14 +271,14 @@ class Simulation:
 
             sim_array = [Simulation(**asdict(self)) for _ in range(self.num_cores)]
             performances = Parallel(n_jobs=self.num_cores)( # prefer="threads" does not work
-                delayed(sim_array[i%self.num_cores].compute_performance)(genotypes_pair, rnd_seed) \
-                for i, (genotypes_pair, rnd_seed) in enumerate(zip(population, random_seeds))
+                delayed(sim_array[i%self.num_cores].compute_performance)(genotypes_pair) \
+                for i, (genotypes_pair) in enumerate(population)
             )
 
         else:
             performances = [
-                self.compute_performance(genotypes_pair, rnd_seed)
-                for genotypes_pair, rnd_seed in zip(population, random_seeds)
+                self.compute_performance(genotypes_pair)
+                for genotypes_pair in population
             ]
         return performances
 

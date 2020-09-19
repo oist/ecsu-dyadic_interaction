@@ -3,7 +3,7 @@ import json
 import matplotlib.pyplot as plt
 
 def analyze_histo_entropy():
-    base_dir = 'data/histo-entropy'
+    base_dir = 'data'
     exp_dirs = sorted(os.listdir(base_dir))
     best_exp_performance = []
     for exp in exp_dirs:

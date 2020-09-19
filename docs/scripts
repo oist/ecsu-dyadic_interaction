@@ -1,0 +1,5 @@
+# test
+python -m dyadic_interaction.main --dir ./data/tmp --cores 5 --seed 0 --popsize 100 --num_gen 10 --trial_duration 20
+
+# rsync
+rsync -av --include="*/" --include="simulation.json" --include="evo_500.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/ ./
