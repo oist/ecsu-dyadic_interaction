@@ -11,7 +11,7 @@ module load python/3.7.3
 # module load ruse
 
 # create a temporary directory for this job and save the name
-tempdir=/flash/FroeseU/dyadic_exp_0
+tempdir=/flash/FroeseU/fede/dyadic_exp_0
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory

@@ -13,7 +13,7 @@ module load python/3.7.3
 
 # create a temporary directory for this job and save the name
 num=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/dyadic_exp_${num}
+tempdir=/flash/FroeseU/fede/dyadic_exp_${num}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
