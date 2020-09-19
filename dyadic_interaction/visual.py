@@ -14,17 +14,19 @@ from pyevolver.evolution import Evolution
 from pyevolver.json_numpy import NumpyListJsonEncoder
 import json
 
-MAX_CANVAS_SIZE = 1000
-ZOOM_FACTOR = 2
+MAX_CANVAS_SIZE = 500
+ZOOM_FACTOR = 3
+REFRESH_RATE = 60
 
-CENTER_SHIFT = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
+CANVAS_CENTER = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
+SHIFT_CENTER_TO_FIRST_AGENT = True
 
 black = (0, 0, 0)
 white = (255, 255, 255)
 sensor_color = (255, 255, 0)
 emitter_color = (200, 50, 20)
 emitter_radius = 1
-sensor_radius = 2
+sensor_radius = 2 * ZOOM_FACTOR
 
 kb_motor_increment = 0.2
 
@@ -52,16 +54,18 @@ class Visualization:
         self.main_surface = pygame.display.set_mode((MAX_CANVAS_SIZE, MAX_CANVAS_SIZE))
 
 
-    def draw_agent(self, a_index):
+    def draw_agent(self, a_index, center_shift):
 
         agent = self.agents_pair_body[a_index]
 
-        angent_center_pos = agent.position + CENTER_SHIFT
+        angent_center_pos = ZOOM_FACTOR * agent.position - ZOOM_FACTOR * center_shift + CANVAS_CENTER
 
-        pygame.draw.circle(self.main_surface, white, angent_center_pos, agent.agent_body_radius, width=1)
+        radius = ZOOM_FACTOR * agent.agent_body_radius
+
+        pygame.draw.circle(self.main_surface, white, angent_center_pos, radius, width=1)
 
         for sp in agent.get_abs_sorsors_pos():
-            sp = sp + CENTER_SHIFT
+            sp = ZOOM_FACTOR * sp - ZOOM_FACTOR * center_shift + CANVAS_CENTER
             pygame.draw.circle(self.main_surface, sensor_color, sp, sensor_radius)
 
 
@@ -71,7 +75,6 @@ class Visualization:
         self.simulation.set_agents_pos_angle(trial_index)
 
         clock = pygame.time.Clock()
-        refresh_rate = 60
 
         self.key_motors_increase_velocity = {                        
             pygame.K_q: (0, (-kb_motor_increment, 0)),  # Q - first agent
@@ -110,9 +113,11 @@ class Visualization:
             # reset canvas
             self.main_surface.fill(black)
 
+            center_shift = - self.agents_pair_body[0].position if SHIFT_CENTER_TO_FIRST_AGENT else 0
+
             # draw agents
-            for a in range(2):
-                self.draw_agent(a)
+            for a in range(2):                
+                self.draw_agent(a, center_shift)
 
             for a in range(2):
                 agent = self.agents_pair_body[a]
@@ -138,13 +143,12 @@ class Visualization:
             prev_delta_xy_agents = delta_xy_agents
             prev_angle_agents = angle_agents
 
-            clock.tick(refresh_rate)
+            clock.tick(REFRESH_RATE)
     
     def start_simulation_from_data(self, trial_index, trial_data):
         running = True
 
         clock = pygame.time.Clock()
-        refresh_rate = 60
         
         duration = self.simulation.num_data_points        
         print("Duration: {}".format(duration))
@@ -167,17 +171,19 @@ class Visualization:
             # reset canvas
             self.main_surface.fill(black)
 
+            center_shift = agent_pair_pos[0][i] if SHIFT_CENTER_TO_FIRST_AGENT else 0
+
             # draw agents
             for a in range(2):
                 agent = self.agents_pair_body[a]                 
                 agent.set_position_and_angle(agent_pair_pos[a][i], agent_pair_angle[a][i])
-                self.draw_agent(a)
+                self.draw_agent(a, center_shift)
 
             # final traformations
             self.final_tranform_main_surface()
             pygame.display.update()
 
-            clock.tick(refresh_rate)
+            clock.tick(REFRESH_RATE)
 
             i += 1
 
@@ -203,10 +209,10 @@ def run_with_keyboard(trial_index):
     vis.start_simulation_with_keyboard(trial_index)
 
 def run_from_data():
-    working_dir = 'data/dyadic_exp'
-    generation = '005'
+    working_dir = 'data/histo-entropy/dyadic_exp_006'
+    generation = '500'
     trial_index = 0
-    genotype_index = 50
+    genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
     sim = Simulation.load_from_file(sim_json_filepath)

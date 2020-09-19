@@ -161,8 +161,8 @@ class Simulation:
             for a in range(2):
                 # set initial state in specified range and compute output
                 self.agents_pair_net[a].brain.set_random_seed(rand_seed_pairs[a])
-                self.agents_pair_net[a].brain.randomize_state()
-                self.timing.add_time('SIM_3_randomize_statess', tim)
+                self.agents_pair_net[a].brain.states = np.array([0., 0.]) # stats initialized with zeros
+                self.timing.add_time('SIM_3_reinitialize_states', tim)
             
                 # compute output
                 self.agents_pair_net[a].brain.compute_output()
