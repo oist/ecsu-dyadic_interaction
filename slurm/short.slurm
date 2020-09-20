@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=short
-#SBATCH --time=0:45:00
+#SBATCH --time=1:45:00
 #SBATCH --mem=24G
 #SBATCH --cpus-per-task=100
 ##SBATCH --mail-type=ALL
