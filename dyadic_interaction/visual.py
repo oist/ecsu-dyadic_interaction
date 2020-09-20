@@ -8,7 +8,7 @@ from numpy import pi as pi
 from numpy.random import RandomState
 import pygame
 from dyadic_interaction.agent_body import AgentBody
-from dyadic_interaction.simulation import Simulation
+from dyadic_interaction.simulation_histo_entropy import Simulation
 from dyadic_interaction import gen_structure
 from pyevolver.evolution import Evolution
 from pyevolver.json_numpy import NumpyListJsonEncoder

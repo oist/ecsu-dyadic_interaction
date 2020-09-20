@@ -9,7 +9,7 @@ import pyevolver.utils
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.neural_entropy import get_norm_entropy
+from dyadic_interaction.neural_histo_entropy import get_norm_entropy
 from dataclasses import dataclass, field, asdict, fields
 from typing import Dict, Tuple, List
 import json
@@ -23,6 +23,7 @@ import multiprocessing
 
 @dataclass
 class Simulation:
+    signature: str = 'Simulation Histo Entropy'
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE)
     num_brain_neurons: int = None  # initialized in __post_init__
     agent_body_radius: int = 4
@@ -250,7 +251,6 @@ class Simulation:
         assert data_point_i == self.num_data_points * self.num_trials
 
         # calculate performance        
-        # TODO
         performance_agent_A, performance_agent_B = (
             get_norm_entropy(agents_pair_brain_output_trials[a])
             for a in range(2)

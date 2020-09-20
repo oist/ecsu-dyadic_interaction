@@ -5,6 +5,7 @@ gitdb==4.0.5
 GitPython==3.1.7
 isort==5.4.2
 joblib==0.16.0
+JPype1==1.0.2
 kiwisolver==1.2.0
 lazy-object-proxy==1.4.3
 matplotlib==3.3.0
@@ -17,8 +18,8 @@ pandas==1.0.5
 patsy==0.5.1
 Pillow==7.2.0
 plotnine==0.7.0
-git+https://gitlab.com/oist-ecsu/pyevolver@0.0.2
-pygame==2.0.0.dev6 
+pyevolver @ git+https://gitlab.com/oist-ecsu/pyevolver@0.0.2
+pygame==2.0.0.dev6
 pylint==2.6.0
 pyparsing==2.4.7
 python-dateutil==2.8.1
@@ -31,5 +32,7 @@ smmap==3.0.4
 statsmodels==0.11.1
 toml==0.10.1
 trianglesolver==1.2
+typed-ast==1.4.1
+typing-extensions==3.7.4.3
 version-query==1.1.0
 wrapt==1.12.1

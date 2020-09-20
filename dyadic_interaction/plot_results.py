@@ -4,7 +4,7 @@ TODO: Missing module docstring
 
 import os
 import matplotlib.pyplot as plt
-from dyadic_interaction.simulation import Simulation
+from dyadic_interaction.simulation_histo_entropy import Simulation
 from dyadic_interaction import gen_structure
 import numpy as np
 from numpy.random import RandomState

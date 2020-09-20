@@ -6,7 +6,8 @@ import os
 import sys
 from joblib import Parallel, delayed
 from dyadic_interaction import gen_structure
-from dyadic_interaction.simulation import Simulation
+from dyadic_interaction.simulation_histo_entropy import Simulation as Simulation_histo_entropy
+from dyadic_interaction.simulation_transfer_entropy import Simulation as Simulation_transfer_entropy
 from pyevolver.evolution import Evolution
 import numpy as np
 from numpy.random import RandomState
@@ -14,13 +15,15 @@ from pyevolver import utils
 import argparse
 from pytictoc import TicToc
 
-def run_experiment(seed, folder_path, num_cores, population_size=96, max_generation=500, trial_duration=200):
+def run_experiment(seed, entropy_type, folder_path, num_cores, 
+    population_size=96, max_generation=500, trial_duration=200):
 
     random_seed = seed
 
     genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
-    
+
+    Simulation = Simulation_histo_entropy if entropy_type=='histo' else Simulation_transfer_entropy
 
     utils.make_dir_if_not_exists(folder_path)
 
@@ -66,9 +69,10 @@ if __name__ == "__main__":
         description='Compare a simulation between single and multi-processing'
     )
 
+    parser.add_argument('--seed', type=int, default=0, help='Random seed')     
+    parser.add_argument('--entropy', choices=['histo', 'transfer'], default='histo', help='Type of entropy measure to use')    
     parser.add_argument('--dir', type=str, default='./data/tmp', help='Output directory')
-    parser.add_argument('--cores', type=int, default=4, help='Number of cores')    
-    parser.add_argument('--seed', type=int, default=0, help='Random seed')    
+    parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    
     parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
     parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
@@ -78,7 +82,7 @@ if __name__ == "__main__":
     t = TicToc()
     t.tic()
 
-    run_experiment(args.seed, args.dir, args.cores,
+    run_experiment(args.seed, args.entropy, args.dir, args.cores,
         args.popsize, args.num_gen, args.trial_duration)
 
     print('Ellapsed time: {}'.format(t.tocvalue()))
