@@ -11,13 +11,13 @@ module load python/3.7.3
 # module load ruse
 
 # create a temporary directory for this job and save the name
-tempdir=/flash/FroeseU/fede/dyadic_exp_0
+tempdir=/flash/FroeseU/fede/dyadic_exp_1
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
 source env/bin/activate
-python -m dyadic_interaction.main --dir $tempdir --seed 0 --cores 96
+python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed 1 --cores 96
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
