@@ -17,7 +17,7 @@ tempdir=/flash/FroeseU/fede/dyadic_exp_1
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
-source env/bin/activatecat 
+source env/bin/activate
 python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed 1 --cores 96
 
 # copy our result back to Bucket. We use "scp" to copy the data 
