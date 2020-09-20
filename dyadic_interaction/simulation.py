@@ -39,13 +39,13 @@ class Simulation:
         self.num_brain_neurons = gen_structure.get_num_brain_neurons(self.genotype_structure)
         self.num_data_points = int(self.trial_duration / self.brain_step_size)
 
-        self.__init_agents_pair__()
-        self.__set__initial_positions_angles()
+        self.init_agents_pair()
+        self.set_initial_positions_angles()
 
         self.timing = Timing(self.timeit)
 
 
-    def __init_agents_pair__(self):
+    def init_agents_pair(self):
         self.agents_pair_net = []
         self.agents_pair_body = []
         for _ in range(2):
@@ -64,18 +64,23 @@ class Simulation:
                 )
             )
 
-    def __set__initial_positions_angles(self):
-        # first agent always points right
-        # second agent at points right, up, left, down in each trial respectively
-        self.agents_pair_start_angle_trials = [
-            [0., 0.],
-            [0., pi/2],
-            [0., pi],
-            [0., 3*pi/2],
-        ]
+    def set_initial_positions_angles(self, random_state=None):
+        
+        if random_state:
+            self.agents_pair_start_angle_trials = pi * random_state.uniform(0, 2, (self.num_trials,2))
+        else:            
+            # first agent always points right
+            # second agent at points right, up, left, down in each trial respectively
+            self.agents_pair_start_angle_trials = [
+                [0., 0.],
+                [0., pi/2],
+                [0., pi],
+                [0., 3*pi/2],
+            ]
 
         # first agent positioned at (0,0)
-        # second agent 20 units away from first, along its facing direction (right, up, left, down)
+        # second agent 20 units away from first, along its facing direction 
+        # (right, up, left, down) if not random
         self.agents_pair_start_pos_trials = [
             [
                 np.array([0.,0.]), 

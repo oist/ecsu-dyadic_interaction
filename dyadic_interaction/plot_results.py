@@ -101,7 +101,7 @@ def plot_motor_output(trial_data):
 
 
 def plot_simultation_results():
-    working_dir = 'data/dyadic_exp_1'
+    working_dir = 'data/histo_entropy/dyadic_exp_096'
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
@@ -109,16 +109,14 @@ def plot_simultation_results():
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
     genotype = evo.population[genotype_index]
-    
-    force_random = False
-    if force_random:
-        random_seed = np.random.randint(10000)
-        # sim.trial_duration = 500
-    else:
-        random_seed = evo.pop_eval_random_seed[genotype_index]
 
+    random_pos_angle = False
+    if random_pos_angle:
+        sim.set_initial_positions_angles(RandomState())
+
+    
     trial_data = {}
-    perf = sim.compute_performance(genotype, random_seed, trial_data)
+    perf = sim.compute_performance(genotype, trial_data)
     print("Best performance recomputed: {}".format(perf))
 
     plot_performances(evo)
@@ -145,8 +143,7 @@ def plot_random_simulation_results():
     )
 
     trial_data = {}
-    random_seed = np.random.randint(10000)
-    perf = sim.compute_performance(random_genotype, random_seed, trial_data)
+    perf = sim.compute_performance(random_genotype, trial_data)
     print("random perf: {}".format(perf))
 
     plot_behavior(trial_data)
