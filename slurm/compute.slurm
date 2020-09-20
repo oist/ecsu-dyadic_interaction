@@ -8,6 +8,7 @@
 
 # load python module
 module load python/3.7.3
+module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
