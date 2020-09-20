@@ -3,9 +3,9 @@
 #SBATCH --time=1:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --output=slurm_%A-%a.out
-#SBATCH --mem=24G
-#SBATCH --cpus-per-task=100
-#SBATCH --array=1-100%20
+#SBATCH --mem=500G
+#SBATCH --cpus-per-task=128
+#SBATCH --array=1-20%10
 
 # load python module
 module load python/3.7.3
