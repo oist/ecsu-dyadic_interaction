@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=short
 #SBATCH --time=1:45:00
-#SBATCH --mem=24G
+#SBATCH --mem=100G
 #SBATCH --cpus-per-task=100
 ##SBATCH --mail-type=ALL
 ##SBATCH --mail-user=federico.sangati2@oist.jp

@@ -101,8 +101,9 @@ def plot_motor_output(trial_data):
 
 
 def plot_simultation_results():
-    working_dir = 'data/histo_entropy/dyadic_exp_096'
-    generation = '500'
+    # working_dir = 'data/histo_entropy/dyadic_exp_096'
+    working_dir = 'data/transfer_entropy/dyadic_exp_1'
+    generation = '140'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
