@@ -20,6 +20,7 @@ tempdir=/flash/FroeseU/fede/dyadic_exp_${num}
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
 source env/bin/activate
+# python -m dyadic_interaction.main --entropy histo --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96
 python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96 --te_obj min
 
 # copy our result back to Bucket. We use "scp" to copy the data 

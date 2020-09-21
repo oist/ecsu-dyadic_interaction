@@ -4,8 +4,7 @@ TODO: Missing module docstring
 
 import os
 import matplotlib.pyplot as plt
-from dyadic_interaction.simulation_histo_entropy import Simulation as simulation_histo_entropy
-from dyadic_interaction.simulation_transfer_entropy import Simulation as simulation_transfer_entropy
+from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
 import numpy as np
 from numpy.random import RandomState
@@ -120,13 +119,12 @@ def plot_emitters(trial_data):
 
 def plot_simultation_results():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/max/dyadic_exp_010'    # 5?, 10, 18(max)
+    working_dir = 'data/transfer_entropy/min/dyadic_exp_007'    # 5?, 10, 18(max)
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
     transfer_entropy = 'transfer' in working_dir
-    Simulation = simulation_transfer_entropy if transfer_entropy else simulation_histo_entropy
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
     genotype = evo.population[genotype_index]
@@ -140,10 +138,7 @@ def plot_simultation_results():
         random_seed = evo.pop_eval_random_seed[genotype_index]
         
     trial_data = {}
-    if transfer_entropy:
-        perf = sim.compute_performance(genotype, random_seed, trial_data)
-    else:
-        perf = sim.compute_performance(genotype, trial_data)
+    perf = sim.compute_performance(genotype, random_seed, trial_data)
     print("Best performance recomputed: {}".format(perf))
 
     plot_performances(evo)
@@ -169,9 +164,11 @@ def plot_random_simulation_results():
         trial_duration=200,  # the brain would iterate trial_duration/brain_step_size number of time
         num_cores=1
     )
+    
+    random_seed = np.random.randint(10000)
 
     trial_data = {}
-    perf = sim.compute_performance(random_genotype, trial_data)
+    perf = sim.compute_performance(random_genotype, random_seed, trial_data)
     print("random perf: {}".format(perf))
 
     plot_behavior(trial_data)

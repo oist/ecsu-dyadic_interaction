@@ -6,8 +6,7 @@ import os
 import sys
 from joblib import Parallel, delayed
 from dyadic_interaction import gen_structure
-from dyadic_interaction.simulation_histo_entropy import Simulation as Simulation_histo_entropy
-from dyadic_interaction.simulation_transfer_entropy import Simulation as Simulation_transfer_entropy
+from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import neural_transfer_entropy
 from pyevolver.evolution import Evolution
 import numpy as np
@@ -27,25 +26,17 @@ def run_experiment(seed, entropy_type, folder_path, num_cores,
 
     utils.make_dir_if_not_exists(folder_path)
 
-    sim_args = {
-        'genotype_structure':genotype_structure,
-        'agent_body_radius':4,
-        'agents_pair_initial_distance':20,
-        'agent_sensors_divergence_angle':np.radians(45),  # angle between sensors and axes of symmetry
-        'brain_step_size':0.1,
-        'trial_duration':trial_duration,  # the brain would iterate trial_duration/brain_step_size number of time
-        'num_cores':num_cores
-    }
-
-    if entropy_type == 'transfer':
-        assert transfer_entropy_objective is not None, \
-                "You need to specify the objective (min,max) of the transfer entropy"
-        sim_args['entropy_objective'] = transfer_entropy_objective
-        Simulation = Simulation_transfer_entropy
-    else:
-        Simulation = Simulation_histo_entropy
-
-    sim = Simulation(**sim_args)
+    sim = Simulation(
+        entropy_type = entropy_type,
+        genotype_structure = genotype_structure,
+        agent_body_radius = 4,
+        agents_pair_initial_distance = 20,
+        agent_sensors_divergence_angle = np.radians(45),  # angle between sensors and axes of symmetry
+        brain_step_size = 0.1,
+        trial_duration = trial_duration,  # the brain would iterate trial_duration/brain_step_size number of time
+        num_cores = num_cores,
+        entropy_objective =  transfer_entropy_objective        
+    )
 
     sim_config_json = os.path.join(folder_path, 'simulation.json')
     sim.save_to_file(sim_config_json)
@@ -75,7 +66,6 @@ def run_experiment(seed, entropy_type, folder_path, num_cores,
     if entropy_type == 'transfer':
         # shutdown JVM
         neural_transfer_entropy.shutdown_JVM()
-
 
 
 if __name__ == "__main__":

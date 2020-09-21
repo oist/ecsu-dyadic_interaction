@@ -9,6 +9,7 @@ import pyevolver.utils
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
+from dyadic_interaction.neural_histo_entropy import get_norm_entropy
 from dyadic_interaction.neural_transfer_entropy import get_transfer_entropy
 from dyadic_interaction.utils import add_noise
 from dataclasses import dataclass, field, asdict, fields
@@ -24,7 +25,7 @@ import multiprocessing
 
 @dataclass
 class Simulation:
-    signature: str = 'Simulation Transfer Entropy'
+    entropy_type: str = 'histo' # 'histo', 'transfer'
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE)
     num_brain_neurons: int = None  # initialized in __post_init__
     agent_body_radius: int = 4
@@ -135,6 +136,150 @@ class Simulation:
 
 
     def compute_performance(self, genotypes_pair, rnd_seed, data_record=None):
+        if self.entropy_type=='histo':
+            return self.compute_performance_histo(genotypes_pair, rnd_seed, data_record)
+        else:
+            return self.compute_performance_transfer(genotypes_pair, rnd_seed, data_record)
+
+
+    def compute_performance_histo(self, genotypes_pair, rnd_seed, data_record=None):
+        '''
+        Main function to compute performace
+        
+        :param np.ndarray genotypes_pair: sequence with two genotypes (one after the other)
+        '''
+
+        tim = self.timing.init_tictoc()
+
+        genotypes_split = np.array_split(genotypes_pair, 2)
+
+        for a in range(2):
+            self.agents_pair_net[a].genotype_to_phenotype(genotypes_split[a])
+            
+        self.timing.add_time('SIM_1_genotype_to_phenotype', tim)
+
+        # initialize agents brain output for computing entropy
+        # data from all trials are put together to make a single histogram
+        agents_pair_brain_output_trials = [np.zeros((self.num_data_points * self.num_trials, 2)) for _ in range(2)]
+
+        if data_record is not None:            
+            data_record['agent_pos'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['agent_angle'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['sensors_input'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['brain_input'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['brain_state'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['derivatives'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['brain_output'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['wheels'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['emitter'] = [[None,None] for _ in range(self.num_trials)]
+
+        self.timing.add_time('SIM_2_init_data', tim)
+
+        data_point_i = 0        
+
+        # do experiment
+        for t in range(self.num_trials):
+
+            prev_delta_xy_agents = [np.array([0.,0.]), np.array([0.,0.])]
+            prev_angle_agents = [None, None]
+
+            self.prepare_agents_for_trial(t)
+            self.timing.add_time('SIM_3_prepare_agents_for_trials', tim)                
+            
+            for a in range(2):                            
+                # compute output
+                self.agents_pair_net[a].brain.compute_output()
+                self.timing.add_time('SIM_4_compute_output', tim)
+
+                if data_record is not None:                    
+                    data_record['agent_pos'][t][a] = np.zeros((self.num_data_points, 2))
+                    data_record['agent_angle'][t][a] = np.zeros(self.num_data_points)
+                    data_record['sensors_input'][t][a] = np.zeros((self.num_data_points, 2))
+                    data_record['brain_input'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                    data_record['brain_state'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                    data_record['derivatives'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                    data_record['brain_output'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                    data_record['wheels'][t][a] = np.zeros((self.num_data_points, 2))
+                    data_record['emitter'][t][a] = np.zeros(self.num_data_points)
+                self.timing.add_time('SIM_5_init_trial_data', tim)
+
+            for i in range(self.num_data_points):
+
+                for a in range(2):
+
+                    agent_net = self.agents_pair_net[a]
+                    agent_body = self.agents_pair_body[a]
+
+                    # 2) Agent sees
+                    b = 1-a
+                    sensor_inputs = agent_body.get_sensor_inputs(
+                        self.agents_pair_body[b].position,
+                        self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
+                    )
+                    self.timing.add_time('SIM_6a_get_sensor_input', tim)
+
+                    # 3-dim vector: strength of emitter from the two sensors                
+                    agent_net.compute_brain_input(sensor_inputs)
+                    self.timing.add_time('SIM_6b_compute_brain_input', tim)
+
+                    # 4) Update agent's neural system
+                    agent_net.brain.euler_step()  # this sets agent.brain.output (2-dim vector)
+                    self.timing.add_time('SIM_7_euler_step', tim)
+
+                    # 5) Agent updates wheels displacement
+                    motor_outputs = agent_net.compute_motor_outputs()
+                    agent_body.wheels = np.take(motor_outputs, [0,2]) # index 0,2: MOTORS
+                    emitter_strength = motor_outputs[1]               # index 1:   EMITTER
+                    self.timing.add_time('SIM_8_compute_motor_outputs', tim)
+
+                    # 6) Save data
+                    agents_pair_brain_output_trials[a][data_point_i,:] = agent_net.brain.output
+                    if data_record is not None:
+                        data_record['agent_pos'][t][a][i] = agent_body.position
+                        data_record['agent_angle'][t][a][i] = agent_body.angle
+                        data_record['sensors_input'][t][a][i] = sensor_inputs
+                        data_record['brain_input'][t][a][i] = agent_net.brain.input
+                        data_record['brain_state'][t][a][i] = agent_net.brain.states
+                        data_record['derivatives'][t][a][i] = agent_net.brain.dy_dt
+                        data_record['brain_output'][t][a][i] = agent_net.brain.output
+                        data_record['wheels'][t][a][i] = agent_body.wheels
+                        data_record['emitter'][t][a][i] = emitter_strength
+                    self.timing.add_time('SIM_9_save_data', tim)
+                
+                # finished exp for agent a
+
+                delta_xy_agents = [None, None]
+                angle_agents = [None, None]
+                for a in range(2):
+                    # 7) Move one step
+                    # TODO: check if the agents didn't go too far from one another
+                    b = 1-a
+                    delta_xy_agents[a], angle_agents[a] =  self.agents_pair_body[a].move_one_step(
+                        prev_delta_xy_agents[b],
+                        prev_angle_agents[b]
+                    )                
+                prev_delta_xy_agents = delta_xy_agents
+                prev_angle_agents = angle_agents
+
+                data_point_i += 1
+
+                self.timing.add_time('SIM_10_move_one_step', tim)
+            
+
+        assert data_point_i == self.num_data_points * self.num_trials
+
+        # calculate performance        
+        performance_agent_A, performance_agent_B = (
+            get_norm_entropy(agents_pair_brain_output_trials[a])
+            for a in range(2)
+        )
+        avg_performance = np.mean([performance_agent_A, performance_agent_B])
+
+        self.timing.add_time('SIM_11_compute_performace', tim)
+
+        return avg_performance
+
+    def compute_performance_transfer(self, genotypes_pair, rnd_seed, data_record=None):
         '''
         Main function to compute performace
         

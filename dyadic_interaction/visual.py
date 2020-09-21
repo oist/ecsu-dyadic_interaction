@@ -8,8 +8,7 @@ from numpy import pi as pi
 from numpy.random import RandomState
 import pygame
 from dyadic_interaction.agent_body import AgentBody
-from dyadic_interaction.simulation_histo_entropy import Simulation as simulation_histo_entropy
-from dyadic_interaction.simulation_transfer_entropy import Simulation as simulation_transfer_entropy
+from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
 from pyevolver.evolution import Evolution
 from pyevolver.json_numpy import NumpyListJsonEncoder
@@ -211,14 +210,13 @@ def run_with_keyboard(trial_index):
 
 def run_from_data():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/max/dyadic_exp_010'    
+    working_dir = 'data/transfer_entropy/min/dyadic_exp_007'    
     generation = '500'
     trial_index = 0
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
     transfer_entropy = 'transfer' in working_dir
-    Simulation = simulation_transfer_entropy if transfer_entropy else simulation_histo_entropy
     sim = Simulation.load_from_file(sim_json_filepath)    
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
     genotype = evo.population[genotype_index]    
@@ -232,10 +230,7 @@ def run_from_data():
         random_seed = evo.pop_eval_random_seed[genotype_index]
 
     trial_data = {}
-    if transfer_entropy:
-        perf = sim.compute_performance(genotype, random_seed, trial_data)
-    else:
-        perf = sim.compute_performance(genotype, trial_data)
+    perf = sim.compute_performance(genotype, random_seed, trial_data)
 
     print("perf: {}".format(perf))
     # print("start pos: {}".format(trial_data['agent_pos'][0][0]))
@@ -260,7 +255,9 @@ def run_random_agent():
 
     trial_index = 0
     trial_data = {}
-    perf = sim.compute_performance(random_genotype, trial_data)
+    random_seed = np.random.randint(10000)
+
+    perf = sim.compute_performance(random_genotype, random_seed, trial_data)
     print("random perf: {}".format(perf))
 
     vis = Visualization(sim)
