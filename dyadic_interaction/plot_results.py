@@ -19,7 +19,7 @@ def plot_performances(evo):
     plt.plot(evo.best_performances, label='Best')
     plt.plot(evo.avg_performances, label='Avg')
     plt.plot(evo.worst_performances, label='Worst')
-    plt.ylim(0, 1)
+    # plt.ylim(0, 1)
     plt.legend()
     plt.show()
 
@@ -68,7 +68,7 @@ def plot_activity(trial_data):
         # trial_data['brain_state'][t]
         # trial_data['derivatives'][t]
     # handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper right')
+    # fig.legend(handles, labels, loc='upper right')
     plt.legend()
     plt.show()
 
@@ -105,7 +105,7 @@ def plot_motor_output(trial_data):
 
 def plot_simultation_results():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/dyadic_exp_017'
+    working_dir = 'data/transfer_entropy/dyadic_exp_001'
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
