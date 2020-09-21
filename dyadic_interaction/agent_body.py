@@ -32,7 +32,7 @@ class AgentBody:
 
     def __post_init__(self):
         assert 0 < self.agent_sensors_divergence_angle <= pi / 2
-        self.timing = Timing(self.timeit)
+        self.timing = Timing(self.timeit)        
 
     def set_position_and_angle(self, agent_position, agent_angle):
         assert all(type(x) in [float, np.float64] for x in agent_position), "Agent's position must be a pair of float"
@@ -53,7 +53,7 @@ class AgentBody:
             for angle in self.sensors_angle
         ]
 
-    def get_abs_sorsors_pos(self):
+    def get_abs_sensors_pos(self):
         return [self.position + ep for ep in self.sensors_pos]
 
 
@@ -72,7 +72,7 @@ class AgentBody:
         # print("Emitter position: {}".format(emitter_position))
         self.timing.add_time('AB2-GVI_emitter_pos', t)
 
-        for i, sp in enumerate(self.get_abs_sorsors_pos()):
+        for i, sp in enumerate(self.get_abs_sensors_pos()):
             self.timing.add_time('AB2-GVI_emitter_translated_angle', t)
             # print("SENSOR POSITION {}: {}".format(i+1, sp))
             self.timing.add_time('AB2-GVI_check_in_vision', t)

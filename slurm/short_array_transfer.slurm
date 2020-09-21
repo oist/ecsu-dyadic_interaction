@@ -1,10 +1,11 @@
 #!/bin/bash
-#SBATCH --partition=compute
-#SBATCH --time=0:45:00
-#SBATCH --mem=24G
-#SBATCH --cpus-per-task=100
-##SBATCH --mail-type=ALL
-##SBATCH --mail-user=federico.sangati2@oist.jp
+#SBATCH --partition=short
+#SBATCH --time=1:00:00
+#SBATCH --job-name=dyadic_exp
+#SBATCH --output=slurm_%A-%a.out
+#SBATCH --mem=500G
+#SBATCH --cpus-per-task=128
+#SBATCH --array=1-20%10
 
 # load python module
 module load python/3.7.3
@@ -12,13 +13,14 @@ module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
-tempdir=/flash/FroeseU/fede/dyadic_exp_0
+num=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
+tempdir=/flash/FroeseU/fede/dyadic_exp_${num}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
 source env/bin/activate
-python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed 0 --cores 96
+python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96 --te_obj max
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.

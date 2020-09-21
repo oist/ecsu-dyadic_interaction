@@ -55,9 +55,7 @@ class AgentNetwork:
             **brain_params
         )
 
-        self.motors_outputs = np.array([0.,0.5,0.]) # 3 motors (the middle is the emitter, initialized as 0.5)
-
-        # these will be set below from the genotype structure dictionary
+        # these will be set in genotype_to_phenotype()
         self.sensor_gains = None
         self.sensor_biases = None
         self.sensor_weights = None
@@ -67,6 +65,10 @@ class AgentNetwork:
         self.emitter_gains = None
         self.emitter_biases = None
         self.emitter_weights = None
+        
+        # IMPORTANT: 
+        # this needs to be initialized in the simulation
+        self.motors_outputs = None 
 
         self.genotype_structure = genotype_structure
 

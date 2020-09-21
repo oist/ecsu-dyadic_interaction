@@ -64,7 +64,7 @@ class Visualization:
 
         pygame.draw.circle(self.main_surface, white, angent_center_pos, radius, width=1)
 
-        for sp in agent.get_abs_sorsors_pos():
+        for sp in agent.get_abs_sensors_pos():
             sp = ZOOM_FACTOR * sp - ZOOM_FACTOR * center_shift + CANVAS_CENTER
             pygame.draw.circle(self.main_surface, sensor_color, sp, sensor_radius)
 
@@ -72,7 +72,7 @@ class Visualization:
     def start_simulation_with_keyboard(self, trial_index):
         running = True
 
-        self.simulation.set_agents_pos_angle(trial_index)
+        self.simulation.prepare_agents_for_trial(trial_index)
 
         clock = pygame.time.Clock()
 

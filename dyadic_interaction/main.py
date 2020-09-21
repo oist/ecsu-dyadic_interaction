@@ -17,26 +17,35 @@ import argparse
 from pytictoc import TicToc
 
 def run_experiment(seed, entropy_type, folder_path, num_cores, 
-    population_size=96, max_generation=500, trial_duration=200):
+    population_size=96, max_generation=500, trial_duration=200,
+    transfer_entropy_objective=None):
 
     random_seed = seed
 
     genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
 
-    Simulation = Simulation_histo_entropy if entropy_type=='histo' else Simulation_transfer_entropy
-
     utils.make_dir_if_not_exists(folder_path)
 
-    sim = Simulation(
-        genotype_structure=genotype_structure,
-        agent_body_radius=4,
-        agents_pair_initial_distance=20,
-        agent_sensors_divergence_angle=np.radians(45),  # angle between sensors and axes of symmetry
-        brain_step_size=0.1,
-        trial_duration=trial_duration,  # the brain would iterate trial_duration/brain_step_size number of time
-        num_cores=num_cores
-    )
+    sim_args = {
+        'genotype_structure':genotype_structure,
+        'agent_body_radius':4,
+        'agents_pair_initial_distance':20,
+        'agent_sensors_divergence_angle':np.radians(45),  # angle between sensors and axes of symmetry
+        'brain_step_size':0.1,
+        'trial_duration':trial_duration,  # the brain would iterate trial_duration/brain_step_size number of time
+        'num_cores':num_cores
+    }
+
+    if entropy_type == 'transfer':
+        assert transfer_entropy_objective is not None, \
+                "You need to specify the objective (min,max) of the transfer entropy"
+        sim_args['entropy_objective'] = transfer_entropy_objective
+        Simulation = Simulation_transfer_entropy
+    else:
+        Simulation = Simulation_histo_entropy
+
+    sim = Simulation(**sim_args)
 
     sim_config_json = os.path.join(folder_path, 'simulation.json')
     sim.save_to_file(sim_config_json)
@@ -52,7 +61,7 @@ def run_experiment(seed, entropy_type, folder_path, num_cores,
         reproduction_mode='GENETIC_ALGORITHM',  # 'HILL_CLIMBING',  'GENETIC_ALGORITHM'
         mutation_variance=0.1, # mutation noice with variance 0.1
         elitist_fraction=0.04, # elite fraction of the top 4% solutions
-        mating_fraction=0.96, # the 
+        mating_fraction=0.96, # the remaining mating fraction
         crossover_probability=0.1,
         crossover_mode='UNIFORM',
         crossover_points= None, #genotype_structure['crossover_points'],
@@ -82,6 +91,7 @@ if __name__ == "__main__":
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    
     parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
     parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
+    parser.add_argument('--te_obj', choices=['min', 'max'], default='max', help='Objective of Trenafer Entropy objective (min, max)')    
 
     args = parser.parse_args()
 
@@ -89,6 +99,6 @@ if __name__ == "__main__":
     t.tic()
 
     run_experiment(args.seed, args.entropy, args.dir, args.cores,
-        args.popsize, args.num_gen, args.trial_duration)
+        args.popsize, args.num_gen, args.trial_duration, args.te_obj)
 
     print('Ellapsed time: {}'.format(t.tocvalue()))

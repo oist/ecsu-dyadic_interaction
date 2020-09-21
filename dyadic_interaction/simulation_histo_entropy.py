@@ -96,11 +96,22 @@ class Simulation:
             for i in range(self.num_trials)
         ]
 
-    def set_agents_pos_angle(self, trial_index):
+    def prepare_agents_for_trial(self, trial_index):
         for a in range(2):
-            agent_pos = self.agents_pair_start_pos_trials[trial_index][a]
+            agent_net = self.agents_pair_net[a]
+            agent_body = self.agents_pair_body[a]
+            
+            # reset params that are due to change during the experiment
+            agent_body.wheels = np.array([0., 0.])
+            agent_body.flag_collision = False            
+            # set initial states to zeros
+            agent_net.brain.states = np.array([0., 0.]) # stats initialized with zeros
+            # 3 motors (the middle is the emitter, initialized as 0.5)
+            agent_net.motors_outputs = np.array([0.,0.5,0.]) 
+                        
+            agent_pos = np.copy(self.agents_pair_start_pos_trials[trial_index][a])
             agent_angle = self.agents_pair_start_angle_trials[trial_index][a]
-            self.agents_pair_body[a].set_position_and_angle(agent_pos, agent_angle)
+            agent_body.set_position_and_angle(agent_pos, agent_angle)
 
     def save_to_file(self, file_path):
         with open(file_path, 'w') as f_out:
@@ -161,16 +172,13 @@ class Simulation:
             prev_delta_xy_agents = [np.array([0.,0.]), np.array([0.,0.])]
             prev_angle_agents = [None, None]
 
-            self.set_agents_pos_angle(t)
+            self.prepare_agents_for_trial(t)
+            self.timing.add_time('SIM_3_prepare_agents_for_trials', tim)                
             
-            for a in range(2):
-                # set initial state in specified range and compute output
-                self.agents_pair_net[a].brain.states = np.array([0., 0.]) # stats initialized with zeros
-                self.timing.add_time('SIM_3_reinitialize_states', tim)
-            
+            for a in range(2):                            
                 # compute output
                 self.agents_pair_net[a].brain.compute_output()
-                self.timing.add_time('SIM_4_randomize_statess_and_compute_output', tim)
+                self.timing.add_time('SIM_4_compute_output', tim)
 
                 if data_record is not None:                    
                     data_record['agent_pos'][t][a] = np.zeros((self.num_data_points, 2))
@@ -186,9 +194,6 @@ class Simulation:
 
             for i in range(self.num_data_points):
 
-                # 1) Add random noise to emitter position
-                # TODO: check if this is necessary
-                
                 for a in range(2):
 
                     agent_net = self.agents_pair_net[a]
@@ -230,6 +235,8 @@ class Simulation:
                         data_record['emitter'][t][a][i] = emitter_strength
                     self.timing.add_time('SIM_9_save_data', tim)
                 
+                # finished exp for agent a
+
                 delta_xy_agents = [None, None]
                 angle_agents = [None, None]
                 for a in range(2):
@@ -246,7 +253,7 @@ class Simulation:
                 data_point_i += 1
 
                 self.timing.add_time('SIM_10_move_one_step', tim)
-
+            
 
         assert data_point_i == self.num_data_points * self.num_trials
 
