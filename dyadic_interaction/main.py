@@ -15,9 +15,8 @@ from pyevolver import utils
 import argparse
 from pytictoc import TicToc
 
-def run_experiment(seed, entropy_type, folder_path, num_cores, 
-    population_size=96, max_generation=500, trial_duration=200,
-    transfer_entropy_objective=None):
+def run_experiment(seed, entropy_type, folder_path, num_cores, performance_objective,
+    population_size=96, max_generation=500, trial_duration=200):
 
     random_seed = seed
 
@@ -34,8 +33,7 @@ def run_experiment(seed, entropy_type, folder_path, num_cores,
         agent_sensors_divergence_angle = np.radians(45),  # angle between sensors and axes of symmetry
         brain_step_size = 0.1,
         trial_duration = trial_duration,  # the brain would iterate trial_duration/brain_step_size number of time
-        num_cores = num_cores,
-        entropy_objective =  transfer_entropy_objective        
+        num_cores = num_cores     
     )
 
     sim_config_json = os.path.join(folder_path, 'simulation.json')
@@ -46,6 +44,7 @@ def run_experiment(seed, entropy_type, folder_path, num_cores,
         population_size=population_size,
         genotype_size=genotype_size*2, # two agents per genotype
         evaluation_function=sim.evaluate,
+        performance_objective=performance_objective,
         fitness_normalization_mode='NONE', # 'NONE', FPS', 'RANK', 'SIGMA' -> NO NORMALIZATION
         selection_mode='UNIFORM', # 'UNIFORM', 'RWS', 'SUS'
         reproduce_from_elite=True,
@@ -81,14 +80,16 @@ if __name__ == "__main__":
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    
     parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
     parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
-    parser.add_argument('--te_obj', choices=['min', 'max'], default='max', help='Objective of Trenafer Entropy objective (min, max)')    
+    parser.add_argument('--perf_obj', choices=['MAX', 'MIN', 'ZERO', 'ABS_MAX'], \
+        default='MAX', help='Fitness normalization mode'
+    )        
 
     args = parser.parse_args()
 
     t = TicToc()
     t.tic()
 
-    run_experiment(args.seed, args.entropy, args.dir, args.cores,
-        args.popsize, args.num_gen, args.trial_duration, args.te_obj)
+    run_experiment(args.seed, args.entropy, args.dir, args.cores, args.perf_obj,
+        args.popsize, args.num_gen, args.trial_duration)
 
     print('Ellapsed time: {}'.format(t.tocvalue()))

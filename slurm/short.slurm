@@ -22,7 +22,7 @@ cd ~/Code/dyadic_interaction
 source env/bin/activate
 # ruse
 # python -m dyadic_interaction.main --entropy histo --dir $tempdir --seed 1 --cores 96
-python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed 1 --cores 96 --te_obj min
+python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed 1 --cores 96 --perf_obj MAX
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.

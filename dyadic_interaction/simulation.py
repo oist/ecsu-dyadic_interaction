@@ -36,7 +36,6 @@ class Simulation:
     trial_duration: int = 200
     num_cores: int = 1
     data_noise_variance: float = 1e-8
-    entropy_objective: str = 'min' # min, max
     timeit: bool = False
 
     def __post_init__(self):        
@@ -418,9 +417,6 @@ class Simulation:
             )
 
             agents_perf = np.mean([performance_agent_A, performance_agent_B])
-
-            if self.entropy_objective=='min':
-                agents_perf = - agents_perf
 
             # appending mean performance between two agents in trial_performances
             trial_performances.append(agents_perf)
