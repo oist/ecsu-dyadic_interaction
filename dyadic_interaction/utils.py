@@ -36,3 +36,7 @@ def rotate_cw_matrix(theta):
     '''
     c, s = np.cos(theta), np.sin(theta)
     return np.array(((c, -s), (s, c)))
+
+def add_noise(vector, random_state, variance=0.05):
+    magnitude = random_state.normal(0, variance)
+    return vector + magnitude

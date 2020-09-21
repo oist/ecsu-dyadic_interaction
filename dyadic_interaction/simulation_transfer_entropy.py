@@ -9,7 +9,8 @@ import pyevolver.utils
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction import neural_transfer_entropy
+from dyadic_interaction.neural_transfer_entropy import get_transfer_entropy
+from dyadic_interaction.utils import add_noise
 from dataclasses import dataclass, field, asdict, fields
 from typing import Dict, Tuple, List
 import json
@@ -33,6 +34,7 @@ class Simulation:
     num_trials: int = 4 # hard coded
     trial_duration: int = 200
     num_cores: int = 1
+    data_noise_variance: float = 1e-8
     timeit: bool = False
 
     def __post_init__(self):        
@@ -120,7 +122,7 @@ class Simulation:
         return sim
 
 
-    def compute_performance(self, genotypes_pair, data_record=None):
+    def compute_performance(self, genotypes_pair, rnd_seed, data_record=None):
         '''
         Main function to compute performace
         
@@ -249,9 +251,18 @@ class Simulation:
 
             # finished exp for agent a
 
+            # add random noise to data before calculating transfer entropy
+            for a in range(2):
+                rs = RandomState(rnd_seed)
+                agents_pair_brain_output[a] = add_noise(
+                    agents_pair_brain_output[a], 
+                    rs, 
+                    variance=self.data_noise_variance
+                )
+
             # calculate performance        
             performance_agent_A, performance_agent_B = (
-                neural_transfer_entropy.get_transfer_entropy(agents_pair_brain_output[a])
+                get_transfer_entropy(agents_pair_brain_output[a])
                 for a in range(2)
             )
 
@@ -272,7 +283,6 @@ class Simulation:
         population_size = len(population)
         assert population_size == len(random_seeds)
 
-        # we are not using random seeeds because behaviour of agents is fully deterministic (with not randomality)
         if self.num_cores > 1:
             # run parallel job
             assert population_size % self.num_cores == 0, \
@@ -281,14 +291,14 @@ class Simulation:
 
             sim_array = [Simulation(**asdict(self)) for _ in range(self.num_cores)]
             performances = Parallel(n_jobs=self.num_cores)( # prefer="threads" does not work
-                delayed(sim_array[i%self.num_cores].compute_performance)(genotypes_pair) \
-                for i, (genotypes_pair) in enumerate(population)
+                delayed(sim_array[i%self.num_cores].compute_performance)(genotype, rnd_seed) \
+                for i, (genotype, rnd_seed) in enumerate(zip(population, random_seeds))
             )
 
         else:
             performances = [
-                self.compute_performance(genotypes_pair)
-                for genotypes_pair in population
+                self.compute_performance(genotype, rnd_seed)
+                for genotype, rnd_seed in zip(population, random_seeds)
             ]
 
         return performances

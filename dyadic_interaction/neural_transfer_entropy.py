@@ -20,7 +20,7 @@ def initialize_calc(calc):
     calc.setProperty("NORMALISE", "true")  
     # no stochastic noise for reproducibility, 
     # see https://github.com/jlizier/jidt/wiki/FAQs#why-are-my-results-from-a-kraskov-stoegbauer-grassberger-estimator-stochastic
-    calc.setProperty("NOISE_LEVEL_TO_ADD", "0") 
+    calc.setProperty("NOISE_LEVEL_TO_ADD", "0")     
     # Use history length 1 (Schreiber k=1)
     calc.initialise(HISTORY_LENGTH)  
     # Use Kraskov parameter K=4 for 4 nearest points
