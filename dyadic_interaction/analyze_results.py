@@ -5,7 +5,7 @@ from scipy import stats
 
 def analyze_histo_entropy():
     # base_dir = 'data/histo_entropy'
-    base_dir = 'data/transfer_entropy'
+    base_dir = 'data/transfer_entropy/max'
     exp_dirs = sorted(os.listdir(base_dir))
     best_exp_performance = []
     for exp in exp_dirs:
@@ -15,7 +15,7 @@ def analyze_histo_entropy():
             gen_best_perf = exp_evo_data['best_performances']
             
             # make sure it's monotonic increasing(otherwise there is a bug)
-            assert all(gen_best_perf[i] <= gen_best_perf[i+1] for i in range(len(gen_best_perf)-1))
+            # assert all(gen_best_perf[i] <= gen_best_perf[i+1] for i in range(len(gen_best_perf)-1))
             
             last_best_performance = gen_best_perf[-1]
             print('{} {:.3f}'.format(exp, last_best_performance))

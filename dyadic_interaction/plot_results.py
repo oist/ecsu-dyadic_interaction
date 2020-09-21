@@ -4,7 +4,8 @@ TODO: Missing module docstring
 
 import os
 import matplotlib.pyplot as plt
-from dyadic_interaction.simulation_histo_entropy import Simulation
+from dyadic_interaction.simulation_histo_entropy import Simulation as simulation_histo_entropy
+from dyadic_interaction.simulation_transfer_entropy import Simulation as simulation_transfer_entropy
 from dyadic_interaction import gen_structure
 import numpy as np
 from numpy.random import RandomState
@@ -77,13 +78,14 @@ def plot_inputs(trial_data):
     num_trials = len(trial_data['agent_pos'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
-    fig.suptitle("Agent inputs")
+    fig.suptitle("Sensor inputs")
     for t in range(num_trials):
         ax = fig.add_subplot(1, num_cols, t + 1)
-        ax.plot(trial_data['eyes_input'][t][:, 0], label='Eye input to s1')
-        ax.plot(trial_data['eyes_input'][t][:, 1], label='Eye input to s2')
-        ax.plot(trial_data['brain_input'][t][:, 0], label='Input to n1')
-        ax.plot(trial_data['brain_input'][t][:, 1], label='Input to n2')
+        for a in range(2):
+            ax.plot(trial_data['sensors_input'][t][a][:, 0], label='Eye input to s1')
+            ax.plot(trial_data['sensors_input'][t][a][:, 1], label='Eye input to s2')
+            # ax.plot(trial_data['brain_input'][t][a][:, 0], label='Input to n1')
+            # ax.plot(trial_data['brain_input'][t][a][:, 1], label='Input to n2')
     plt.legend()
     plt.show()
 
@@ -92,42 +94,64 @@ def plot_motor_output(trial_data):
     num_trials = len(trial_data['agent_pos'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
-    fig.suptitle("Agent inputs")
+    fig.suptitle("Wheels")
     for t in range(num_trials):
         ax = fig.add_subplot(1, num_cols, t + 1)
-        ax.plot(trial_data['brain_output'][t][:, 0], label='Output of n1')
-        ax.plot(trial_data['brain_output'][t][:, 1], label='Output of n2')
-        ax.plot(trial_data['wheels'][t][:, 0], label='Wheel 1')
-        ax.plot(trial_data['wheels'][t][:, 1], label='Wheel 2')
+        for a in range(2):
+            ax.plot(trial_data['wheels'][t][a][:, 0], label='Wheel 1 agent {}'.format(a))
+            ax.plot(trial_data['wheels'][t][a][:, 1], label='Wheel 2 agent {}'.format(a))
+            # ax.plot(trial_data['wheels'][t][a][:, 1], label='Emitter agent {}'.format(a))
+            # ax.plot(trial_data['wheels'][t][a][:, 2], label='Wheel 2 agent {}'.format(a))
+    plt.legend()
+    plt.show()
+
+def plot_emitters(trial_data):
+    num_trials = len(trial_data['agent_pos'])
+    num_cols = num_trials
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Emitters")
+    for t in range(num_trials):
+        ax = fig.add_subplot(1, num_cols, t + 1)
+        for a in range(2):
+            ax.plot(trial_data['emitter'][t][a], label='Emitter agent {}'.format(a))
     plt.legend()
     plt.show()
 
 
 def plot_simultation_results():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/dyadic_exp_001'
+    working_dir = 'data/transfer_entropy/max/dyadic_exp_010'    # 5?, 10, 18(max)
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
+    transfer_entropy = 'transfer' in working_dir
+    Simulation = simulation_transfer_entropy if transfer_entropy else simulation_histo_entropy
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
     genotype = evo.population[genotype_index]
 
-    random_pos_angle = False
-    if random_pos_angle:
-        sim.set_initial_positions_angles(RandomState())
-
-    
+    force_random = False
+    if force_random:
+        rs = RandomState()
+        sim.set_initial_positions_angles(rs)
+        random_seed = rs.randint(10000)
+    else:
+        random_seed = evo.pop_eval_random_seed[genotype_index]
+        
     trial_data = {}
-    perf = sim.compute_performance(genotype, trial_data)
+    if transfer_entropy:
+        perf = sim.compute_performance(genotype, random_seed, trial_data)
+    else:
+        perf = sim.compute_performance(genotype, trial_data)
     print("Best performance recomputed: {}".format(perf))
 
     plot_performances(evo)
     plot_behavior(trial_data)
     plot_activity(trial_data)
-    # plot_inputs(trial_data)
-    # plot_motor_output(trial_data)
+    plot_inputs(trial_data)
+    plot_motor_output(trial_data)
+    plot_emitters(trial_data)
 
 
 def plot_random_simulation_results():
