@@ -8,6 +8,7 @@ from joblib import Parallel, delayed
 from dyadic_interaction import gen_structure
 from dyadic_interaction.simulation_histo_entropy import Simulation as Simulation_histo_entropy
 from dyadic_interaction.simulation_transfer_entropy import Simulation as Simulation_transfer_entropy
+from dyadic_interaction import neural_transfer_entropy
 from pyevolver.evolution import Evolution
 import numpy as np
 from numpy.random import RandomState
@@ -61,6 +62,11 @@ def run_experiment(seed, entropy_type, folder_path, num_cores,
         checkpoint_interval=np.ceil(max_generation/100),
     )
     evo.run()
+
+    if entropy_type == 'transfer':
+        # shutdown JVM
+        neural_transfer_entropy.shutdown_JVM()
+
 
 
 if __name__ == "__main__":

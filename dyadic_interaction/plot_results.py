@@ -62,10 +62,13 @@ def plot_activity(trial_data):
     fig.suptitle("Brain activity")
     for t in range(num_trials):
         ax = fig.add_subplot(1, num_cols, t + 1)
-        ax.plot(trial_data['brain_output'][t][:, 0], label='Output of n1')
-        ax.plot(trial_data['brain_output'][t][:, 1], label='Output of n2')
+        for a in range(2):
+            ax.plot(trial_data['brain_output'][t][a][:, 0], label='Output of n1 agent {}'.format(a))
+            ax.plot(trial_data['brain_output'][t][a][:, 1], label='Output of n2 agent {}'.format(a))
         # trial_data['brain_state'][t]
         # trial_data['derivatives'][t]
+    # handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper right')
     plt.legend()
     plt.show()
 
@@ -102,7 +105,7 @@ def plot_motor_output(trial_data):
 
 def plot_simultation_results():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/dyadic_exp_1'
+    working_dir = 'data/transfer_entropy/dyadic_exp_017'
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
@@ -122,7 +125,7 @@ def plot_simultation_results():
 
     plot_performances(evo)
     plot_behavior(trial_data)
-    # plot_activity(trial_data)
+    plot_activity(trial_data)
     # plot_inputs(trial_data)
     # plot_motor_output(trial_data)
 

@@ -267,6 +267,7 @@ class Simulation:
     def evaluate(self, population, random_seeds):        
         population_size = len(population)
         assert population_size == len(random_seeds)
+
         # we are not using random seeeds because behaviour of agents is fully deterministic (with not randomality)
         if self.num_cores > 1:
             # run parallel job
@@ -285,6 +286,7 @@ class Simulation:
                 self.compute_performance(genotypes_pair)
                 for genotypes_pair in population
             ]
+
         return performances
 
 

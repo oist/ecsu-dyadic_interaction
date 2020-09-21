@@ -9,7 +9,7 @@ import pyevolver.utils
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.neural_transfer_entropy import get_transfer_entropy
+from dyadic_interaction import neural_transfer_entropy
 from dataclasses import dataclass, field, asdict, fields
 from typing import Dict, Tuple, List
 import json
@@ -219,7 +219,7 @@ class Simulation:
                     self.timing.add_time('SIM_8_compute_motor_outputs', tim)
 
                     # 6) Save data
-                    agents_pair_brain_output[a][i] = agent_net.brain.output
+                    agents_pair_brain_output[a][i,:] = agent_net.brain.output
                     if data_record is not None:
                         data_record['agent_pos'][t][a][i] = agent_body.position
                         data_record['agent_angle'][t][a][i] = agent_body.angle
@@ -251,7 +251,7 @@ class Simulation:
 
             # calculate performance        
             performance_agent_A, performance_agent_B = (
-                get_transfer_entropy(agents_pair_brain_output[a])
+                neural_transfer_entropy.get_transfer_entropy(agents_pair_brain_output[a])
                 for a in range(2)
             )
 
@@ -268,9 +268,10 @@ class Simulation:
     '''
     POPULATION EVALUATION FUNCTION
     '''
-    def evaluate(self, population, random_seeds):        
+    def evaluate(self, population, random_seeds):                
         population_size = len(population)
         assert population_size == len(random_seeds)
+
         # we are not using random seeeds because behaviour of agents is fully deterministic (with not randomality)
         if self.num_cores > 1:
             # run parallel job
@@ -289,6 +290,7 @@ class Simulation:
                 self.compute_performance(genotypes_pair)
                 for genotypes_pair in population
             ]
+
         return performances
 
 

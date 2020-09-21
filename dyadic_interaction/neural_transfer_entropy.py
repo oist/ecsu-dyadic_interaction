@@ -9,17 +9,29 @@ HISTORY_LENGTH = 2
 infodynamics_dir = './infodynamics'
 jarLocation = os.path.join(infodynamics_dir, "infodynamics.jar")
 jpype.startJVM(jpype.getDefaultJVMPath(), "-ea", "-Djava.class.path=" + jarLocation)
-teCalcClass = jpype.JPackage("infodynamics.measures.continuous.kraskov").TransferEntropyCalculatorKraskov
 
-def initialize_teCalc(calc):
-    calc.setProperty("NORMALISE", "true")  # Normalise the individual variables
-    calc.initialise(HISTORY_LENGTH)  # Use history length 1 (Schreiber k=1)
-    calc.setProperty("k", "4")  # Use Kraskov parameter K=4 for 4 nearest points
+# Shut down JVM
+def shutdown_JVM():    
+    jpype.shutdownJVM()
+
+
+def initialize_calc(calc):
+    # Normalise the individual variables
+    calc.setProperty("NORMALISE", "true")  
+    # no stochastic noise for reproducibility, 
+    # see https://github.com/jlizier/jidt/wiki/FAQs#why-are-my-results-from-a-kraskov-stoegbauer-grassberger-estimator-stochastic
+    calc.setProperty("NOISE_LEVEL_TO_ADD", "0") 
+    # Use history length 1 (Schreiber k=1)
+    calc.initialise(HISTORY_LENGTH)  
+    # Use Kraskov parameter K=4 for 4 nearest points
+    calc.setProperty("k", "4")  
 
 
 def get_transfer_entropy(brain_output, reciprocal=True):
-    calc = teCalcClass()
-    initialize_teCalc(calc)
+    # return brain_output[0][0]
+    calcClass = jpype.JPackage("infodynamics.measures.continuous.kraskov").TransferEntropyCalculatorKraskov
+    calc = calcClass()
+    initialize_calc(calc)
     source = brain_output[:,0]
     destination = brain_output[:,1]
     calc.setObservations(source, destination)    
@@ -33,12 +45,13 @@ def get_transfer_entropy(brain_output, reciprocal=True):
     # print('te_dst_src: {}'.format(te_dst_src))
     return np.mean([te_src_dst, te_dst_src])
 
-def test_neural_entropy_random():    
-    bins = 100
-    num_data_points = 10 * bins * bins
-    brain_output = np.random.rand(num_data_points, 2)
+def test_neural_entropy_random(log=True):    
+    num_data_points = 20000
+    rs = RandomState(0)
+    brain_output = rs.rand(num_data_points, 2)
     transfer_entropy = get_transfer_entropy(brain_output)
-    print("Transfer Entropy on random data ({} data points): {}".format(num_data_points, transfer_entropy))
+    if log:
+        print("Transfer Entropy on random data ({} data points): {}".format(num_data_points, transfer_entropy))
     
 def test_neural_entropy_single():   
     bins = 100
@@ -74,8 +87,12 @@ def test_neural_entropy_reciprocal():
     transfer_entropy = get_transfer_entropy(brain_output)
     print("Transfer Entropy on random data ({} data points) B A: {}".format(num_data_points, transfer_entropy))
 
+
+
+
+
 if __name__ == "__main__":
-    # test_neural_entropy_random()
-    # test_neural_entropy_single()
-    # test_neural_entropy_uniform()
+    test_neural_entropy_single()
+    test_neural_entropy_uniform()
     test_neural_entropy_reciprocal()
+    shutdown_JVM()
