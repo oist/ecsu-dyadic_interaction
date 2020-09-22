@@ -407,7 +407,7 @@ class Simulation:
                 agents_pair_brain_output[a] = add_noise(
                     agents_pair_brain_output[a], 
                     rs, 
-                    noise_level=self.data_noise_variance
+                    noise_level=self.data_noise_level
                 )
 
             # calculate performance        
