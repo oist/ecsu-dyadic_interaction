@@ -118,18 +118,13 @@ def plot_emitters(trial_data):
     plt.show()
 
 
-def plot_simultation_results():
-    # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/max/dyadic_exp_018'    # 5?, 10, 18(max)
-    generation = '500'
-    genotype_index = 0
-    sim_json_filepath = os.path.join(working_dir, 'simulation.json')
-    evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
+def plot_simultation_results(dir, generation, genotype_index, force_random=False):
+    sim_json_filepath = os.path.join(dir, 'simulation.json')
+    evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
     sim = Simulation.load_from_file(sim_json_filepath)
-    evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
+    evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
     genotype = evo.population[genotype_index]
 
-    force_random = False
     if force_random:
         rs = RandomState()
         sim.set_initial_positions_angles(rs)
@@ -174,5 +169,25 @@ def plot_random_simulation_results():
     print("random perf: {}".format(perf))        
 
 if __name__ == "__main__":
-    plot_simultation_results()
+    import argparse
+
+    # default_dir = 'data/histo_entropy/dyadic_exp_096'
+    default_dir = 'data/transfer_entropy/max/dyadic_exp_018'    # 5?, 10, 18(max)
+    default_gen = '500'
+    default_index = 0
+    default_random = False
+
+    # plot_simultation_results()
     # plot_random_simulation_results()
+
+    parser = argparse.ArgumentParser(
+        description='Plot results'
+    )
+
+    parser.add_argument('--dir', type=str, default=default_dir, help='Directory path')     
+    parser.add_argument('--gen', type=str, default=default_gen, help='number of genration (str)')    
+    parser.add_argument('--index', type=str, default=default_index, help='Index of agent in population')
+    parser.add_argument('--random', type=bool, default=default_random, help='If to randomize result')
+
+    args = parser.parse_args()
+    plot_simultation_results(args.dir, args.gen, args.index, args.random)
