@@ -210,13 +210,12 @@ def run_with_keyboard(trial_index):
 
 def run_from_data():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/min/dyadic_exp_007'    
+    working_dir = 'data/transfer_entropy/zero/dyadic_exp_009'    
     generation = '500'
-    trial_index = 0
+    trial_index = 2
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
-    transfer_entropy = 'transfer' in working_dir
     sim = Simulation.load_from_file(sim_json_filepath)    
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
     genotype = evo.population[genotype_index]    

@@ -119,7 +119,7 @@ def plot_emitters(trial_data):
 
 def plot_simultation_results():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/min/dyadic_exp_007'    # 5?, 10, 18(max)
+    working_dir = 'data/transfer_entropy/zero/dyadic_exp_009'    # 5?, 10, 18(max)
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')

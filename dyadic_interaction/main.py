@@ -80,9 +80,7 @@ if __name__ == "__main__":
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    
     parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
     parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
-    parser.add_argument('--perf_obj', choices=['MAX', 'MIN', 'ZERO', 'ABS_MAX'], \
-        default='MAX', help='Fitness normalization mode'
-    )        
+    parser.add_argument('--perf_obj', default='MAX', help='Fitness normalization mode') # 'MAX', 'MIN', 'ZERO', 'ABS_MAX' or float value
 
     args = parser.parse_args()
 
