@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--dir', type=str, default=default_dir, help='Directory path')     
     parser.add_argument('--gen', type=str, default=default_gen, help='number of genration (str)')    
-    parser.add_argument('--index', type=str, default=default_index, help='Index of agent in population')
+    parser.add_argument('--index', type=int, default=default_index, help='Index of agent in population')
     parser.add_argument('--random', type=bool, default=default_random, help='If to randomize result')
 
     args = parser.parse_args()
