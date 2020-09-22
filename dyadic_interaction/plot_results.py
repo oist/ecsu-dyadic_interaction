@@ -172,8 +172,8 @@ if __name__ == "__main__":
     import argparse
 
     # default_dir = 'data/histo_entropy/dyadic_exp_096'
-    default_dir = 'data/transfer_entropy/max/dyadic_exp_018'    # 5?, 10, 18(max)
-    default_gen = '500'
+    default_dir = 'data/transfer_entropy_test/tmp1'    # 5?, 10, 18(max)
+    default_gen = '20'
     default_index = 0
     default_random = False
 

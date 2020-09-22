@@ -16,7 +16,7 @@ import json
 
 MAX_CANVAS_SIZE = 500
 ZOOM_FACTOR = 3
-REFRESH_RATE = 60
+REFRESH_RATE = 30
 
 CANVAS_CENTER = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
 SHIFT_CENTER_TO_FIRST_AGENT = False
@@ -210,9 +210,9 @@ def run_with_keyboard(trial_index):
 
 def run_from_data():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/0.5/dyadic_exp_002'    
+    working_dir = 'data/transfer_entropy/MAX/dyadic_exp_006'    
     generation = '500'
-    trial_index = 3
+    trial_index = 1
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))

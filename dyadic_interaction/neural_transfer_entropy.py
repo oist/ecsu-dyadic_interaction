@@ -36,7 +36,7 @@ def initialize_calc(calc, delay=DELAY):
     calc.initialise()
 
 
-def get_transfer_entropy(brain_output, delay=1, reciprocal=True):
+def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False):
     calcClass = jpype.JPackage("infodynamics.measures.continuous.kraskov").TransferEntropyCalculatorKraskov
     calc = calcClass()
     initialize_calc(calc, delay)
@@ -44,13 +44,15 @@ def get_transfer_entropy(brain_output, delay=1, reciprocal=True):
     destination = brain_output[:, 1]
     calc.setObservations(source, destination)
     te_src_dst = calc.computeAverageLocalOfObservations()
-    print('te_src_dst: {}'.format(te_src_dst))
+    if log:
+        print('te_src_dst: {}'.format(te_src_dst))
     if not reciprocal:
         return te_src_dst
     calc.initialise()  # Re-initialise leaving the parameters the same
     calc.setObservations(destination, source)
     te_dst_src = calc.computeAverageLocalOfObservations()
-    print('te_dst_src: {}'.format(te_dst_src))
+    if log:
+        print('te_dst_src: {}'.format(te_dst_src))
     return np.mean([te_src_dst, te_dst_src])
 
 
@@ -139,7 +141,7 @@ def test_neural_entropy_uniform(scramble=True):
 
 def analyze_sample_brain():
     import json
-    with open('dyadic_interaction/tmp_brains2.json') as f:
+    with open('data/tmp_brains.json') as f:
         data = json.load(f)
     df = np.array(data)
     t1_a1 = df[0][0]
@@ -152,9 +154,9 @@ def analyze_sample_brain():
     ax = fig.add_subplot(2, 2, 1)
     ax.plot(t1_a1[150:, 0])
     ax = fig.add_subplot(2, 2, 2)
-    ax.plot(t1_a2[150:, 1])
+    ax.plot(t1_a1[150:, 1])
     ax = fig.add_subplot(2, 2, 3)
-    ax.plot(t1_a1[150:, 0])
+    ax.plot(t1_a2[150:, 0])
     ax = fig.add_subplot(2, 2, 4)
     ax.plot(t1_a2[150:, 1])
     plt.show()

@@ -409,8 +409,9 @@ class Simulation:
                 )
 
             # calculate performance        
-            performance_agent_A, performance_agent_B = (
-                get_transfer_entropy(agents_pair_brain_output[a])
+            # TODO: understand what happens if reciprocal=False
+            performance_agent_A, performance_agent_B = (                
+                get_transfer_entropy(agents_pair_brain_output[a]) 
                 for a in range(2)
             )
 
