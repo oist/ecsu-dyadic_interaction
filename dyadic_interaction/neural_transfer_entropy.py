@@ -26,7 +26,7 @@ def shutdown_JVM():
 
 def initialize_calc(calc, delay=DELAY):
     # Normalise the individual variables
-    # calc.setProperty("NORMALISE", "true")
+    calc.setProperty("NORMALISE", "true")
     calc.setProperty("DELAY", str(delay))
     calc.setProperty("k", "4")
     # no stochastic noise for reproducibility,
