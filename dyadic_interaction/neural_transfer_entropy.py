@@ -5,7 +5,7 @@ import jpype
 from dyadic_interaction.utils import add_noise
 
 
-HISTORY_LENGTH = 2
+DELAY = 1
 
 infodynamics_dir = './infodynamics'
 jarLocation = os.path.join(infodynamics_dir, "infodynamics.jar")
@@ -19,11 +19,12 @@ def shutdown_JVM():
 def initialize_calc(calc):
     # Normalise the individual variables
     calc.setProperty("NORMALISE", "true")  
+    calc.setProperty("DELAY", str(DELAY))  
     # no stochastic noise for reproducibility, 
     # see https://github.com/jlizier/jidt/wiki/FAQs#why-are-my-results-from-a-kraskov-stoegbauer-grassberger-estimator-stochastic
     calc.setProperty("NOISE_LEVEL_TO_ADD", "0")     
     # Use history length 1 (Schreiber k=1)
-    calc.initialise(HISTORY_LENGTH)  
+    calc.initialise()  
     # Use Kraskov parameter K=4 for 4 nearest points
     calc.setProperty("k", "4")  
 
