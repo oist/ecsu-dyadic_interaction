@@ -125,6 +125,10 @@ def plot_simultation_results(dir, generation, genotype_index, force_random=False
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
     genotype = evo.population[genotype_index]
 
+    invert_type = False
+    if invert_type:
+        sim.entropy_type = 'histo' if sim.entropy_type == 'transfer' else 'transfer'
+
     if force_random:
         rs = RandomState()
         sim.set_initial_positions_angles(rs)
