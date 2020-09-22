@@ -6,9 +6,9 @@ import os
 import matplotlib.pyplot as plt
 from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
+from dyadic_interaction import utils
 import numpy as np
 from numpy.random import RandomState
-from pyevolver.json_numpy import NumpyListJsonEncoder
 from pyevolver.evolution import Evolution
 
 
@@ -63,8 +63,9 @@ def plot_activity(trial_data):
     for t in range(num_trials):
         ax = fig.add_subplot(1, num_cols, t + 1)
         for a in range(2):
-            ax.plot(trial_data['brain_output'][t][a][:, 0], label='Output of n1 agent {}'.format(a))
-            ax.plot(trial_data['brain_output'][t][a][:, 1], label='Output of n2 agent {}'.format(a))
+            brain_output = trial_data['brain_output'][t][a]
+            ax.plot(brain_output[:, 0], label='Output of n1 agent {}'.format(a))
+            ax.plot(brain_output[:, 1], label='Output of n2 agent {}'.format(a))
         # trial_data['brain_state'][t]
         # trial_data['derivatives'][t]
     # handles, labels = ax.get_legend_handles_labels()
@@ -119,12 +120,11 @@ def plot_emitters(trial_data):
 
 def plot_simultation_results():
     # working_dir = 'data/histo_entropy/dyadic_exp_096'
-    working_dir = 'data/transfer_entropy/zero/dyadic_exp_009'    # 5?, 10, 18(max)
+    working_dir = 'data/transfer_entropy/max/dyadic_exp_018'    # 5?, 10, 18(max)
     generation = '500'
     genotype_index = 0
     sim_json_filepath = os.path.join(working_dir, 'simulation.json')
     evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
-    transfer_entropy = 'transfer' in working_dir
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
     genotype = evo.population[genotype_index]
@@ -147,6 +147,8 @@ def plot_simultation_results():
     plot_inputs(trial_data)
     plot_motor_output(trial_data)
     plot_emitters(trial_data)
+    plot_motor_output(trial_data)
+    # utils.save_numpy_data(trial_data['brain_output'], 'data/tmp_brains.json')    
 
 
 def plot_random_simulation_results():
@@ -169,9 +171,7 @@ def plot_random_simulation_results():
 
     trial_data = {}
     perf = sim.compute_performance(random_genotype, random_seed, trial_data)
-    print("random perf: {}".format(perf))
-
-    plot_behavior(trial_data)
+    print("random perf: {}".format(perf))        
 
 if __name__ == "__main__":
     plot_simultation_results()

@@ -37,6 +37,24 @@ def rotate_cw_matrix(theta):
     c, s = np.cos(theta), np.sin(theta)
     return np.array(((c, -s), (s, c)))
 
-def add_noise(vector, random_state, variance=0.05):
-    magnitude = random_state.normal(0, variance)
-    return vector + magnitude
+def add_noise(vector, random_state, noise_level):
+    return vector + noise_level * random_state.normal(0, 1, vector.shape)
+
+def make_rand_vector(dims, random_state):
+    """
+    Generate a random unit vector.  This works by first generating a vector each of whose elements
+    is a random Gaussian and then normalizing the resulting vector.
+    """
+    vec = random_state.normal(0, 1, dims)
+    mag = sum(vec ** 2) ** .5    
+    return vec / mag
+
+def save_numpy_data(data, file_path):
+    import json
+    from pyevolver.json_numpy import NumpyListJsonEncoder
+    json.dump(
+        data, 
+        open(file_path,'w'),
+        indent=3,
+        cls=NumpyListJsonEncoder
+    )    

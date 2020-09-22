@@ -35,7 +35,7 @@ class Simulation:
     num_trials: int = 4 # hard coded
     trial_duration: int = 200
     num_cores: int = 1
-    data_noise_variance: float = 1e-8
+    data_noise_level: float = 1e-8
     timeit: bool = False
 
     def __post_init__(self):        
@@ -407,7 +407,7 @@ class Simulation:
                 agents_pair_brain_output[a] = add_noise(
                     agents_pair_brain_output[a], 
                     rs, 
-                    variance=self.data_noise_variance
+                    noise_level=self.data_noise_variance
                 )
 
             # calculate performance        

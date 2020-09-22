@@ -2,6 +2,7 @@ import os
 import numpy as np
 from numpy.random import RandomState
 import jpype
+from dyadic_interaction.utils import add_noise
 
 
 HISTORY_LENGTH = 2
@@ -56,7 +57,9 @@ def test_neural_entropy_random(log=True):
 def test_neural_entropy_single():   
     bins = 100
     num_data_points = bins * bins 
-    brain_output = np.ones((num_data_points, 2))
+    brain_output = np.ones((num_data_points, 2))    
+    rs = RandomState(1)
+    brain_output = add_noise(brain_output, rs, noise_level=1e-8)
     transfer_entropy = get_transfer_entropy(brain_output)
     print("Transfer Entropy on singleton data: {}".format(transfer_entropy))
 
@@ -79,7 +82,7 @@ def test_neural_entropy_reciprocal():
     num_data_points = 100
     rs = RandomState(0)
     brain_output = rs.rand(num_data_points, 2)
-    print(brain_output[1:5,:])
+    # print(brain_output[1:5,:])
     transfer_entropy = get_transfer_entropy(brain_output)
     print("Transfer Entropy on random data ({} data points) A B: {}".format(num_data_points, transfer_entropy))
     # swapping columns
@@ -88,10 +91,8 @@ def test_neural_entropy_reciprocal():
     print("Transfer Entropy on random data ({} data points) B A: {}".format(num_data_points, transfer_entropy))
 
 
-
-
-
 if __name__ == "__main__":
+    test_neural_entropy_random()
     test_neural_entropy_single()
     test_neural_entropy_uniform()
     test_neural_entropy_reciprocal()
