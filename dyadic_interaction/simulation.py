@@ -5,7 +5,6 @@ TODO: Missing module docstring
 import os
 import numpy as np
 from numpy import pi as pi
-import pyevolver.utils
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
@@ -17,7 +16,6 @@ from typing import Dict, Tuple, List
 import json
 from pyevolver.json_numpy import NumpyListJsonEncoder
 from pyevolver.timing import Timing
-from pyevolver import utils
 from numpy.random import RandomState
 from joblib import Parallel, delayed
 import multiprocessing
