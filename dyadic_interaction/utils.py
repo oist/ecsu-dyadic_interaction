@@ -58,3 +58,11 @@ def save_numpy_data(data, file_path):
         indent=3,
         cls=NumpyListJsonEncoder
     )    
+
+np_intinfo = np.iinfo(int)
+
+def random_int(random_state=None, size=None):
+    if random_state is None:
+        return np.random.randint(np_intinfo.min, np_intinfo.max, size)
+    else:
+        return random_state.randint(np_intinfo.min, np_intinfo.max, size)

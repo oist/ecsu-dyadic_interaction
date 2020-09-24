@@ -5,6 +5,7 @@ from dataclasses import asdict
 from pyevolver.json_numpy import NumpyListJsonEncoder
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction.agent_body import AgentBody
+from dyadic_interaction import utils
 import json
 
 '''
@@ -38,7 +39,7 @@ def test(entropy_type):
 
     data1 = {}
     data2 = {}
-    rnd_seed = None if entropy_type is 'histo' else np.random.randint(10000)
+    rnd_seed = None if entropy_type is 'histo' else utils.random_int()
     perf1 = sim.compute_performance(agent_pair_genome, rnd_seed, data1)
     print('perf1: {}'.format(perf1))
     perf2 = sim.compute_performance(agent_pair_genome, rnd_seed, data2)

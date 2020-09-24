@@ -34,6 +34,10 @@ class AgentBody:
         assert 0 < self.agent_sensors_divergence_angle <= pi / 2
         self.timing = Timing(self.timeit)        
 
+    def init_params(self, wheels, flag_collision = False):
+        self.wheels = wheels
+        self.flag_collision = flag_collision            
+
     def set_position_and_angle(self, agent_position, agent_angle):
         assert all(type(x) in [float, np.float64] for x in agent_position), "Agent's position must be a pair of float"
         assert type(agent_angle) in [float, np.float64], "Agent's angle must be a float"
@@ -57,7 +61,7 @@ class AgentBody:
         return [self.position + ep for ep in self.sensors_pos]
 
 
-    def get_sensor_inputs(self, emitter_position, emitter_strenght):
+    def get_signal_strength(self, emitter_position, emitter_strenght):
         """
         The sensor input to the agent
         :param emitter_position: absolute position of the emitter

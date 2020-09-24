@@ -62,9 +62,6 @@ class AgentNetwork:
         self.motor_gains = None
         self.motor_biases = None
         self.motor_weights = None
-        self.emitter_gains = None
-        self.emitter_biases = None
-        self.emitter_weights = None
         
         # IMPORTANT: 
         # this needs to be initialized in the simulation
@@ -75,6 +72,9 @@ class AgentNetwork:
         if genotype:
             self.genotype_to_phenotype(genotype)
 
+    def init_params(self, brain_states, motors_outputs):
+        self.brain.states = brain_states
+        self.motors_outputs = motors_outputs
 
     def genotype_to_phenotype(self, genotype):
         '''
@@ -84,13 +84,19 @@ class AgentNetwork:
             if k == 'crossover_points':
                 continue
             if k.startswith('neural'):
-                brain_field = k.split('_')[1]  # neural_taus -> brain.taus
+                brain_field = k.split('_')[1]  
+                # 1 neural_taus -> (1,2) self.brain.taus
+                # 1 neural_biases -> (1,2) self.brain.biases
+                # 1 neural_gains -> (1,2) self.brain.gains
+                # 4 neural_weights -> (2,2) self.brain.weights
                 if 'indexes' in val:
                     gene_values = np.array([genotype[i] for i in val['indexes']])
                     if k == 'neural_weights':
                         gene_values = gene_values.reshape(self.brain.num_neurons, -1)
                     else:
-                        gene_values = np.tile(gene_values, self.brain.num_neurons) # same tau/bias values for all neurons
+                        # biases, gains, weights
+                        # same values for all neurons
+                        gene_values = np.tile(gene_values, self.brain.num_neurons) 
                     setattr(
                         self.brain, brain_field,
                         linmap(gene_values, EVOLVE_GENE_RANGE, val['range'])
@@ -117,8 +123,8 @@ class AgentNetwork:
                     default_val_copy = np.copy(val['default'])
                     setattr(self, k, default_val_copy)
 
-    def compute_brain_input(self, sensor_inputs):
-        sensor_outputs = np.multiply(self.sensor_gains, expit(sensor_inputs + self.sensor_biases))  # [o1, o2]
+    def compute_brain_input(self, signal_strength):
+        sensor_outputs = np.multiply(self.sensor_gains, expit(signal_strength + self.sensor_biases))  # [o1, o2]
         self.brain.input = np.dot(sensor_outputs, self.sensor_weights)  # [1,2]·[2,2] = [1,2] two dimensional array
 
     def compute_motor_outputs(self):

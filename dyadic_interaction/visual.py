@@ -8,8 +8,10 @@ from numpy import pi as pi
 from numpy.random import RandomState
 import pygame
 from dyadic_interaction.agent_body import AgentBody
+from dyadic_interaction import simulation
 from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
+from dyadic_interaction import utils
 from pyevolver.evolution import Evolution
 from pyevolver.json_numpy import NumpyListJsonEncoder
 import json
@@ -89,7 +91,7 @@ class Visualization:
 
         prev_delta_xy_agents = [np.array([0.,0.]), np.array([0.,0.])]
         prev_angle_agents = [None, None]
-        sensor_inputs = [None, None]
+        signal_strength = [None, None]
 
         while running:
 
@@ -97,8 +99,8 @@ class Visualization:
                 if event.type == pygame.QUIT:
                     running = False
                 # elif event.type == pygame.MOUSEBUTTONDOWN:
-                #     sensor_inputs = self.agent.get_sensor_inputs(self.emitter_position)
-                #     print('sensor inputs: {}'.format(sensor_inputs))
+                #     signal_strength = self.agent.get_signal_strength(self.emitter_position)
+                #     print('sensor inputs: {}'.format(signal_strength))
                 elif event.type == pygame.KEYDOWN:
                     agent_index, wheel_update = self.key_motors_increase_velocity.get(event.key, (None,None))
                     if wheel_update:
@@ -122,7 +124,7 @@ class Visualization:
             for a in range(2):
                 agent = self.agents_pair_body[a]
                 b = 1-a
-                sensor_inputs[a] = agent.get_sensor_inputs(
+                signal_strength[a] = agent.get_signal_strength(
                     self.agents_pair_body[b].position,
                     self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
                 )
@@ -145,7 +147,7 @@ class Visualization:
 
             clock.tick(REFRESH_RATE)
     
-    def start_simulation_from_data(self, trial_index, trial_data):
+    def start_simulation_from_data(self, trial_index, data_record):
         running = True
 
         clock = pygame.time.Clock()
@@ -153,8 +155,8 @@ class Visualization:
         duration = self.simulation.num_data_points        
         print("Duration: {}".format(duration))
 
-        agent_pair_pos = trial_data['agent_pos'][trial_index]
-        agent_pair_angle = trial_data['agent_angle'][trial_index]
+        agent_pair_pos = data_record['agent_pos'][trial_index]
+        agent_pair_angle = data_record['agent_angle'][trial_index]
 
         i = 0
 
@@ -210,38 +212,22 @@ def run_with_keyboard(trial_index):
 
 def run_from_data():
     # working_dir = 'data/histo_entropy/MAX/dyadic_exp_005'
-    working_dir = 'data/transfer_entropy/MAX/dyadic_exp_006'    
-    generation = '500'
+    dir = 'data/transfer_entropy/MAX/dyadic_exp_006'    
+    generation = 500
     trial_index = 3
     genotype_index = 0
-    sim_json_filepath = os.path.join(working_dir, 'simulation.json')
-    evo_json_filepath = os.path.join(working_dir, 'evo_{}.json'.format(generation))
-    sim = Simulation.load_from_file(sim_json_filepath)    
-    evo = Evolution.load_from_file(evo_json_filepath, folder_path=working_dir)
-    genotype = evo.population[genotype_index]   
-
-    invert_type = False
-    if invert_type:
-        sim.entropy_type = 'histo' if sim.entropy_type == 'transfer' else 'transfer'
-
     force_random = False
-    if force_random:
-        rs = RandomState()
-        sim.set_initial_positions_angles(rs)
-        random_seed = rs.randint(10000)
-    else:
-        random_seed = evo.pop_eval_random_seed[genotype_index]
+    invert_sim_type = False
 
-    trial_data = {}
-    perf = sim.compute_performance(genotype, random_seed, trial_data)
-
-    print("perf: {}".format(perf))
-    # print("start pos: {}".format(trial_data['agent_pos'][0][0]))
+    evo, sim, data_record = simulation.obtain_trial_data(
+        dir, generation, genotype_index, 
+        force_random, invert_sim_type
+    )
 
     vis = Visualization(sim)
-    vis.start_simulation_from_data(trial_index, trial_data)
+    vis.start_simulation_from_data(trial_index, data_record)
 
-def run_random_agent():
+def run_random_agents():
     genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE
     gen_size = gen_structure.get_genotype_size(genotype_structure)
     random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size*2) # pairs of agents in a single genotype
@@ -257,16 +243,16 @@ def run_random_agent():
     )
 
     trial_index = 0
-    trial_data = {}
-    random_seed = np.random.randint(10000)
+    data_record = {}
+    random_seed = utils.random_int()
 
-    perf = sim.compute_performance(random_genotype, random_seed, trial_data)
+    perf = sim.compute_performance(random_genotype, random_seed, data_record)
     print("random perf: {}".format(perf))
 
     vis = Visualization(sim)
-    vis.start_simulation_from_data(trial_index, trial_data)
+    vis.start_simulation_from_data(trial_index, data_record)
 
 if __name__ == "__main__":
     # run_with_keyboard(trial_index=1)
     run_from_data()
-    # run_random_agent()
+    # run_random_agents()
