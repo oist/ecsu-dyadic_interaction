@@ -5,10 +5,12 @@ for various types of time series relationships.
 import jpype
 import os
 import numpy as np
+from dyadic_interaction.utils import discretize
 
 DEST_HISTORY = 1
 SOURCE_HISTORY = 1
 DELAY = 1
+BINS = 100
 
 infodynamics_dir = './infodynamics'
 jarLocation = os.path.join(infodynamics_dir, "infodynamics.jar")
@@ -31,8 +33,7 @@ def initialize_calc(calc, delay=DELAY):
     calc.setProperty("NOISE_LEVEL_TO_ADD", "0")
     calc.initialise()
 
-
-def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False, local=False):
+def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False, local=False, binning=True):
     """
     Calculate transfer entropy from 2D time series.
     :param brain_output: time series numpy array
@@ -41,13 +42,25 @@ def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False, loca
     :param log: whether to print intermediate results
     :param local: whether to calculate local entropy values
     """
-    calcClass = jpype.JPackage("infodynamics.measures.continuous.kraskov").TransferEntropyCalculatorKraskov
-    calc = calcClass()
-    initialize_calc(calc, delay)
-    source = brain_output[:, 0]
-    destination = brain_output[:, 1]
-    calc.setObservations(source, destination)
+    if binning:
+        calcClass = jpype.JPackage("infodynamics.measures.discrete").TransferEntropyCalculatorDiscrete
+        source = discretize(brain_output[:, 0], bins=BINS).tolist()
+        destination = discretize(brain_output[:, 1], bins=BINS).tolist()
+        calc = calcClass(BINS,1)
+        calc.initialise()
+        calc.addObservations(source, destination)            
+    else:
+        calcClass = jpype.JPackage("infodynamics.measures.continuous.kraskov").TransferEntropyCalculatorKraskov
+        source = brain_output[:, 0]
+        destination = brain_output[:, 1]
+        calc = calcClass()
+        initialize_calc(calc, delay)
+        calc.setObservations(source, destination)        
+    
     te_src_dst = calc.computeAverageLocalOfObservations()
+    if binning:
+        te_src_dst = te_src_dst / np.log2(BINS)
+
     if log:
         print('te_src_dst: {}'.format(te_src_dst))
     local_te = []
@@ -56,10 +69,15 @@ def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False, loca
         local_te.append(te_src_dst_local)
     if not reciprocal:
         return te_src_dst
-
+    
     calc.initialise()  # Re-initialise leaving the parameters the same
-    calc.setObservations(destination, source)
+    if binning:
+        calc.addObservations(destination, source)
+    else:
+        calc.setObservations(destination, source)
     te_dst_src = calc.computeAverageLocalOfObservations()
+    if binning:
+        te_dst_src = te_dst_src / np.log2(BINS)
     avg_te = np.mean([te_src_dst, te_dst_src])
     if log:
         print('te_dst_src: {}'.format(te_dst_src))

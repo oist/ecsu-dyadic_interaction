@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=short
-#SBATCH --time=1:00:00
+#SBATCH --time=2:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=500G
