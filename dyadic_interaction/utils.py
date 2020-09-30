@@ -10,6 +10,14 @@ from numpy import pi
 TWO_PI = 2*pi
 RANDOM_CHAR_SET = string.ascii_uppercase + string.digits
 
+def discretize(a, bins, min=0, max=1):
+    a[a > max] = max
+    a[a < min] = min
+    bins = np.linspace(min,max,bins)
+    return np.digitize(a,bins, right=True)
+    
+    return 
+
 def random_string(size=5):
     '''
     generates random alphanumeric string
@@ -63,6 +71,6 @@ np_intinfo = np.iinfo(int)
 
 def random_int(random_state=None, size=None):
     if random_state is None:
-        return np.random.randint(np_intinfo.min, np_intinfo.max, size)
+        return np.random.randint(0, 2**32 - 1, size)
     else:
         return random_state.randint(np_intinfo.min, np_intinfo.max, size)

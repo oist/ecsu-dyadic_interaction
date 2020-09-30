@@ -319,17 +319,17 @@ class Simulation:
 
             self.prepare_agents_for_trial(t)
             self.timing.add_time('SIM_3_prepare_agents_for_trials', tim)                
-            
+
+            # initialize agents brain output of this trial for computing entropy
+            agents_pair_brain_output = [
+                np.zeros((self.num_data_points, 2)) 
+                for _ in range(2)
+            ]
+
             for a in range(2):            
                 # compute output
                 self.agents_pair_net[a].brain.compute_output()
                 self.timing.add_time('SIM_4_compute_output', tim)
-
-                # initialize agents brain output of this trial for computing entropy
-                agents_pair_brain_output = [
-                    np.zeros((self.num_data_points, 2)) 
-                    for _ in range(2)
-                ]
 
                 if data_record is not None:                    
                     data_record['agent_pos'][t][a] = np.zeros((self.num_data_points, 2))
@@ -415,7 +415,7 @@ class Simulation:
             # calculate performance        
             # TODO: understand what happens if reciprocal=False
             performance_agent_A, performance_agent_B = (                
-                get_transfer_entropy(agents_pair_brain_output[a]) 
+                get_transfer_entropy(agents_pair_brain_output[a], binning=True) 
                 for a in range(2)
             )
 
