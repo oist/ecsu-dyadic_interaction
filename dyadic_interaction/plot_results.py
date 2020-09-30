@@ -56,6 +56,58 @@ def plot_behavior(data_record):
     plt.show()
 
 
+def plot_angles(data_record):    
+    angle_data = np.mod(np.degrees(data_record['agent_angle']), 360.)
+    num_trials = len(angle_data)
+    num_cols = num_trials
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Angles")
+    for t in range(num_trials):
+        ax = fig.add_subplot(1, num_cols, t + 1)
+        for a in range(2):
+            ax.plot(angle_data[t][a], label='Angle agent {}'.format(a))
+    # ax = fig.add_subplot(1, 1, 1)
+    # for a in range(2):
+    #     ax.plot(angle_data[0][a], label='Angle agent {}'.format(a))
+    plt.legend()
+    plt.show()
+
+def plot_norm_x(data_record):    
+    pos_data = data_record['agent_pos']
+    num_trials = len(pos_data)    
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("X Pos")
+    # num_cols = num_trials
+    # for t in range(num_trials):
+    #     ax = fig.add_subplot(1, num_cols, t + 1)
+    #     for a in range(2):
+    #         ax.plot(x_data[t][a], label='Angle agent {}'.format(a))
+    ax = fig.add_subplot(1, 1, 1)
+    for a in range(2):
+        x_data = pos_data[0][a][:,0]
+        x_data = (x_data - x_data.min()) / (x_data.max() - x_data.min())
+        ax.plot(x_data, label='X agent {}'.format(a))
+    plt.legend()
+    plt.show()
+
+def plot_activity_scatter(data_record):
+    num_trials = len(data_record['agent_pos'])
+    num_cols = num_trials
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Brain activity")
+    for t in range(num_trials):       
+        for a in range(2):
+            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
+            brain_output = data_record['brain_output'][t][a]
+            ax.scatter(brain_output[0][0], brain_output[0][1], label='Tracker start', color='orange')            
+            ax.plot(brain_output[:, 0], brain_output[:, 1], label='Output of n1 agent {}'.format(a))            
+        # data_record['brain_state'][t]
+        # data_record['derivatives'][t]
+    # handles, labels = ax.get_legend_handles_labels()
+    # fig.legend(handles, labels, loc='upper right')
+    plt.legend()
+    plt.show()
+
 def plot_activity(data_record):
     num_trials = len(data_record['agent_pos'])
     num_cols = num_trials
@@ -87,6 +139,19 @@ def plot_inputs(data_record):
             # ax.plot(data_record['signal_strength'][t][a][:, 1], label='Signal strength to s2 agent {}'.format(a))
             ax.plot(data_record['brain_input'][t][a][:, 0], label='Brain Input to n1 agent {}'.format(a))
             ax.plot(data_record['brain_input'][t][a][:, 1], label='Brain Input to n2 agent {}'.format(a))
+    plt.legend()
+    plt.show()
+
+def plot_signal(data_record):
+    num_trials = len(data_record['agent_pos'])
+    num_cols = num_trials
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Signal Strength")
+    for t in range(num_trials):
+        for a in range(2):
+            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
+            ax.plot(data_record['signal_strength'][t][a][:, 0], label='Signal strength to s1 agent {}'.format(a))
+            ax.plot(data_record['signal_strength'][t][a][:, 1], label='Signal strength to s2 agent {}'.format(a))
     plt.legend()
     plt.show()
 
@@ -127,8 +192,12 @@ def plot_simultation_results(dir, num_generation, genotype_index, force_random=F
     )
 
     plot_performances(evo)
+    plot_activity_scatter(data_record)
+    # plot_angles(data_record)
+    plot_norm_x(data_record)
     plot_behavior(data_record)
-    plot_activity(data_record)
+    plot_activity(data_record)    
+    plot_signal(data_record)
     plot_inputs(data_record)
     plot_motor_output(data_record)
     plot_emitters(data_record)

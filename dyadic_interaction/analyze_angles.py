@@ -41,7 +41,6 @@ def analyze_circle_angles():
     # print(mov_angle_diff[:100])
 
 
-
 if __name__ == "__main__":
     analyze_circle_angles()
 
