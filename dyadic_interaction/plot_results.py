@@ -53,7 +53,7 @@ def plot_behavior(data_record, to_plot='all'):
             ax.set_aspect('equal')
     else:
         fig = plt.figure(figsize=(6, 5))
-        fig.suptitle("Agents behavior")
+        # fig.suptitle("Agents behavior")
         for a in range(2):
             plt.scatter(agent_pos[int(to_plot) - 1][a][0][0],
                         agent_pos[int(to_plot) - 1][a][1][0], label='Tracker start',
@@ -64,14 +64,15 @@ def plot_behavior(data_record, to_plot='all'):
             plt.plot(agent_pos[int(to_plot) - 1][a][0],
                      agent_pos[int(to_plot) - 1][a][1],
                      label='Tracker position')
-        plt.xlim((-4, 31))
-        plt.ylim((-15, 20))
+        # plt.xlim((-4, 31))
+        # plt.ylim((-15, 20))
     # handles, labels = ax.get_legend_handles_labels()
     # fig.legend(handles, labels, loc='upper right')
     # plt.legend()
     # plt.show()
     # plt.savefig('plots/shannon_beh.eps', format='eps')
-    plt.savefig('plots/transfer_beh.eps', format='eps')
+    # plt.savefig('plots/transfer_beh.eps', format='eps')
+    plt.savefig('plots/transfer_beh_bin.eps', format='eps')
 
 
 def plot_activity(data_record, to_plot):
@@ -154,37 +155,39 @@ def plot_activity(data_record, to_plot):
                            xticklabels=[], xticks=[],
                            ylim=(-0.2, 1.2))
         ax4 = fig.add_axes([0.12, 0.1, 0.8, 0.15],
+                           xticklabels=np.arange(900, 1600, step=100),
                            ylim=(-0.2, 1.2))
 
         brain_output1 = data_record['brain_output'][int(to_plot)][0]
         brain_output2 = data_record['brain_output'][int(to_plot)][1]
         ax1.plot(brain_output1[1000:1500, 0])
-        ax1.set_title('Agent 1, N1 output', y=0.9)
+        # ax1.set_title('Agent 1, N1 output', y=0.9)
         ax1.spines["top"].set_visible(False)
         ax1.spines["right"].set_visible(False)
         ax1.spines["bottom"].set_visible(False)
 
         ax2.plot(brain_output1[1000:1500, 1])
-        ax2.set_title('Agent 1, N2 output', y=0.9)
+        # ax2.set_title('Agent 1, N2 output', y=0.9)
         ax2.spines["top"].set_visible(False)
         ax2.spines["right"].set_visible(False)
         ax2.spines["bottom"].set_visible(False)
 
         ax3.plot(brain_output2[1000:1500, 0])
-        ax3.set_title('Agent 2, N1 output', y=0.9)
+        # ax3.set_title('Agent 2, N1 output', y=0.9)
         ax3.spines["top"].set_visible(False)
         ax3.spines["right"].set_visible(False)
         ax3.spines["bottom"].set_visible(False)
 
         ax4.plot(brain_output2[1000:1500, 1])
-        ax4.set_title('Agent 2, N2 output', y=0.9)
+        # ax4.set_title('Agent 2, N2 output', y=0.9)
         ax4.spines["top"].set_visible(False)
         ax4.spines["right"].set_visible(False)
         ax4.spines["bottom"].set_visible(True)
 
     # plt.show()
-    plt.savefig('plots/shannon_activity.eps', format='eps')
+    # plt.savefig('plots/shannon_activity.eps', format='eps')
     # plt.savefig('plots/transfer_activity.eps', format='eps')
+    plt.savefig('plots/transfer_activity_bin.eps', format='eps')
 
 
 def plot_inputs(data_record):
@@ -239,7 +242,7 @@ def plot_simultation_results(dir, num_generation, genotype_index, force_random=F
     )
 
     # plot_performances(evo)
-    # plot_behavior(data_record, '1')
+    plot_behavior(data_record, '1')
     plot_activity(data_record, '1')
     # plot_inputs(data_record)
     # plot_motor_output(data_record)
