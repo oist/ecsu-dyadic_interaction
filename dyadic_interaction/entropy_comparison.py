@@ -32,11 +32,14 @@ def test_neural_entropy_random(num_experiments, num_data_points, distribution='u
     rs = RandomState(0)
     if distribution == 'normal':
         brain_output = rs.normal(0, 1, (num_experiments, num_data_points, 2))
+        for i in range(num_experiments):
+            norm_entropy.append(get_norm_entropy(brain_output[i, :, :], min_v=-3., max_v=3.))
+            transfer_entropy.append(get_transfer_entropy(brain_output[i, :, :], min_v=-3., max_v=3.))
     else:
         brain_output = rs.rand(num_experiments, num_data_points, 2)
-    for i in range(num_experiments):
-        transfer_entropy.append(get_transfer_entropy(brain_output[i, :, :]))
-        norm_entropy.append(get_norm_entropy(brain_output[i, :, :]))
+        for i in range(num_experiments):
+            norm_entropy.append(get_norm_entropy(brain_output[i, :, :]))
+            transfer_entropy.append(get_transfer_entropy(brain_output[i, :, :]))
     print("Simulated {} experiments of {} data points".format(num_experiments, num_data_points))
     print("Transfer Entropy on random {} data: {}".format(distribution, transfer_entropy))
     print("Shannon Entropy on random {} data: {}".format(distribution, norm_entropy))
@@ -53,8 +56,8 @@ def test_neural_entropy_single(num_experiments, num_data_points):
     for i in range(num_experiments):
         rs = RandomState(1)
         brain_output = add_noise(brain_output, rs, noise_level=1e-8)
-        transfer_entropy.append(get_transfer_entropy(brain_output))
         norm_entropy.append(get_norm_entropy(brain_output))
+        transfer_entropy.append(get_transfer_entropy(brain_output))
     print("Transfer Entropy on 1D constant data: {}".format(transfer_entropy))
     print("Shannon Entropy on 1D constant data: {}".format(norm_entropy))
     # plt.plot(brain_output)
@@ -67,13 +70,13 @@ def test_neural_entropy_constant(num_experiments, num_data_points):
     transfer_entropy = []
     norm_entropy = []
     source = np.ones(num_data_points)
-    destination = np.ones(num_data_points) * 2
+    destination = np.ones(num_data_points) / 2.
     brain_output = np.column_stack((source, destination))
     for _ in range(num_experiments):
         rs = RandomState(1)
         brain_output = add_noise(brain_output, rs, noise_level=1e-8)  # does rs keep going?
-        transfer_entropy.append(get_transfer_entropy(brain_output))
         norm_entropy.append(get_norm_entropy(brain_output))
+        transfer_entropy.append(get_transfer_entropy(brain_output))
     print("Transfer Entropy on 2D constant data: {}".format(transfer_entropy))
     print("Shannon Entropy on 2D constant data: {}".format(norm_entropy))
     # plt.plot(brain_output)
@@ -95,16 +98,18 @@ def test_neural_entropy_uniform(num_experiments, scramble=True):
                 brain_output[row, :] = [i / 100 + 0.0001, j / 100 + 0.0001]
                 row += 1
     if scramble:
+        rs = RandomState(1)
         for _ in range(num_experiments):
-            rs = RandomState(1)
             rs.shuffle(brain_output)
-            transfer_entropy.append(get_transfer_entropy(brain_output))
             norm_entropy.append(get_norm_entropy(brain_output))
+            transfer_entropy.append(get_transfer_entropy(brain_output))
     else:
-        transfer_entropy = get_transfer_entropy(brain_output)
-        norm_entropy = get_norm_entropy(brain_output)
-    print("Transfer Entropy on uniform data: {}".format(transfer_entropy))
-    print("Shannon Entropy on uniform data: {}".format(norm_entropy))
+        for _ in range(num_experiments):
+            norm_entropy.append(get_norm_entropy(brain_output))
+            transfer_entropy.append(get_transfer_entropy(brain_output))
+
+    print("Transfer Entropy on uniform bin data: {}".format(transfer_entropy))
+    print("Shannon Entropy on uniform bin data: {}".format(norm_entropy))
     # plt.plot(brain_output)
     # plt.show()
     return norm_entropy, transfer_entropy
@@ -119,8 +124,10 @@ def test_neural_entropy_correlated(num_experiments, num_data_points, cov=0.99, d
     rs = RandomState(0)
     for _ in range(num_experiments):
         brain_output = generate_correlated_data(num_data_points, cov, delay, rs)
-        transfer_entropy.append(get_transfer_entropy(brain_output, delay, log=True))
-        norm_entropy.append(get_norm_entropy(brain_output))
+        norm_entropy.append(get_norm_entropy(brain_output, min_v=-3., max_v=3.))
+        transfer_entropy.append(get_transfer_entropy(brain_output, delay, log=True,
+                                                     min_v=-3., max_v=3.))
+
     # transfer_entropy, local_te = get_transfer_entropy(brain_output, delay, local=True)
     # local_te = np.array(local_te)
     # plt.plot(brain_output)
@@ -147,8 +154,9 @@ def test_coupled_oscillators(num_experiments):
                                          lengths=rs.uniform(0.1, 5.0, 2))
         pos = np.column_stack((spring_data[:, 0], spring_data[:, 2]))
         # transfer_entropy, local_te = get_transfer_entropy(pos, local=True)
-        transfer_entropy.append(get_transfer_entropy(pos))
-        norm_entropy.append(get_norm_entropy(pos))
+        norm_entropy.append(get_norm_entropy(pos, min_v=pos.min(), max_v=pos.max()))
+        transfer_entropy.append(get_transfer_entropy(pos, min_v=pos.min(), max_v=pos.max()))
+
         print("Transfer Entropy of spring positions: {}".format(transfer_entropy))
         print("Shannon Entropy of spring positions: {}".format(norm_entropy))
         # plt.plot(pos)
@@ -227,31 +235,36 @@ if __name__ == "__main__":
     entropies = dict()
     num_exp = 100
     data_size = 2000
-    entropies['sh_random-uniform'], entropies['te_random-uniform'] = \
+    binned = True
+    if binned:
+        suffix = 'd'
+    else:
+        suffix = 'c'
+    entropies['sh_random-uniform'], entropies['te{}_random-uniform'.format(suffix)] = \
         test_neural_entropy_random(num_exp, data_size, 'uniform')
-    entropies['sh_random-normal'], entropies['te_random-normal'] = \
+    entropies['sh_random-normal'], entropies['te{}_random-normal'.format(suffix)] = \
         test_neural_entropy_random(num_exp, data_size, 'normal')
-    entropies['sh_corr-constant'], entropies['te_corr-constant'] = \
+    entropies['sh_corr-constant'], entropies['te{}_corr-constant'.format(suffix)] = \
         test_neural_entropy_constant(num_exp, data_size)
-    entropies['sh_singleton'], entropies['te_singleton'] = \
+    entropies['sh_singleton'], entropies['te{}_singleton'.format(suffix)] = \
         test_neural_entropy_single(num_exp, data_size)
-    entropies['sh_uniform-unscrambled'], entropies['te_uniform-unscrambled'] = \
+    entropies['sh_uniform-unscrambled'], entropies['te{}_uniform-unscrambled'.format(suffix)] = \
         test_neural_entropy_uniform(num_exp, False)
-    entropies['sh_uniform-scrambled'], entropies['te_uniform-scrambled'] = \
+    entropies['sh_uniform-scrambled'], entropies['te{}_uniform-scrambled'.format(suffix)] = \
         test_neural_entropy_uniform(num_exp)
-    entropies['sh_corr-01-1'], entropies['te_corr-01-1'] = \
+    entropies['sh_corr-01-1'], entropies['te{}_corr-01-1'.format(suffix)] = \
         test_neural_entropy_correlated(num_exp, data_size, 0.1, 1)
-    entropies['sh_corr-04-1'], entropies['te_corr-04-1'] = \
+    entropies['sh_corr-04-1'], entropies['te{}_corr-04-1'.format(suffix)] = \
         test_neural_entropy_correlated(num_exp, data_size, 0.4, 1)
-    entropies['sh_corr-09-1'], entropies['te_corr-09-1'] = \
+    entropies['sh_corr-09-1'], entropies['te{}_corr-09-1'.format(suffix)] = \
         test_neural_entropy_correlated(num_exp, data_size, 0.9, 1)
-    entropies['sh_corr-04-2'], entropies['te_corr-04-2'] = \
+    entropies['sh_corr-04-2'], entropies['te{}_corr-04-2'.format(suffix)] = \
         test_neural_entropy_correlated(num_exp, data_size, 0.4, 2)
-    entropies['sh_mass-spring'], entropies['te_mass-spring'] = \
+    entropies['sh_mass-spring'], entropies['te{}_mass-spring'.format(suffix)] = \
         test_coupled_oscillators(num_exp)
 
     df = pd.DataFrame.from_dict(entropies)
-    with open('data/entropies_sim.csv', 'w') as f:
+    with open('data/entropies_sim_{}.csv'.format(suffix), 'w') as f:
         df.to_csv(f, ';', index=False)
     # analyze_sample_brain()
     # analyze_brain_freqs()

@@ -33,7 +33,9 @@ def initialize_calc(calc, delay=DELAY):
     calc.setProperty("NOISE_LEVEL_TO_ADD", "0")
     calc.initialise()
 
-def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False, local=False, binning=True):
+
+def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False,
+                         local=False, binning=True, min_v=0., max_v=1.):
     """
     Calculate transfer entropy from 2D time series.
     :param brain_output: time series numpy array
@@ -44,8 +46,8 @@ def get_transfer_entropy(brain_output, delay=1, reciprocal=True, log=False, loca
     """
     if binning:
         calcClass = jpype.JPackage("infodynamics.measures.discrete").TransferEntropyCalculatorDiscrete
-        source = discretize(brain_output[:, 0], bins=BINS).tolist()
-        destination = discretize(brain_output[:, 1], bins=BINS).tolist()
+        source = discretize(brain_output[:, 0], BINS, min_v, max_v).tolist()
+        destination = discretize(brain_output[:, 1], BINS, min_v, max_v).tolist()
         calc = calcClass(BINS,1)
         calc.initialise()
         calc.addObservations(source, destination)            

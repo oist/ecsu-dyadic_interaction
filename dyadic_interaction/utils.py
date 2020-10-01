@@ -7,16 +7,16 @@ import numpy as np
 from numpy import pi
 
 # CONSTANTS
-TWO_PI = 2*pi
+TWO_PI = 2 * pi
 RANDOM_CHAR_SET = string.ascii_uppercase + string.digits
 
-def discretize(a, bins, min=0, max=1):
-    a[a > max] = max
-    a[a < min] = min
-    bins = np.linspace(min,max,bins)
-    return np.digitize(a,bins, right=True)
-    
-    return 
+
+def discretize(a, bins, min_v=0, max_v=1):
+    a[a > max_v] = max_v
+    a[a < min_v] = min_v
+    bins = np.linspace(min_v, max_v, bins)
+    return np.digitize(a, bins, right=True)
+
 
 def random_string(size=5):
     '''
@@ -45,8 +45,10 @@ def rotate_cw_matrix(theta):
     c, s = np.cos(theta), np.sin(theta)
     return np.array(((c, -s), (s, c)))
 
+
 def add_noise(vector, random_state, noise_level):
     return vector + noise_level * random_state.normal(0, 1, vector.shape)
+
 
 def make_rand_vector(dims, random_state):
     """
@@ -54,23 +56,26 @@ def make_rand_vector(dims, random_state):
     is a random Gaussian and then normalizing the resulting vector.
     """
     vec = random_state.normal(0, 1, dims)
-    mag = sum(vec ** 2) ** .5    
+    mag = sum(vec ** 2) ** .5
     return vec / mag
+
 
 def save_numpy_data(data, file_path):
     import json
     from pyevolver.json_numpy import NumpyListJsonEncoder
     json.dump(
-        data, 
-        open(file_path,'w'),
+        data,
+        open(file_path, 'w'),
         indent=3,
         cls=NumpyListJsonEncoder
-    )    
+    )
+
 
 np_intinfo = np.iinfo(int)
 
+
 def random_int(random_state=None, size=None):
     if random_state is None:
-        return np.random.randint(0, 2**32 - 1, size)
+        return np.random.randint(0, 2 ** 32 - 1, size)
     else:
         return random_state.randint(np_intinfo.min, np_intinfo.max, size)
