@@ -222,11 +222,11 @@ class Simulation:
 
                     # 2) Agent sees
                     b = 1-a
-                    signal_strength = np.array([0.,0.])
-                    # agent_body.get_signal_strength(
-                    #     self.agents_pair_body[b].position,
-                    #     self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
-                    # )
+                    # signal_strength = np.array([0.,0.]) # if we want to mimic zero signal strenght
+                    signal_strength = agent_body.get_signal_strength(
+                        self.agents_pair_body[b].position,
+                        self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
+                    )
                     self.timing.add_time('SIM_6a_get_signal_strength', tim)
 
                     # 3-dim vector: strength of emitter from the two sensors                
@@ -353,11 +353,11 @@ class Simulation:
 
                     # 2) Agent sees
                     b = 1-a
-                    signal_strength = np.array([0.,0.])
-                    # agent_body.get_signal_strength(
-                    #     self.agents_pair_body[b].position,
-                    #     self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
-                    # )
+                    # signal_strength = np.array([0.,0.])  # if we want to mimic zero signal strenght
+                    signal_strength = agent_body.get_signal_strength(
+                        self.agents_pair_body[b].position,
+                        self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
+                    )
                     self.timing.add_time('SIM_6a_get_signal_strength', tim)
 
                     # 3-dim vector: strength of emitter from the two sensors                
