@@ -39,14 +39,14 @@ def test(entropy_type):
 
     data1 = {}
     data2 = {}
-    rnd_seed = None if entropy_type is 'histo' else utils.random_int()
+    rnd_seed = None if entropy_type is 'shannon' else utils.random_int()
     perf1 = sim.compute_performance(agent_pair_genome, rnd_seed, data1)
     print('perf1: {}'.format(perf1))
     perf2 = sim.compute_performance(agent_pair_genome, rnd_seed, data2)
     print('perf2: {}'.format(perf2))
 
 if __name__ == "__main__":
-    for entropy_type in ['histo','transfer']:
+    for entropy_type in ['shannon','transfer']:
         print(entropy_type)
         test(entropy_type)
         print()

@@ -106,14 +106,14 @@ if __name__ == "__main__":
     # analyze_circle_angles()
     spinning_complexity = analyze_angle_entropy('spinning')
 
-    # histo_angles = analyze_file_angles('histo')
-    # np.savetxt('data/angles_histo.csv', histo_angles, delimiter=';')
+    # shannon_angles = analyze_file_angles('shannon')
+    # np.savetxt('data/angles_shannon.csv', shannon_angles, delimiter=';')
     #
     # transfer_angles = analyze_file_angles('transfer')
     # np.savetxt('data/angles_transfer.csv', transfer_angles, delimiter=';')
 
-    # beh_complexity_h = analyze_angle_entropy('histo')
-    # with open('data/histo_beh_metrics.json', 'w') as f:
+    # beh_complexity_h = analyze_angle_entropy('shannon')
+    # with open('data/shannon_beh_metrics.json', 'w') as f:
     #     json.dump(beh_complexity_h, f, cls=NumpyListJsonEncoder)
     #
     # beh_complexity_te = analyze_angle_entropy('transfer')

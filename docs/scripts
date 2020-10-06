@@ -1,5 +1,5 @@
-# test hist entropy
-python -m dyadic_interaction.main --dir ./data/histo_entropy_test/tmp0 --entropy histo --cores 5 --seed 0 --popsize 40 --num_gen 10 --trial_duration 20
+# test shannon entropy
+python -m dyadic_interaction.main --dir ./data/shannon_entropy_test/tmp1 --entropy shannon --cores 5 --seed 0 --popsize 40 --num_gen 10 --trial_duration 20
 
 # test transfer entropy
 python -m dyadic_interaction.main --dir ./data/transfer_entropy_test/tmp1 --entropy transfer --cores 5 --seed 0 --popsize 40 --num_gen 10 --trial_duration 20 --perf_obj MAX
@@ -8,4 +8,4 @@ python -m dyadic_interaction.main --dir ./data/transfer_entropy_test/tmp1 --entr
 python -m dyadic_interaction.plot_results --dir data/transfer_entropy_test/tmp0 --gen 10 --index 0
 
 # rsync
-rsync -av --include="*/" --include="simulation.json" --include="evo_500.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/histo_entropy ./data/
+rsync -av --include="*/" --include="simulation.json" --include="evo_500.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/shannon_entropy ./data/

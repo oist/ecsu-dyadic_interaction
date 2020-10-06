@@ -8,7 +8,7 @@ def get_spinning_agents_data():
     genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE
 
     sim = Simulation(
-        entropy_type = 'histo',
+        entropy_type = 'shannon',
         genotype_structure = genotype_structure,
         trial_duration = 200,  # the brain would iterate trial_duration/brain_step_size number of time
     )

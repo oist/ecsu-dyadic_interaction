@@ -211,7 +211,7 @@ def run_with_keyboard(trial_index):
     vis.start_simulation_with_keyboard(trial_index)
 
 def run_from_data():
-    # working_dir = 'data/histo_entropy/MAX/dyadic_exp_005'
+    # working_dir = 'data/shannon_entropy/MAX/dyadic_exp_005'
     dir = 'data/transfer_entropy/MAX/dyadic_exp_006'    
     generation = 500
     trial_index = 3

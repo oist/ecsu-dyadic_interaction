@@ -352,7 +352,7 @@ def plot_random_simulation_results():
 if __name__ == "__main__":
     import argparse
 
-    # default_dir = 'data/histo_entropy/dyadic_exp_096'
+    # default_dir = 'data/shannon_entropy/dyadic_exp_096'
     default_dir = 'data/transfer_entropy_test/tmp1'  # 5?, 10, 18(max)
     default_gen = 20
     default_index = 0
@@ -371,7 +371,7 @@ if __name__ == "__main__":
     parser.add_argument('--index', type=int, default=default_index, help='Index of agent in population')
     parser.add_argument('--random', type=bool, default=default_random, help='Whether to randomize result')
     parser.add_argument('--invert', type=bool, default=default_invert,
-                        help='Whether to invert the simulation type (histo <-> transfer)')
+                        help='Whether to invert the simulation type (shannon <-> transfer)')
 
     args = parser.parse_args()
     plot_simultation_results(args.dir, args.gen, args.index, args.random, args.invert)

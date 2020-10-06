@@ -5,7 +5,7 @@ from numpy.random import RandomState
 from matplotlib import pyplot as plt
 from dyadic_interaction.utils import add_noise
 from dyadic_interaction.neural_transfer_entropy import get_transfer_entropy, shutdown_JVM
-from dyadic_interaction.neural_histo_entropy import get_norm_entropy, BINS
+from dyadic_interaction.neural_shannon_entropy import get_norm_entropy, BINS
 
 
 def generate_correlated_data(num_data_points, cov, delay, rs):

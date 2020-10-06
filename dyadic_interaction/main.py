@@ -74,7 +74,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
-    parser.add_argument('--entropy', choices=['histo', 'transfer'], default='histo', help='Type of entropy measure to use')    
+    parser.add_argument('--entropy', choices=['shannon', 'transfer'], default='shannon', help='Type of entropy measure to use')    
     parser.add_argument('--dir', type=str, default='./data/tmp', help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    

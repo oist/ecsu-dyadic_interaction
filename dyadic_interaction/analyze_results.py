@@ -3,8 +3,8 @@ import json
 import matplotlib.pyplot as plt
 from scipy import stats
 
-def analyze_histo_entropy():
-    base_dir = 'data/histo_entropy/MAX'
+def analyze_shannon_entropy():
+    base_dir = 'data/shannon_entropy/MAX'
     # base_dir = 'data/transfer_entropy/MAX'
     exp_dirs = sorted(os.listdir(base_dir))
     best_exp_performance = []
@@ -25,4 +25,4 @@ def analyze_histo_entropy():
     plt.show()
 
 if __name__ == "__main__":
-    analyze_histo_entropy()
+    analyze_shannon_entropy()
