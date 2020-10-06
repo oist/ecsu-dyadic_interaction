@@ -46,17 +46,18 @@ def vectorfield(w, t, p):
     return f
 
 
-def spring_mass_system(to_plot=False):
+def spring_mass_system(masses=(1.0, 1.5), constants=(8.0, 40.0),
+                       lengths=(0.5, 1.0), to_plot=False):
     # Parameter values
     # Masses:
-    m1 = 1.0
-    m2 = 1.5
+    m1 = masses[0]
+    m2 = masses[1]
     # Spring constants
-    k1 = 8.0
-    k2 = 40.0
+    k1 = constants[0]
+    k2 = constants[1]
     # Natural lengths
-    L1 = 0.5
-    L2 = 1.0
+    L1 = lengths[0]
+    L2 = lengths[1]
     # Friction coefficients
     # b1 = 0.8
     # b2 = 0.5

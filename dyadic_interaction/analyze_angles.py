@@ -1,12 +1,12 @@
 import os
-import matplotlib.pyplot as plt
 from dyadic_interaction.simulation import obtain_trial_data
-from dyadic_interaction.plot_results import plot_behavior
 from dyadic_interaction import spinning_agents
 import numpy as np
 from dyadic_interaction import entropy as ent
 import json
 from pyevolver.json_numpy import NumpyListJsonEncoder
+import matplotlib.pyplot as plt
+from dyadic_interaction.plot_results import plot_behavior
 
 
 def analyze_angle_entropy(entropy_type):
