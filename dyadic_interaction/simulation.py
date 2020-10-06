@@ -222,10 +222,11 @@ class Simulation:
 
                     # 2) Agent sees
                     b = 1-a
-                    signal_strength = agent_body.get_signal_strength(
-                        self.agents_pair_body[b].position,
-                        self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
-                    )
+                    signal_strength = np.array([0.,0.])
+                    # agent_body.get_signal_strength(
+                    #     self.agents_pair_body[b].position,
+                    #     self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
+                    # )
                     self.timing.add_time('SIM_6a_get_signal_strength', tim)
 
                     # 3-dim vector: strength of emitter from the two sensors                
@@ -352,10 +353,11 @@ class Simulation:
 
                     # 2) Agent sees
                     b = 1-a
-                    signal_strength = agent_body.get_signal_strength(
-                        self.agents_pair_body[b].position,
-                        self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
-                    )
+                    signal_strength = np.array([0.,0.])
+                    # agent_body.get_signal_strength(
+                    #     self.agents_pair_body[b].position,
+                    #     self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
+                    # )
                     self.timing.add_time('SIM_6a_get_signal_strength', tim)
 
                     # 3-dim vector: strength of emitter from the two sensors                
@@ -456,7 +458,7 @@ class Simulation:
 
         return performances
 
-def obtain_trial_data(dir, num_generation, genotype_index, force_random=False, invert_sim_type = False):
+def obtain_trial_data(dir, num_generation, genotype_index, force_random=False, invert_sim_type = False, initial_distance=None):
     from pyevolver.evolution import Evolution
     file_num_zfill = len(next(f for f in os.listdir(dir) if f.startswith('evo')).split('_')[1].split('.')[0])
     num_generation = str(num_generation).zfill(file_num_zfill)
@@ -465,6 +467,10 @@ def obtain_trial_data(dir, num_generation, genotype_index, force_random=False, i
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
     genotype = evo.population[genotype_index]
+
+    if initial_distance is not None:
+        sim.agents_pair_initial_distance = initial_distance
+        sim.set_initial_positions_angles()
     
     if invert_sim_type:
         sim.entropy_type = 'histo' if sim.entropy_type == 'transfer' else 'transfer'
@@ -475,6 +481,7 @@ def obtain_trial_data(dir, num_generation, genotype_index, force_random=False, i
         random_seed = utils.random_int(rs)
     else:
         random_seed = evo.pop_eval_random_seed[genotype_index]
+    
         
     data_record = {}
 
