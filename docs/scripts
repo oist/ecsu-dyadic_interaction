@@ -4,8 +4,15 @@ python -m dyadic_interaction.main --dir ./data/shannon_entropy_test/tmp1 --entro
 # test transfer entropy
 python -m dyadic_interaction.main --dir ./data/transfer_entropy_test/tmp1 --entropy transfer --cores 5 --seed 0 --popsize 40 --num_gen 10 --trial_duration 20 --perf_obj MAX
 
+# visual
+python -m dyadic_interaction.visual_run_from_data --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --trial 0
+# visual with ghost
+python -m dyadic_interaction.visual_run_from_data --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --trial 0 --ghost 0
+
 # plot
-python -m dyadic_interaction.plot_results --dir data/transfer_entropy_test/tmp0 --gen 10 --index 0
+python -m dyadic_interaction.plot_results --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0
+# plot with ghost
+python -m dyadic_interaction.plot_results --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --ghost 0
 
 # rsync
 rsync -av --include="*/" --include="simulation.json" --include="evo_500.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/shannon_entropy ./data/

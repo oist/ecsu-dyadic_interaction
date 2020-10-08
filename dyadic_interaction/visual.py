@@ -17,14 +17,17 @@ from pyevolver.json_numpy import NumpyListJsonEncoder
 import json
 
 MAX_CANVAS_SIZE = 500
-ZOOM_FACTOR = 3
-REFRESH_RATE = 60
+ZOOM_FACTOR = 4
+REFRESH_RATE = 20
 
 CANVAS_CENTER = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
 SHIFT_CENTER_TO_FIRST_AGENT = False
 
 black = (0, 0, 0)
 white = (255, 255, 255)
+red = (255, 0, 0)
+blue = (0, 0, 255)
+agents_color = [red, blue]
 sensor_color = (255, 255, 0)
 emitter_color = (200, 50, 20)
 emitter_radius = 1
@@ -64,7 +67,7 @@ class Visualization:
 
         radius = ZOOM_FACTOR * agent.agent_body_radius
 
-        pygame.draw.circle(self.main_surface, white, angent_center_pos, radius, width=1)
+        pygame.draw.circle(self.main_surface, agents_color[a_index], angent_center_pos, radius, width=0)
 
         for sp in agent.get_abs_sensors_pos():
             sp = ZOOM_FACTOR * sp - ZOOM_FACTOR * center_shift + CANVAS_CENTER
@@ -155,8 +158,8 @@ class Visualization:
         duration = self.simulation.num_data_points        
         print("Duration: {}".format(duration))
 
-        agent_pair_pos = data_record['agent_pos'][trial_index]
-        agent_pair_angle = data_record['agent_angle'][trial_index]
+        agent_pair_pos = data_record['position'][trial_index]
+        agent_pair_angle = data_record['angle'][trial_index]
 
         i = 0
 
@@ -210,23 +213,6 @@ def run_with_keyboard(trial_index):
     vis = Visualization()
     vis.start_simulation_with_keyboard(trial_index)
 
-def run_from_data():
-    # working_dir = 'data/shannon_entropy/MAX/dyadic_exp_005'
-    dir = 'data/transfer_entropy/MAX/dyadic_exp_006'    
-    generation = 500
-    trial_index = 3
-    genotype_index = 0
-    force_random = False
-    invert_sim_type = False
-
-    evo, sim, data_record = simulation.obtain_trial_data(
-        dir, generation, genotype_index, 
-        force_random, invert_sim_type
-    )
-
-    vis = Visualization(sim)
-    vis.start_simulation_from_data(trial_index, data_record)
-
 def run_random_agents():
     genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE
     gen_size = gen_structure.get_genotype_size(genotype_structure)
@@ -254,5 +240,4 @@ def run_random_agents():
 
 if __name__ == "__main__":
     # run_with_keyboard(trial_index=1)
-    run_from_data()
-    # run_random_agents()
+    run_random_agents()

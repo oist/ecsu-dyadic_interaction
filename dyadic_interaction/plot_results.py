@@ -28,7 +28,7 @@ def plot_performances(evo):
 def plot_behavior(data_record, to_plot='all'):
     agent_pos = [
         [x[0].transpose(), x[1].transpose()]
-        for x in data_record['agent_pos']
+        for x in data_record['position']
     ]
     num_trials = len(agent_pos)
     # print("agent_pos shape: {}".format(agent_pos[0].shape))
@@ -69,14 +69,14 @@ def plot_behavior(data_record, to_plot='all'):
     # handles, labels = ax.get_legend_handles_labels()
     # fig.legend(handles, labels, loc='upper right')
     # plt.legend()
-    # plt.show()
+    plt.show()
     # plt.savefig('plots/shannon_beh.eps', format='eps')
     # plt.savefig('plots/transfer_beh.eps', format='eps')
-    plt.savefig('plots/transfer_beh_bin.eps', format='eps')
+    # plt.savefig('plots/transfer_beh_bin.eps', format='eps')
 
 
 def plot_angles(data_record):    
-    angle_data = np.mod(np.degrees(data_record['agent_angle']), 360.)
+    angle_data = np.mod(np.degrees(data_record['angle']), 360.)
     num_trials = len(angle_data)
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
@@ -92,7 +92,7 @@ def plot_angles(data_record):
     plt.show()
 
 def plot_norm_x(data_record):    
-    pos_data = data_record['agent_pos']
+    pos_data = data_record['position']
     num_trials = len(pos_data)    
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("X Pos")
@@ -110,7 +110,7 @@ def plot_norm_x(data_record):
     plt.show()
 
 def plot_activity_scatter(data_record):
-    num_trials = len(data_record['agent_pos'])
+    num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Brain activity")
@@ -128,7 +128,7 @@ def plot_activity_scatter(data_record):
     plt.show()
 
 def plot_activity(data_record, to_plot):
-    num_trials = len(data_record['agent_pos'])
+    num_trials = len(data_record['position'])
     num_cols = num_trials
     if to_plot == 'all':
         fig = plt.figure(figsize=(10, 6))
@@ -243,7 +243,7 @@ def plot_activity(data_record, to_plot):
 
 
 def plot_inputs(data_record):
-    num_trials = len(data_record['agent_pos'])
+    num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Inputs")
@@ -258,7 +258,7 @@ def plot_inputs(data_record):
     plt.show()
 
 def plot_signal(data_record):
-    num_trials = len(data_record['agent_pos'])
+    num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Signal Strength")
@@ -272,7 +272,7 @@ def plot_signal(data_record):
 
 
 def plot_motor_output(data_record):
-    num_trials = len(data_record['agent_pos'])
+    num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Wheels")
@@ -288,7 +288,7 @@ def plot_motor_output(data_record):
 
 
 def plot_emitters(data_record):
-    num_trials = len(data_record['agent_pos'])
+    num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Emitters")
@@ -300,26 +300,22 @@ def plot_emitters(data_record):
     plt.show()
 
 
-def plot_simultation_results(dir, num_generation, genotype_index, force_random=False, invert_sim_type=False):
-    evo, sim, data_record = simulation.obtain_trial_data(
-        dir, num_generation, genotype_index,
-        force_random, invert_sim_type
-    )
-
-    plot_performances(evo)
-    plot_activity_scatter(data_record)
-    # plot_angles(data_record)
-    plot_norm_x(data_record)
-    plot_behavior(data_record)
-    plot_activity(data_record)    
-    plot_signal(data_record)
-    plot_inputs(data_record)
-    plot_motor_output(data_record)
-    plot_emitters(data_record)
-    plot_motor_output(data_record)
+def plot_simultation_results(evo, data_record):
+    
     # plot_performances(evo)
-    plot_behavior(data_record, '1')
-    plot_activity(data_record, '1')
+    # plot_activity_scatter(data_record)
+    # plot_angles(data_record)
+    # plot_norm_x(data_record)
+    plot_behavior(data_record)
+    # plot_activity(data_record)    
+    # plot_signal(data_record)
+    # plot_inputs(data_record)
+    # plot_motor_output(data_record)
+    # plot_emitters(data_record)
+    # plot_motor_output(data_record)
+    # plot_performances(evo)
+    # plot_behavior(data_record, '1')
+    # plot_activity(data_record, '1')
     # plot_inputs(data_record)
     # plot_motor_output(data_record)
     # plot_emitters(data_record)
@@ -352,13 +348,6 @@ def plot_random_simulation_results():
 if __name__ == "__main__":
     import argparse
 
-    # default_dir = 'data/shannon_entropy/dyadic_exp_096'
-    default_dir = 'data/transfer_entropy_test/tmp1'  # 5?, 10, 18(max)
-    default_gen = 20
-    default_index = 0
-    default_random = False
-    default_invert = False
-
     # plot_simultation_results()
     # plot_random_simulation_results()
 
@@ -366,12 +355,29 @@ if __name__ == "__main__":
         description='Plot results'
     )
 
-    parser.add_argument('--dir', type=str, default=default_dir, help='Directory path')
-    parser.add_argument('--gen', type=int, default=default_gen, help='number of genration')
-    parser.add_argument('--index', type=int, default=default_index, help='Index of agent in population')
-    parser.add_argument('--random', type=bool, default=default_random, help='Whether to randomize result')
-    parser.add_argument('--invert', type=bool, default=default_invert,
-                        help='Whether to invert the simulation type (shannon <-> transfer)')
+    parser.add_argument('--dir', type=str, help='Directory path')
+    parser.add_argument('--generation', type=int, help='number of genration')
+    parser.add_argument('--genotype', type=int, help='Index of agent in population')
+    parser.add_argument('--random', action='store_true', help='Whether to randomize result')
+    parser.add_argument('--invert', action='store_true', help='Whether to invert the simulation type (shannon <-> transfer)')
+    parser.add_argument('--distance', type=int, default=-1, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
+    parser.add_argument('--ghost', type=int, default=-1, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
 
     args = parser.parse_args()
-    plot_simultation_results(args.dir, args.gen, args.index, args.random, args.invert)
+    evo, _, data_record = simulation.obtain_trial_data(
+        dir=args.dir, 
+        num_generation=args.generation, 
+        genotype_index=args.genotype, 
+        force_random=args.random, 
+        invert_sim_type=args.invert,
+        initial_distance=args.distance if args.distance>=0 else None,
+        ghost_index=args.ghost if args.ghost in (0,1) else None        
+    )
+
+    plot_simultation_results(evo, data_record)
+
+    output_file_path = 'sim_original.json' if args.ghost<0 else 'sim_ghost_random.json' if args.random else 'sim_ghost_norandom.json'
+    
+    # trial_index = 0
+    # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
+    utils.dump_numpy_json(data_record, output_file_path)

@@ -36,7 +36,10 @@ class Simulation:
     data_noise_level: float = 1e-8
     timeit: bool = False
 
-    def __post_init__(self):        
+    def __post_init__(self):  
+
+        assert self.entropy_type in ['shannon', 'transfer'], \
+            'entropy_type should be shannon or transfer'    
 
         self.num_brain_neurons = gen_structure.get_num_brain_neurons(self.genotype_structure)
         self.num_data_points = int(self.trial_duration / self.brain_step_size)
@@ -149,7 +152,8 @@ class Simulation:
         self.timing.add_time('SIM-INIT_genotype_to_phenotype', tim)
 
   
-    def compute_performance(self, genotypes_pair=None, rnd_seed=None, data_record=None):
+    def compute_performance(self, genotypes_pair=None, rnd_seed=None, 
+        data_record=None, ghost_index=None, original_data_record=None):
         '''
         Main function to compute shannon/transfer entropy performace        
         '''
@@ -173,8 +177,9 @@ class Simulation:
 
 
         if data_record is not None:            
-            data_record['agent_pos'] = [[None,None] for _ in range(self.num_trials)]
-            data_record['agent_angle'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['position'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['angle'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['delta_xy'] = [[None,None] for _ in range(self.num_trials)]
             data_record['signal_strength'] = [[None,None] for _ in range(self.num_trials)]
             data_record['brain_input'] = [[None,None] for _ in range(self.num_trials)]
             data_record['brain_state'] = [[None,None] for _ in range(self.num_trials)]
@@ -185,40 +190,58 @@ class Simulation:
 
         self.timing.add_time('SIM_2_init_data', tim)
 
-        # do experiment
+        # EXPERIMENT START
         for t in range(self.num_trials):
 
+            self.prepare_agents_for_trial(t)            
             prev_delta_xy_agents = [np.array([0.,0.]), np.array([0.,0.])]
-            prev_angle_agents = [None, None]
-
-            self.prepare_agents_for_trial(t)
+            # initialize prev_angle as initial angle of each agent
+            prev_angle_agents = [self.agents_pair_body[a].angle for a in range(2)]            
             self.timing.add_time('SIM_3_prepare_agents_for_trials', tim)                
 
-            for a in range(2):            
-                # compute output
-                self.agents_pair_net[a].brain.compute_output()
-                self.timing.add_time('SIM_4_compute_output', tim)
+            # INIT TRIAL VARIABLES
+            for a in range(2):           
 
-                if data_record is not None:                    
-                    data_record['agent_pos'][t][a] = np.zeros((self.num_data_points, 2))
-                    data_record['agent_angle'][t][a] = np.zeros(self.num_data_points)
-                    data_record['signal_strength'][t][a] = np.zeros((self.num_data_points, 2))
-                    data_record['brain_input'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
-                    data_record['brain_state'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
-                    data_record['derivatives'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
-                    data_record['brain_output'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
-                    data_record['wheels'][t][a] = np.zeros((self.num_data_points, 2))
-                    data_record['emitter'][t][a] = np.zeros(self.num_data_points)
-                self.timing.add_time('SIM_5_init_trial_data', tim)
+                if ghost_index == a:
+                    if data_record is not None:                    
+                        # copy all ghost agent's values from original_data_record
+                        for k in data_record:
+                            data_record[k][t][a] = original_data_record[k][t][a]
+                else:
+                    # compute output
+                    self.agents_pair_net[a].brain.compute_output()
+                    self.timing.add_time('SIM_4_compute_output', tim)
+
+                    if data_record is not None:                    
+                        data_record['position'][t][a] = np.zeros((self.num_data_points, 2))
+                        data_record['angle'][t][a] = np.zeros(self.num_data_points)
+                        data_record['delta_xy'][t][a] = np.zeros((self.num_data_points, 2))
+                        data_record['signal_strength'][t][a] = np.zeros((self.num_data_points, 2))
+                        data_record['brain_input'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                        data_record['brain_state'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                        data_record['derivatives'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                        data_record['brain_output'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
+                        data_record['wheels'][t][a] = np.zeros((self.num_data_points, 2))
+                        data_record['emitter'][t][a] = np.zeros(self.num_data_points)
+                    self.timing.add_time('SIM_5_init_trial_data', tim)
+
+            # TRIAL START
 
             for i in range(self.num_data_points):
 
-                for a in range(2):
+                for a in range(2):    
 
                     agent_net = self.agents_pair_net[a]
                     agent_body = self.agents_pair_body[a]
 
-                    # 2) Agent sees
+                    if ghost_index == a:
+                        # data of the ghost won't be computed because already available
+                        # we need to set the body position and emitter because it is used in the step 1 (agent senses) below
+                        agent_body.position = original_data_record['position'][t][a][i] 
+                        agent_net.motors_outputs[1] = original_data_record['emitter'][t][a][i]
+                        continue                
+
+                    # 1) Agent senses
                     b = 1-a
                     # signal_strength = np.array([0.,0.])  # if we want to mimic zero signal strenght
                     signal_strength = agent_body.get_signal_strength(
@@ -231,50 +254,65 @@ class Simulation:
                     agent_net.compute_brain_input(signal_strength)
                     self.timing.add_time('SIM_6b_compute_brain_input', tim)
 
-                    # 4) Update agent's neural system
+                    # 2) Update agent's neural system
                     agent_net.brain.euler_step()  # this sets agent.brain.output (2-dim vector)
                     self.timing.add_time('SIM_7_euler_step', tim)
 
-                    # 5) Agent updates wheels displacement
+                    # 3) Agent updates wheels displacement
                     motor_outputs = agent_net.compute_motor_outputs()
-                    agent_body.wheels = np.take(motor_outputs, [0,2]) # index 0,2: MOTORS
-                    emitter_strength = motor_outputs[1]               # index 1:   EMITTER
+                    agent_body.wheels = np.take(motor_outputs, [0,2]) # index 0,2: MOTORS  
                     self.timing.add_time('SIM_8_compute_motor_outputs', tim)
 
-                    # 6) Save data
+                    # 4) Save data
                     agents_pair_brain_output_trials[t][a][i,:] = agent_net.brain.output
                     if data_record is not None:
-                        data_record['agent_pos'][t][a][i] = agent_body.position
-                        data_record['agent_angle'][t][a][i] = agent_body.angle
+                        data_record['position'][t][a][i] = agent_body.position
+                        data_record['angle'][t][a][i] = agent_body.angle
+                        # data_record['delta_xy'] --> later
                         data_record['signal_strength'][t][a][i] = signal_strength
                         data_record['brain_input'][t][a][i] = agent_net.brain.input
                         data_record['brain_state'][t][a][i] = agent_net.brain.states
                         data_record['derivatives'][t][a][i] = agent_net.brain.dy_dt
                         data_record['brain_output'][t][a][i] = agent_net.brain.output
                         data_record['wheels'][t][a][i] = agent_body.wheels
-                        data_record['emitter'][t][a][i] = emitter_strength
-                    self.timing.add_time('SIM_9_save_data', tim)
+                        data_record['emitter'][t][a][i] = motor_outputs[1] # index 1:   EMITTER
+                    self.timing.add_time('SIM_9_save_data', tim)                
+                                
+                if i == self.num_data_points - 1:
+                    continue
                 
-                # finished exp for agents
+                # 5) Move one step
                 
                 delta_xy_agents = [None, None]
                 angle_agents = [None, None]
-                for a in range(2):
-                    # 7) Move one step
-                    # TODO: check if the agents didn't go too far from one another
-                    b = 1-a
-                    delta_xy_agents[a], angle_agents[a] =  self.agents_pair_body[a].move_one_step(
-                        prev_delta_xy_agents[b],
-                        prev_angle_agents[b]
-                    )                
+                
+                for a in range(2):                    
+                    if ghost_index == a:
+                        # for ghost agent we need to retrieve position, delta_xy, and angle from data
+                        delta_xy_agents[a] = original_data_record['delta_xy'][t][a][i+1]                        
+                        angle_agents[a] = original_data_record['angle'][t][a][i+1]
+                    else:                                                
+                        # TODO: check if the agents didn't go too far from one another
+                        b = 1-a
+                        delta_xy_agents[a], angle_agents[a] =  self.agents_pair_body[a].move_one_step(
+                            prev_delta_xy_agents[b],
+                            prev_angle_agents[b]
+                        ) 
+                    if data_record is not None:  
+                        data_record['delta_xy'][t][a][i] = prev_delta_xy_agents[a]
+                
                 prev_delta_xy_agents = delta_xy_agents
                 prev_angle_agents = angle_agents
 
                 self.timing.add_time('SIM_10_move_one_step', tim)            
 
+            # TRIAL END
+
             if self.entropy_type=='transfer':
                 # add random noise to data before calculating transfer entropy
                 for a in range(2):
+                    if ghost_index == a:
+                        continue
                     rs = RandomState(rnd_seed)
                     agents_pair_brain_output_trials[t][a] = utils.add_noise(
                         agents_pair_brain_output_trials[t][a], 
@@ -284,17 +322,19 @@ class Simulation:
 
                 # calculate performance        
                 # TODO: understand what happens if reciprocal=False
-                performance_agent_A, performance_agent_B = (                
+                performance_agent_AB = ([               
                     get_transfer_entropy(agents_pair_brain_output_trials[t][a], binning=True) 
-                    for a in range(2)
-                )
+                    for a in range(2) if a != ghost_index
+                ])
 
-                agents_perf = np.mean([performance_agent_A, performance_agent_B])
+                agents_perf = np.mean(performance_agent_AB)
 
                 # appending mean performance between two agents in trial_performances
                 trial_performances.append(agents_perf)
 
                 self.timing.add_time('SIM_11_compute_performace', tim)
+
+        # EXPERIMENT END
 
         if self.entropy_type=='shannon':
             # concatenate data from all trials
@@ -304,14 +344,14 @@ class Simulation:
                     agents_pair_brain_output_trials[t][a]
                     for t in range(4)
                 ])
-                for a in range(2)
+                for a in range(2) if a != ghost_index
             ]
             # calculate performance         
-            performance_agent_A, performance_agent_B = (
-                get_norm_entropy(agents_pair_brain_output_concat[a])
-                for a in range(2)
-            )
-            avg_performance = np.mean([performance_agent_A, performance_agent_B])
+            performance_agent_AB = ([
+                get_norm_entropy(agents_brain_output_concat)
+                for agents_brain_output_concat in agents_pair_brain_output_concat
+            ])
+            avg_performance = np.mean([performance_agent_AB])
             self.timing.add_time('SIM_11_compute_performace', tim)
             return avg_performance
         else: 
@@ -346,7 +386,13 @@ class Simulation:
 
         return performances
 
-def obtain_trial_data(dir, num_generation, genotype_index, force_random=False, invert_sim_type = False, initial_distance=None):
+def obtain_trial_data(dir, num_generation, genotype_index, 
+    force_random=False, invert_sim_type = False, 
+    ghost_index=None, initial_distance=None):    
+    ''' 
+    utitity function to get data from a simulation
+    '''
+    func_arguments = locals()
     from pyevolver.evolution import Evolution
     file_num_zfill = len(next(f for f in os.listdir(dir) if f.startswith('evo')).split('_')[1].split('.')[0])
     num_generation = str(num_generation).zfill(file_num_zfill)
@@ -357,24 +403,37 @@ def obtain_trial_data(dir, num_generation, genotype_index, force_random=False, i
     genotype = evo.population[genotype_index]
 
     if initial_distance is not None:
+        print("Changing initial distance to: {}".format(initial_distance))
         sim.agents_pair_initial_distance = initial_distance
         sim.set_initial_positions_angles()
     
-    if invert_sim_type:
+    if invert_sim_type:        
         sim.entropy_type = 'shannon' if sim.entropy_type == 'transfer' else 'transfer'
+        print("Inverting sim entropy type to: {}".format(sim.entropy_type))
 
     if force_random:
+        print("Randomizing positions and angles")
         rs = RandomState()
         sim.set_initial_positions_angles(rs)
         random_seed = utils.random_int(rs)
     else:
         random_seed = evo.pop_eval_random_seed[genotype_index]
     
-        
     data_record = {}
 
-    data_record = {}
-    perf = sim.compute_performance(genotype, random_seed, data_record)
-    print("Best performance recomputed: {}".format(perf))
+    if ghost_index is not None:
+        assert ghost_index in [0,1], 'ghost_index must be 0 or 1'
+        
+        # get original results without ghost condition and no random
+        func_arguments['ghost_index'] = None
+        func_arguments['force_random'] = False
+        _, _, original_data_record = obtain_trial_data(**func_arguments) 
+        perf = sim.compute_performance(genotype, random_seed, data_record, 
+            ghost_index=ghost_index, original_data_record=original_data_record)
+        print("Best performance recomputed (non-ghost agent only): {}".format(perf))
+
+    else:                
+        perf = sim.compute_performance(genotype, random_seed, data_record)
+        print("Best performance recomputed: {}".format(perf))
 
     return evo, sim, data_record

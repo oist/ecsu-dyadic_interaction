@@ -79,3 +79,10 @@ def random_int(random_state=None, size=None):
         return np.random.randint(0, 2 ** 32 - 1, size)
     else:
         return random_state.randint(0, 2 ** 32 - 1, size)
+
+def dump_numpy_json(obj, file_path):
+    from pyevolver.json_numpy import NumpyListJsonEncoder
+    import json
+    with open(file_path, 'w') as f:
+        json.dump(obj, f, indent=3, cls=NumpyListJsonEncoder)
+    

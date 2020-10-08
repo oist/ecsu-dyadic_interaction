@@ -54,7 +54,7 @@ def analyze_file_angles(entropy_type):
                                              force_random=False, invert_sim_type=False)
         for a in range(2):
             for t in range(4):
-                angle = trial_data['agent_angle'][t][a]
+                angle = trial_data['angle'][t][a]
                 angles_diff = np.diff(angle)
                 all_angles.append(angles_diff)
 
@@ -72,7 +72,7 @@ def analyze_circle_angles():
 
     for a in range(2):
         for t in range(4):
-            angle = data_record['agent_angle'][t][a]
+            angle = data_record['angle'][t][a]
             angles_diff = np.diff(angle)
             all_angles.append(angles_diff)
 
@@ -85,7 +85,7 @@ def analyze_circle_angles():
     # print('Agent angles')
     # print(np.degrees(angle[:10]))
     
-    # pos = data_record['agent_pos'][0][1]
+    # pos = data_record['position'][0][1]
     # print('Agent pos')
     # print(pos[:10])
 

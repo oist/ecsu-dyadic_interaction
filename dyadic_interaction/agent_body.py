@@ -86,8 +86,6 @@ class AgentBody:
             Is = emitter_strenght / np.power(N - 1, 2)
             dist_centers = norm(self.position - emitter_position)
             self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
-            # if self.flag_collision:
-            #     print("Collision!")
             pow_D_centers = np.power(dist_centers,2)
             pow_Radius = np.power(self.agent_body_radius,2)
             pow_Dsen = np.power(dist_sensor_emitter,2)
@@ -101,11 +99,18 @@ class AgentBody:
             self.timing.add_time('AB2-GVI_compute_inputs', t)
         return visual_inputs
 
+    def get_delta_xy(self):
+        avg_displacement = np.mean(self.wheels)
+        delta_xy = avg_displacement * np.array([np.cos(self.angle), np.sin(self.angle)])
+        return delta_xy
+
     # move the agent of one step
-    # see equation 6 in http://rossum.sourceforge.net/papers/DiffSteer/
+    # see equation 6 in http://rossum.sourceforge.net/papers/DiffSteer/#d6
     def move_one_step(self, other_delta_xy, other_angle):
 
         if self.flag_collision:
+            # if self.flag_collision:
+            #     print("Collision!")
             self.position += other_delta_xy
             if self.angle != other_angle:
                 self.angle = other_angle
@@ -115,8 +120,7 @@ class AgentBody:
         wheel_diff = self.wheels[1] - self.wheels[0]  # right - left
         delta_angle = wheel_diff / self.agent_body_radius
         self.angle += delta_angle
-        avg_displacement = np.mean(self.wheels)
-        delta_xy = avg_displacement * np.array([np.cos(self.angle), np.sin(self.angle)])
+        delta_xy = self.get_delta_xy()
         self.position += delta_xy
 
         if delta_angle:
