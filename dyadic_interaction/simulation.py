@@ -279,7 +279,8 @@ class Simulation:
                     self.timing.add_time('SIM_9_save_data', tim)                
                                 
                 if i == self.num_data_points - 1:
-                    continue
+                    # no need to move because data won't be saved
+                    break
                 
                 # 5) Move one step
                 
@@ -299,6 +300,7 @@ class Simulation:
                             prev_angle_agents[b]
                         ) 
                     if data_record is not None:  
+                        # storing delta_xy
                         data_record['delta_xy'][t][a][i] = prev_delta_xy_agents[a]
                 
                 prev_delta_xy_agents = delta_xy_agents
