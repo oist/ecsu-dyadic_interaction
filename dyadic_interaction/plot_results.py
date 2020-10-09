@@ -92,10 +92,10 @@ def plot_angles(data_record):
     plt.show()
 
 def plot_norm_x(data_record):    
-    pos_data = data_record['position']
-    num_trials = len(pos_data)    
+    pos_data = data_record['position']    
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("X Pos")
+    # num_trials = len(pos_data)    
     # num_cols = num_trials
     # for t in range(num_trials):
     #     ax = fig.add_subplot(1, num_cols, t + 1)
