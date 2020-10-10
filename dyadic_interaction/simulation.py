@@ -147,7 +147,7 @@ class Simulation:
         trial_performances = []
         signal_strength_agents = [None, None]
         emitter_agents = [None, None]
-        prev_delta_xy_agents, prev_angle_agents = None, None
+        prev_delta_xy_agents, prev_angle_agents = None, None # pylint: disable=W0612
 
         # initialize agents brain output of all trial for computing entropy
         # list of list (4 trials x 2 agents) each containing array (num_data_points,2)
@@ -268,7 +268,9 @@ class Simulation:
                 self.agents_pair_net[a].brain.euler_step()  # this sets agent.brain.output (2-dim vector)
                 self.timing.add_time('SIM_euler_step', tim)
 
-        def move_one_step_agents(prev_delta_xy_agents, prev_angle_agents):
+        def move_one_step_agents():
+            nonlocal prev_delta_xy_agents
+            nonlocal prev_angle_agents
             delta_xy_agents = [None, None]
             angle_agents = [None, None]
             for a in range(2):                
@@ -285,7 +287,7 @@ class Simulation:
                         prev_angle_agents[b]
                     )                                           
             prev_delta_xy_agents = delta_xy_agents
-            prev_angle_agents = angle_agents     
+            prev_angle_agents = angle_agents
             self.timing.add_time('SIM_move_one_step', tim)  
                           
         # INITIALIZE DATA
@@ -328,7 +330,7 @@ class Simulation:
                     agents_pair_brain_output_trials[t][a][i,:] = self.agents_pair_net[a].brain.output                        
 
                 # 6) Move one step  agents
-                move_one_step_agents(prev_delta_xy_agents, prev_angle_agents)
+                move_one_step_agents()
 
                 save_data(t, i)             
 
