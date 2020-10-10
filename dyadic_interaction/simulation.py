@@ -415,7 +415,7 @@ class Simulation:
         return performances
 
 def obtain_trial_data(dir, num_generation, genotype_index, 
-    force_random=False, invert_sim_type = False, 
+    random_position=False, invert_sim_type=False, 
     ghost_index=None, initial_distance=None):    
     ''' 
     utitity function to get data from a simulation
@@ -439,7 +439,7 @@ def obtain_trial_data(dir, num_generation, genotype_index,
         sim.entropy_type = 'shannon' if sim.entropy_type == 'transfer' else 'transfer'
         print("Inverting sim entropy type to: {}".format(sim.entropy_type))
 
-    if force_random:
+    if random_position:
         print("Randomizing positions and angles")
         rs = RandomState()
         sim.set_initial_positions_angles(rs)
@@ -454,7 +454,8 @@ def obtain_trial_data(dir, num_generation, genotype_index,
         
         # get original results without ghost condition and no random
         func_arguments['ghost_index'] = None
-        func_arguments['force_random'] = False
+        func_arguments['random_position'] = False
+        func_arguments['initial_distance'] = None
         _, _, original_data_record = obtain_trial_data(**func_arguments) 
         perf = sim.compute_performance(genotype, random_seed, data_record, 
             ghost_index=ghost_index, original_data_record=original_data_record)

@@ -51,7 +51,7 @@ def analyze_file_angles(entropy_type):
     for exp in exp_dirs:
         exp_file = os.path.join(base_dir, exp)
         _, _, trial_data = obtain_trial_data(exp_file, 500, 0,
-                                             force_random=False, invert_sim_type=False)
+                                             random_position=False, invert_sim_type=False)
         for a in range(2):
             for t in range(4):
                 angle = trial_data['angle'][t][a]

@@ -8,7 +8,7 @@ def run_default():
         dir='data/shannon_entropy/MAX/dyadic_exp_001', 
         num_generation=500, 
         genotype_index=0, 
-        force_random=True, 
+        random_position=True, 
         invert_sim_type=False, 
         initial_distance=None,
         ghost_index=0
@@ -37,7 +37,7 @@ if __name__ == "__main__":
         dir=args.dir, 
         num_generation=args.generation, 
         genotype_index=args.genotype, 
-        force_random=args.random, 
+        random_position=args.random, 
         invert_sim_type=args.invert, 
         initial_distance=args.distance if args.distance>=0 else None,
         ghost_index=args.ghost if args.ghost in (0,1) else None        
