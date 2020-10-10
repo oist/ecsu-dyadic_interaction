@@ -69,9 +69,10 @@ def test_data(entropy_type):
     data_record = {}
     perf = sim.compute_performance(agent_pair_genome, data_record = data_record)
     print('Performance: {}'.format(perf))
+    trial_index = 1
     # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
-    utils.save_numpy_data(data_record['position'], 'data/positions_new.json')
-    utils.save_numpy_data(data_record['brain_output'], 'data/brain_output_new.json')
+    utils.save_numpy_data(data_record['position'][trial_index], 'data/positions_new.json')
+    utils.save_numpy_data(data_record['brain_output'][trial_index], 'data/brain_output_new.json')
 
 def test_visual(entropy_type):
     from pyevolver.evolution import Evolution
