@@ -145,8 +145,18 @@ class Simulation:
             self.timing.add_time('SIM_init_agent_phenotypes', tim)    
 
         trial_performances = []
-        signal_strength_agents = []
+        signal_strength_agents = [None, None]
+        emitter_agents = [None, None]
         prev_delta_xy_agents, prev_angle_agents = None, None
+
+        # initialize agents brain output of all trial for computing entropy
+        # list of list (4 trials x 2 agents) each containing array (num_data_points,2)
+        agents_pair_brain_output_trials = [
+            [
+                np.zeros((self.num_data_points, 2)) 
+                for _ in range(2)
+            ] for _ in range(self.num_trials)
+        ]
 
         def init_data():
             if data_record is  None:                       
@@ -195,20 +205,39 @@ class Simulation:
                 data_record['position'][t][a][i] = agent_body.position
                 data_record['angle'][t][a][i] = agent_body.angle
                 data_record['delta_xy'][t][a][i] = prev_delta_xy_agents[a]
-                data_record['signal_strength'][t][a][i] = signal_strength
+                data_record['signal_strength'][t][a][i] = signal_strength_agents[a]
                 data_record['brain_input'][t][a][i] = agent_net.brain.input
                 data_record['brain_state'][t][a][i] = agent_net.brain.states
                 data_record['derivatives'][t][a][i] = agent_net.brain.dy_dt
                 data_record['brain_output'][t][a][i] = agent_net.brain.output
                 data_record['wheels'][t][a][i] = agent_body.wheels
-                data_record['emitter'][t][a][i] = motor_outputs[1] # index 1:   EMITTER
+                data_record['emitter'][t][a][i] = emitter_agents[a]
             self.timing.add_time('SIM_save_data', tim)                            
 
-        def prepare_agents_for_trial(trial_index):
+        def compute_signal_strength_agents():
+            for a in [x for x in range(2) if x != ghost_index]:    
+                b = 1 - a
+                # signal_strength = np.array([0.,0.])  # if we want to mimic zero signal strength
+                signal_strength_agents[a] = self.agents_pair_body[a].get_signal_strength(
+                    self.agents_pair_body[b].position,
+                    emitter_agents[b]
+                )
+            self.timing.add_time('SIM_get_signal_strength', tim)
+
+        def update_wheels_emitter_agents(t,i):
+            for a in range(2):
+                if a == ghost_index:
+                    emitter_agents[a] = original_data_record['emitter'][t][a][i]
+                else:
+                    motor_outputs = self.agents_pair_net[a].compute_motor_outputs()
+                    self.agents_pair_body[a].wheels = np.take(motor_outputs, [0,2]) # index 0,2: MOTORS  
+                    emitter_agents[a] = motor_outputs[1] # index 1: EMITTER
+            self.timing.add_time('SIM_compute_motors_emitter', tim)
+
+        def prepare_agents_for_trial(t):
             for a in range(2):
                 agent_net = self.agents_pair_net[a]
                 agent_body = self.agents_pair_body[a]
-
                 # reset params that are due to change during the experiment
                 agent_body.init_params(
                     wheels = np.array([0., 0.]),
@@ -216,27 +245,49 @@ class Simulation:
                 )
                 # set initial states to zeros
                 agent_net.init_params(
-                    brain_states = np.array([0., 0.]), # states initialized with zeros
-                    motors_outputs = np.array([0., 0.5, 0.]) # 3 motors (the middle is the emitter, initialized as 0.5)
+                    brain_states = np.array([0., 0.]),
                 )
-
-                agent_pos = np.copy(self.agents_pair_start_pos_trials[trial_index][a])
-                agent_angle = self.agents_pair_start_angle_trials[trial_index][a]
+                agent_pos = np.copy(self.agents_pair_start_pos_trials[t][a])
+                agent_angle = self.agents_pair_start_angle_trials[t][a]
                 agent_body.set_position_and_angle(agent_pos, agent_angle)
-
                 # compute output
-                self.agents_pair_net[a].brain.compute_output()
+                agent_net.brain.compute_output()        
+            # compute motor outpus    
+            update_wheels_emitter_agents(t, 0)                          
+            # compute signal streng
+            compute_signal_strength_agents()
             self.timing.add_time('SIM_prepare_agents_for_trials', tim)     
 
-        # initialize agents brain output of all trial for computing entropy
-        # list of list (4 trials x 2 agents) each containing array (num_data_points,2)
-        agents_pair_brain_output_trials = [
-            [
-                np.zeros((self.num_data_points, 2)) 
-                for _ in range(2)
-            ] for _ in range(self.num_trials)
-        ]
+        def compute_brain_input_agents():
+            for a in [x for x in range(2) if x != ghost_index]:    
+                self.agents_pair_net[a].compute_brain_input(signal_strength_agents[a])
+                self.timing.add_time('SIM_compute_brain_input', tim)
 
+        def compute_brain_euler_step_agents():          
+            for a in [x for x in range(2) if x != ghost_index]:              
+                self.agents_pair_net[a].brain.euler_step()  # this sets agent.brain.output (2-dim vector)
+                self.timing.add_time('SIM_euler_step', tim)
+
+        def move_one_step_agents(prev_delta_xy_agents, prev_angle_agents):
+            delta_xy_agents = [None, None]
+            angle_agents = [None, None]
+            for a in range(2):                
+                if ghost_index == a:
+                    # for ghost agent we need to retrieve position, delta_xy, and angle from data
+                    self.agents_pair_body[a].position = original_data_record['position'][t][a][i] 
+                    delta_xy_agents[a] = original_data_record['delta_xy'][t][a][i]                        
+                    angle_agents[a] = original_data_record['angle'][t][a][i]
+                else:                                                
+                    # TODO: check if the agents didn't go too far from one another
+                    b = 1 - a
+                    delta_xy_agents[a], angle_agents[a] =  self.agents_pair_body[a].move_one_step(
+                        prev_delta_xy_agents[b],
+                        prev_angle_agents[b]
+                    )                                           
+            prev_delta_xy_agents = delta_xy_agents
+            prev_angle_agents = angle_agents     
+            self.timing.add_time('SIM_move_one_step', tim)  
+                          
         # INITIALIZE DATA
         init_data()        
 
@@ -256,74 +307,28 @@ class Simulation:
 
             # 0) Save data at time 0
             save_data(t, 0)
-            
+
             # TRIAL START
             for i in range(1, self.num_data_points):                
 
-                delta_xy_agents = [None, None]
-                angle_agents = [None, None]
+                # 1) Agent senses strength of emitter from the two sensors
+                compute_signal_strength_agents()
 
-                for a in range(2):    
+                # 2) compute brain input
+                compute_brain_input_agents()
 
-                    b = 1-a
-                    agent_net = self.agents_pair_net[a]
-                    agent_body = self.agents_pair_body[a]
+                # 3) Update agent's neural system
+                compute_brain_euler_step_agents()
 
-                    if ghost_index == a:
-                        # data of the ghost won't be computed because already available
-                        # we need to set the body position and emitter because it is used in 
-                        # the step signal_sensing below
-                        agent_body.position = original_data_record['position'][t][a][i] 
-                        agent_net.motors_outputs[1] = original_data_record['emitter'][t][a][i]
+                # 4) Agent updates wheels and  emitter
+                update_wheels_emitter_agents(t,i)
 
-                    else:                                                                       
+                # 5) Store brain outputs
+                for a in [x for x in range(2) if x != ghost_index]:              
+                    agents_pair_brain_output_trials[t][a][i,:] = self.agents_pair_net[a].brain.output                        
 
-                        # 1) Agent senses strength of emitter from the two sensors
-                        # signal_strength = np.array([0.,0.])  # if we want to mimic zero signal strenght
-                        signal_strength = agent_body.get_signal_strength(
-                            self.agents_pair_body[b].position,
-                            self.agents_pair_net[b].motors_outputs[1] # index 1:   EMITTER
-                        )
-                        self.timing.add_time('SIM_get_signal_strength', tim)
-
-                        # 2) compute brain input
-                        agent_net.compute_brain_input(signal_strength)
-                        self.timing.add_time('SIM_compute_brain_input', tim)
-
-                        # 3) Update agent's neural system
-                        agent_net.brain.euler_step()  # this sets agent.brain.output (2-dim vector)
-                        self.timing.add_time('SIM_euler_step', tim)
-
-                        # 4) Agent updates wheels displacement
-                        motor_outputs = agent_net.compute_motor_outputs()
-                        agent_body.wheels = np.take(motor_outputs, [0,2]) # index 0,2: MOTORS  
-                        self.timing.add_time('SIM_compute_motor_outputs', tim)
-
-                        # 5) Store brain outputs
-                        agents_pair_brain_output_trials[t][a][i,:] = agent_net.brain.output                        
-
-                for a in range(2):                
-                        
-                    # 6) Move one step                    
-                                
-                    if ghost_index == a:
-                        # for ghost agent we need to retrieve position, delta_xy, and angle from data
-                        delta_xy_agents[a] = original_data_record['delta_xy'][t][a][i]                        
-                        angle_agents[a] = original_data_record['angle'][t][a][i]
-                    else:                                                
-                        # TODO: check if the agents didn't go too far from one another
-                        b = 1 - a
-                        delta_xy_agents[a], angle_agents[a] =  self.agents_pair_body[a].move_one_step(
-                            prev_delta_xy_agents[b],
-                            prev_angle_agents[b]
-                        )                                             
-                    
-                    self.timing.add_time('SIM_move_one_step', tim)            
-                
-                # END DATA POINT i for AGENT A
-
-                prev_delta_xy_agents = delta_xy_agents
-                prev_angle_agents = angle_agents   
+                # 6) Move one step  agents
+                move_one_step_agents(prev_delta_xy_agents, prev_angle_agents)
 
                 save_data(t, i)             
 

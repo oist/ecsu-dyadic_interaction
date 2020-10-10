@@ -37,16 +37,18 @@ def test(entropy_type):
         num_cores = 1
     )    
 
-    data1 = {}
-    data2 = {}
-    rnd_seed = None if entropy_type is 'shannon' else utils.random_int()
-    perf1 = sim.compute_performance(agent_pair_genome, rnd_seed, data1)
-    print('perf1: {}'.format(perf1))
-    perf2 = sim.compute_performance(agent_pair_genome, rnd_seed, data2)
-    print('perf2: {}'.format(perf2))
+    data_record = {}
+    perf = sim.compute_performance(agent_pair_genome, data_record = data_record)
+    print('Performance: {}'.format(perf))
+    t = 0
+    # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
+    utils.dump_numpy_json(data_record['position'][t], 'positions_new.json')
+
+
 
 if __name__ == "__main__":
-    for entropy_type in ['shannon','transfer']:
-        print(entropy_type)
-        test(entropy_type)
-        print()
+    test('shannon')
+    # for entropy_type in ['shannon','transfer']:
+    #     print(entropy_type)
+    #     test(entropy_type)
+    #     print()

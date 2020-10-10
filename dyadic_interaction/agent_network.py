@@ -22,8 +22,7 @@ class AgentNetwork:
     TODO: update documentation above
     """
 
-    def __init__(self, num_brain_neurons, brain_step_size, genotype_structure,
-        brain_state_range=None, random_seed=None, genotype=None):
+    def __init__(self, num_brain_neurons, brain_step_size, genotype_structure, genotype=None):
 
         get_param_range = lambda param: \
             genotype_structure[param]['range'] \
@@ -48,7 +47,6 @@ class AgentNetwork:
 
 
         self.brain = BrainCTRNN(
-            random_seed=random_seed,
             num_neurons=num_brain_neurons,
             step_size=brain_step_size,
             states=np.array([0.,0.]), # states are initialized with zeros
@@ -72,9 +70,8 @@ class AgentNetwork:
         if genotype:
             self.genotype_to_phenotype(genotype)
 
-    def init_params(self, brain_states, motors_outputs):
+    def init_params(self, brain_states):
         self.brain.states = brain_states
-        self.motors_outputs = motors_outputs
 
     def genotype_to_phenotype(self, genotype):
         '''
@@ -133,3 +130,28 @@ class AgentNetwork:
             expit(np.dot(self.motor_weights, self.brain.output) + self.motor_biases)
         )
         return self.motors_outputs
+
+def test_random_genotype():
+    from dyadic_interaction import gen_structure
+    from pyevolver.evolution import Evolution
+    from numpy.random import RandomState
+    default_gen_structure = gen_structure.DEFAULT_GEN_STRUCTURE
+    gen_size = gen_structure.get_genotype_size(default_gen_structure)
+    num_brain_neurons = gen_structure.get_num_brain_neurons(default_gen_structure)
+    print('Gen size of agent: {}'.format(gen_size))
+    print('Num brain neurons: {}'.format(num_brain_neurons))
+    random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size)        
+    agent_net = AgentNetwork(
+        num_brain_neurons,
+        brain_step_size=0.1,
+        genotype_structure=default_gen_structure,
+        genotype = random_genotype
+    )
+    agent_net.brain.states = np.array([0., 0.])
+    agent_net.brain.compute_output()    
+    print('brain output: {}'.format(agent_net.brain.output))    
+    motor_outputs = agent_net.compute_motor_outputs()
+    print('motor output: {}'.format(motor_outputs))
+
+if __name__ == "__main__":
+    test_random_genotype()
