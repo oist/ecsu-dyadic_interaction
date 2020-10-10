@@ -377,7 +377,7 @@ if __name__ == "__main__":
     plot_simultation_results(evo, data_record)
 
     output_file_path = 'sim_original.json' if args.ghost<0 else 'sim_ghost_random.json' if args.random else 'sim_ghost_norandom.json'
-    
+    output_file_path = 'data/' + output_file_path
     # trial_index = 0
     # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
     utils.save_numpy_data(data_record, output_file_path)
