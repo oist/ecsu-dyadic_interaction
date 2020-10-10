@@ -43,6 +43,7 @@ def test(entropy_type):
     t = 0
     # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
     utils.save_numpy_data(data_record['position'][t], 'data/positions_new.json')
+    utils.save_numpy_data(data_record['position'][t], 'data/brain_output_new.json')
 
 
 
