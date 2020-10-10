@@ -14,25 +14,54 @@ Check the performance are reproducible with the same Simulation object
 '''
 
 agent_pair_genome = \
-    np.array([ 
-        0.09762701,  0.43037873,  0.20552675,  0.08976637, -0.1526904 ,
-        0.29178823, -0.12482558,  0.783546  ,  0.92732552, -0.23311696,
-        0.58345008,  0.05778984,  0.13608912,  0.85119328, -0.85792788,
-       -0.8257414 , -0.95956321,  0.66523969,  0.5563135 ,  0.7400243 ,
-        0.95723668,  0.59831713, -0.07704128,  0.56105835, -0.76345115,
-        0.27984204, -0.71329343,  0.88933783,  0.04369664, -0.17067612,
-       -0.47088878,  0.54846738, -0.08769934,  0.1368679 , -0.9624204 ,
-        0.23527099,  0.22419145,  0.23386799,  0.88749616,  0.3636406 
-    ])
+    np.array(      [
+         -0.7562370205971931,
+         -0.780304551233475,
+         0.9814727096214281,
+         0.5146751791050619,
+         -0.7216033919480229,
+         0.9515233481643174,
+         0.17877538640830895,
+         -0.1724482239533077,
+         0.25747111408791695,
+         -0.5191985279442142,
+         -0.2752507560221079,
+         -0.18006493467646623,
+         -0.4127344451831818,
+         -0.10509666964599175,
+         0.3630909527831917,
+         -0.8290791318495379,
+         0.8765249811234751,
+         0.4795130240089538,
+         0.4924513410793277,
+         0.5425757087064366,
+         -0.8118738326524774,
+         0.15425480821649531,
+         -0.4129169555901072,
+         0.018891165557032904,
+         0.046841091024842435,
+         0.28229852983953724,
+         0.3734892853885499,
+         0.2803370838924146,
+         0.012069762709188046,
+         -0.9855760690165177,
+         0.5088166947529534,
+         0.42092777694431915,
+         0.9893834513017314,
+         -0.4239067770881425,
+         -0.5205278341676729,
+         -0.4633839563397559,
+         -0.47349365900065266,
+         0.7803947889566571,
+         0.461392585471145,
+         0.35688559458014874
+      ])
 
-def test(entropy_type):
+def test_data(entropy_type):
+
     sim = Simulation(
         entropy_type = entropy_type,
         genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE,
-        agent_body_radius = 4,
-        agents_pair_initial_distance = 20,
-        agent_sensors_divergence_angle = np.radians(45),  # angle between sensors and axes of symmetry
-        brain_step_size = 0.1,
         trial_duration = 20,  # the brain would iterate trial_duration/brain_step_size number of time
         num_cores = 1
     )    
@@ -40,15 +69,41 @@ def test(entropy_type):
     data_record = {}
     perf = sim.compute_performance(agent_pair_genome, data_record = data_record)
     print('Performance: {}'.format(perf))
-    t = 0
     # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
-    utils.save_numpy_data(data_record['position'][t], 'data/positions_new.json')
-    utils.save_numpy_data(data_record['position'][t], 'data/brain_output_new.json')
+    utils.save_numpy_data(data_record['position'], 'data/positions_new.json')
+    utils.save_numpy_data(data_record['brain_output'], 'data/brain_output_new.json')
 
+def test_visual(entropy_type):
+    from pyevolver.evolution import Evolution
+    from numpy.random import RandomState
+    from dyadic_interaction.visual import Visualization
+
+    default_gen_structure = gen_structure.DEFAULT_GEN_STRUCTURE    
+
+    sim = Simulation(
+        entropy_type = entropy_type,
+        genotype_structure = default_gen_structure,
+        trial_duration = 20,  # the brain would iterate trial_duration/brain_step_size number of time
+        num_cores = 1
+    )    
+
+    # gen_size = gen_structure.get_genotype_size(gen_structure.DEFAULT_GEN_STRUCTURE)
+    # agent_pair_genome = Evolution.get_random_genotype(RandomState(None), gen_size*2)
+
+    data_record = {}
+    sim.compute_performance(agent_pair_genome, data_record = data_record)
+
+    vis = Visualization(sim)
+    trial_index = 1
+    vis.start_simulation_from_data(trial_index, data_record)
+
+    # print(agent_pair_genome.tolist())
 
 
 if __name__ == "__main__":
-    test('shannon')
+    test_data('shannon')
+    # test_visual('shannon')
+    
     # for entropy_type in ['shannon','transfer']:
     #     print(entropy_type)
     #     test(entropy_type)
