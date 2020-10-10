@@ -380,4 +380,4 @@ if __name__ == "__main__":
     
     # trial_index = 0
     # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
-    utils.dump_numpy_json(data_record, output_file_path)
+    utils.save_numpy_data(data_record, output_file_path)
