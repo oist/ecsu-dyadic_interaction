@@ -99,6 +99,10 @@ class Simulation:
             ]
             for i in range(self.num_trials)
         ]
+        if random_state:
+            # reinitialized the angle because it was used for positioning
+            # we don't want the second agent to necessarily face outwards
+            self.agents_pair_start_angle_trials = pi * random_state.uniform(0, 2, (self.num_trials,2))
 
     def save_to_file(self, file_path):
         with open(file_path, 'w') as f_out:
