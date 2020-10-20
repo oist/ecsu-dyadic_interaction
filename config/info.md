@@ -1,3 +1,6 @@
+DEAFULT
+--------
+
 2 ACUSTIC SENSORS
     0: B1&2
     1: G1&2
@@ -23,3 +26,21 @@
    17: W22
    18: W13
    19: W23
+
+
+GEORGINA
+--------
+INPUTS
+gains
+bias
+weights (W11,W12,W21,W22)
+
+NEURONS
+taus
+bias
+weights (W11, W12, W21, W22)
+
+MOTORS
+gains
+bias
+weights (W11, W12, W13, W21, W22, W23)
