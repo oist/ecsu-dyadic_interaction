@@ -1,12 +1,11 @@
 import numpy as np
 from dyadic_interaction import gen_structure
 from dyadic_interaction.simulation import Simulation
-from dataclasses import asdict
-from pyevolver.json_numpy import NumpyListJsonEncoder
-from dyadic_interaction.agent_network import AgentNetwork
-from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction import utils
+from dyadic_interaction.agent_network import AgentNetwork
 import json
+
+GEORGINA_GEN_STRUCTURE = gen_structure.load_genotype_structure('config/georgina_genotype_structure.json')
 
 '''
 Check the performance are reproducible with the same Simulation object
@@ -14,98 +13,118 @@ Check the performance are reproducible with the same Simulation object
 '''
 
 agent_pair_genome = \
-    np.array(      [
-         -0.7562370205971931,
-         -0.780304551233475,
-         0.9814727096214281,
-         0.5146751791050619,
-         -0.7216033919480229,
-         0.9515233481643174,
-         0.17877538640830895,
-         -0.1724482239533077,
-         0.25747111408791695,
-         -0.5191985279442142,
-         -0.2752507560221079,
-         -0.18006493467646623,
-         -0.4127344451831818,
-         -0.10509666964599175,
-         0.3630909527831917,
-         -0.8290791318495379,
-         0.8765249811234751,
-         0.4795130240089538,
-         0.4924513410793277,
-         0.5425757087064366,
-         -0.8118738326524774,
-         0.15425480821649531,
-         -0.4129169555901072,
-         0.018891165557032904,
-         0.046841091024842435,
-         0.28229852983953724,
-         0.3734892853885499,
-         0.2803370838924146,
-         0.012069762709188046,
-         -0.9855760690165177,
-         0.5088166947529534,
-         0.42092777694431915,
-         0.9893834513017314,
-         -0.4239067770881425,
-         -0.5205278341676729,
-         -0.4633839563397559,
-         -0.47349365900065266,
-         0.7803947889566571,
-         0.461392585471145,
-         0.35688559458014874
-      ])
+    np.array([
+        -0.138300787995370766392255745813599787652492523193359375,
+        -0.54189722127169248633293818784295581281185150146484375, 
+        0.108851114935846926545792712204274721443653106689453125, 
+        0.187434893864179608069520099888904951512813568115234375, 
+        0.493528557346037566322394241069559939205646514892578125, 
+        -0.55181291667760057340075263709877617657184600830078125, 
+        -0.473328126528107129278311049347394146025180816650390625, 
+        -0.99822365115097688725853686264599673449993133544921875, 
+        -0.8256929085903224052600535287638194859027862548828125, 
+        0.56657910538214506512844081953517161309719085693359375, 
+        -0.652729413114339518386941563221625983715057373046875, 
+        0.72665004096520802168157615597010590136051177978515625, 
+        0.99688422931032250051686105507542379200458526611328125, 
+        0.061756354358896654865862529959485982544720172882080078125, 
+        -0.08621485681672678980103086132658063434064388275146484375, 
+        -0.41516933494953989214337752855499275028705596923828125, 
+        0.699334661902925258658569873659871518611907958984375, 
+        -0.177208966483298258065559593887883238494396209716796875, 
+        0.414718057732613443189251256626448594033718109130859375, 
+        0.128516169746153485764494917020783759653568267822265625, 
+        -0.7365894463833930760898738299147225916385650634765625, 
+        0.204744068126590461620395444697351194918155670166015625, 
+        -0.9826875435977762140993263528798706829547882080078125, 
+        -0.055494983290108101936510820451076142489910125732421875, 
+        0.929585033995432130637937007122673094272613525390625, 
+        0.4077434591931672347442372483783401548862457275390625, 
+        -0.1615989361533980428475842927582561969757080078125, 
+        -0.53938596894061541231479850466712377965450286865234375, 
+        0.33618676342015973990129396042902953922748565673828125, 
+        -0.2552392951729693937323872887645848095417022705078125, 
+        0.10466919667055431253377406619620160199701786041259765625, 
+        -0.83751681388398402372530426873709075152873992919921875, 
+        0.94113732708186537134764648726559244096279144287109375, 
+        0.0955303849910250912902398567894124425947666168212890625, 
+        0.62740679163165247178568506569718010723590850830078125, 
+        -0.0349203898759716524491381051120697520673274993896484375, 
+        0.07684178405376286546957231848864466883242130279541015625, 
+        -0.59421889727346000054097885367809794843196868896484375, 
+        0.912250638675411007483262437744997441768646240234375, 
+        0.267757338521746157677938526830985210835933685302734375,
+    ])
+
+def test_genotype(index):
+    genotype = np.array_split(agent_pair_genome, 2)[index]
+    agent_net = AgentNetwork(
+        gen_structure.get_num_brain_neurons(GEORGINA_GEN_STRUCTURE),
+        0.01,
+        GEORGINA_GEN_STRUCTURE,
+    )
+    phenotype = np.zeros(len(genotype))
+    agent_net.genotype_to_phenotype(genotype, phenotype)
+    print(json.dumps(phenotype.tolist(), indent=3))
+    agent_net.brain.states = np.array([0., 0.])
+    agent_net.brain.compute_output()    
+    print('brain output: {}'.format(agent_net.brain.output))    
+    motor_outputs = agent_net.compute_motor_outputs()
+    print('motor output: {}'.format(motor_outputs))
 
 def test_data(entropy_type):
 
     sim = Simulation(
-        entropy_type = entropy_type,
-        genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE,
-        trial_duration = 20,  # the brain would iterate trial_duration/brain_step_size number of time
-        num_cores = 1
-    )    
+        entropy_type=entropy_type,
+        genotype_structure=GEORGINA_GEN_STRUCTURE,
+        num_cores=1
+    )
 
     data_record = {}
-    perf = sim.compute_performance(agent_pair_genome, data_record = data_record)
+    perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
     print('Performance: {}'.format(perf))
-    trial_index = 1
-    # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
-    utils.save_numpy_data(data_record['position'][trial_index], 'data/positions_new.json')
-    utils.save_numpy_data(data_record['brain_output'][trial_index], 'data/brain_output_new.json')
+    for t in range(4):
+    # t = 0    
+        for k,v in data_record.items():
+            for a in range(2):
+                utils.save_numpy_data(v[t][a], 'data/test/{}_{}_{}.json'.format(k,t+1,a+1))
+
 
 def test_visual(entropy_type):
-    from pyevolver.evolution import Evolution
-    from numpy.random import RandomState
     from dyadic_interaction.visual import Visualization
 
-    default_gen_structure = gen_structure.DEFAULT_GEN_STRUCTURE    
-
     sim = Simulation(
-        entropy_type = entropy_type,
-        genotype_structure = default_gen_structure,
-        trial_duration = 20,  # the brain would iterate trial_duration/brain_step_size number of time
-        num_cores = 1
-    )    
-
-    # gen_size = gen_structure.get_genotype_size(gen_structure.DEFAULT_GEN_STRUCTURE)
-    # agent_pair_genome = Evolution.get_random_genotype(RandomState(None), gen_size*2)
+        entropy_type=entropy_type,
+        genotype_structure=GEORGINA_GEN_STRUCTURE,
+        num_cores=1
+    )
 
     data_record = {}
-    sim.compute_performance(agent_pair_genome, data_record = data_record)
+    perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
+    print('Performance: {}'.format(perf))
 
     vis = Visualization(sim)
     trial_index = 1
     vis.start_simulation_from_data(trial_index, data_record)
 
-    # print(agent_pair_genome.tolist())
+def test_plot(entropy_type):
+    from dyadic_interaction import plot_results
+
+    sim = Simulation(
+        entropy_type=entropy_type,
+        genotype_structure=GEORGINA_GEN_STRUCTURE,
+        num_cores=1
+    )
+
+    data_record = {}
+    perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
+    print('Performance: {}'.format(perf))
+
+    plot_results.plot_behavior(data_record)
 
 
 if __name__ == "__main__":
+    # test_genotype(0)
     test_data('shannon')
     # test_visual('shannon')
-    
-    # for entropy_type in ['shannon','transfer']:
-    #     print(entropy_type)
-    #     test(entropy_type)
-    #     print()
+    # test_plot('shannon')
