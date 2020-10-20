@@ -40,7 +40,7 @@ def process_genotype_structure(genotype_structure):
         assert k_split[1] in ['taus', 'biases', 'gains', 'weights']
         assert k_split[0] == 'neural' or k_split[1] != 'taus'
         if 'indexes' in v:
-            assert sorted(v['indexes']) == list(v['indexes'])
+            assert sorted(set(v['indexes'])) == sorted(v['indexes'])
         else:
             assert 'default' in v
             assert type(v['default']) == list
