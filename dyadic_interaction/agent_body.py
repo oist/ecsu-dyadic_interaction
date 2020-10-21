@@ -81,10 +81,10 @@ class AgentBody:
             # print("SENSOR POSITION {}: {}".format(i+1, sp))
             self.timing.add_time('AB2-GVI_check_in_vision', t)
             # TODO: check the following
-            dist_sensor_emitter = norm(sp - emitter_position)            
+            dist_sensor_emitter = min(norm(sp - emitter_position),  self.agent_body_radius)           
             N = dist_sensor_emitter / self.agent_body_radius
             Is = emitter_strenght / np.power(N - 1, 2)
-            dist_centers = norm(self.position - emitter_position)
+            dist_centers = min(norm(self.position - emitter_position), 2 * self.agent_body_radius)
             self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
             pow_D_centers = np.power(dist_centers,2)
             pow_Radius = np.power(self.agent_body_radius,2)

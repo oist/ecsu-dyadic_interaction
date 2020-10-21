@@ -21,3 +21,11 @@ def get_norm_entropy(brain_output, min_v=0., max_v=1.):
     entropy = np.nansum(histo_neg_prob_log_prob)
     norm_entropy = entropy / np.log2(BINS * BINS)
     return norm_entropy
+
+if __name__ == "__main__":
+    a = np.array([[.1, .2, .3, .4],[.1, .2, .3, .4]])
+    a = np.transpose(a)
+    #b = a + 1
+    print(a)
+    norm_entropy = get_norm_entropy(a)
+    print(norm_entropy)

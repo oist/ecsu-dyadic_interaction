@@ -24,6 +24,7 @@ import multiprocessing
 @dataclass
 class Simulation:
     entropy_type: str = 'shannon' # 'shannon', 'transfer'
+    # TODO: add entropy_target_value param ('output_neuron' or 'agents_distance')
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE)
     num_brain_neurons: int = None  # initialized in __post_init__
     agent_body_radius: int = 4
@@ -152,6 +153,9 @@ class Simulation:
         signal_strength_agents = [None, None]
         emitter_agents = [None, None]
         prev_delta_xy_agents, prev_angle_agents = None, None # pylint: disable=W0612
+
+        # TODO: check entropy_target_values to see if we are interested in brain_outputs or distance
+        # and initialize variable accordingly
 
         # initialize agents brain output of all trial for computing entropy
         # list of list (4 trials x 2 agents) each containing array (num_data_points,2)
@@ -371,6 +375,9 @@ class Simulation:
         if self.entropy_type=='shannon':
             # concatenate data from all trials
             # resulting in a list of 2 elements (agents) each having num_trials * num_data_points
+
+            # TODO: change this to take into consideration the two cases of entropy_target_values (brain_output, distance)
+
             agents_pair_brain_output_concat = [
                 np.concatenate([
                     agents_pair_brain_output_trials[t][a]
