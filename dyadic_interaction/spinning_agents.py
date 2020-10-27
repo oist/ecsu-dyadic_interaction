@@ -5,7 +5,7 @@ from dyadic_interaction import utils
 
 
 def get_spinning_agents_data():
-    genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE
+    genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE(2)
 
     sim = Simulation(
         entropy_type = 'shannon',

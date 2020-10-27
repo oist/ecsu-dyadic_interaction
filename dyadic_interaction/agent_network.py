@@ -103,7 +103,9 @@ class AgentNetwork:
                 # using same fields as in genotype_structure
                 if 'indexes' in val:
                     gene_values = np.take(genotype, val['indexes'])
-                    if k in ['sensor_weights', 'motor_weights']:
+                    if k == 'sensor_weights':
+                        gene_values = gene_values.reshape(2, -1) # the matrix will have 2 rows (number of sensors)
+                    elif k == 'motor_weights':
                         gene_values = gene_values.reshape(self.brain.num_neurons, -1)
                     else:
                         num_units = 2 if k.split('_')[0]=='sensor' else 3 # 3 motors
@@ -126,7 +128,7 @@ class AgentNetwork:
     
     def compute_brain_input(self, signal_strength):
         sensor_outputs = np.multiply(self.sensor_gains, expit(signal_strength + self.sensor_biases))  # [o1, o2]
-        self.brain.input = np.dot(sensor_outputs, self.sensor_weights)  # [1,2]·[2,2] = [1,2] two dimensional array
+        self.brain.input = np.dot(sensor_outputs, self.sensor_weights)  # [1,2]·[2,n] = [1,n] where n is the number of neurons
 
     def compute_motor_outputs(self):
         self.motors_outputs = np.multiply(
@@ -139,7 +141,7 @@ def test_random_genotype():
     from dyadic_interaction import gen_structure
     from pyevolver.evolution import Evolution
     from numpy.random import RandomState
-    default_gen_structure = gen_structure.DEFAULT_GEN_STRUCTURE
+    default_gen_structure = gen_structure.DEFAULT_GEN_STRUCTURE(2)
     gen_size = gen_structure.get_genotype_size(default_gen_structure)
     num_brain_neurons = gen_structure.get_num_brain_neurons(default_gen_structure)
     print('Gen size of agent: {}'.format(gen_size))

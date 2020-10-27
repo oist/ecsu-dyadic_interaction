@@ -18,7 +18,7 @@ import json
 
 MAX_CANVAS_SIZE = 500
 ZOOM_FACTOR = 4
-REFRESH_RATE =40
+REFRESH_RATE = 40
 
 CANVAS_CENTER = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
 SHIFT_CENTER_TO_FIRST_AGENT = False
@@ -214,7 +214,7 @@ def run_with_keyboard(trial_index):
     vis.start_simulation_with_keyboard(trial_index)
 
 def run_random_agents():
-    genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE
+    genotype_structure=gen_structure.DEFAULT_GEN_STRUCTURE(2)
     gen_size = gen_structure.get_genotype_size(genotype_structure)
     random_genotype = Evolution.get_random_genotype(RandomState(None), gen_size*2) # pairs of agents in a single genotype
 
