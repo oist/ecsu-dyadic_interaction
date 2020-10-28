@@ -236,10 +236,10 @@ def plot_activity(data_record, to_plot):
         ax4.spines["right"].set_visible(False)
         ax4.spines["bottom"].set_visible(True)
 
-    # plt.show()
+    plt.show()
     # plt.savefig('plots/shannon_activity.eps', format='eps')
     # plt.savefig('plots/transfer_activity.eps', format='eps')
-    plt.savefig('plots/transfer_activity_bin.eps', format='eps')
+    # plt.savefig('plots/transfer_activity_bin.eps', format='eps')
 
 
 def plot_inputs(data_record):

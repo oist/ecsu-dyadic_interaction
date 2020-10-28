@@ -27,7 +27,7 @@ def run_experiment(seed, entropy_type, entropy_target_value, folder_path, num_co
 
     sim = Simulation(
         entropy_type = entropy_type,
-        # entropy_target_value = entropy_target_value, ##
+        entropy_target_value = entropy_target_value,
         genotype_structure = genotype_structure,
         agent_body_radius = 4,
         agents_pair_initial_distance = 20,
@@ -75,8 +75,8 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
-    parser.add_argument('--entropy', choices=['shannon', 'transfer', 'sample_entropy'], default='shannon', help='Type of entropy measure to use')   ##
-    parser.add_argument('--entropy_target_value', choices=['output_neuron', 'agents_distance'], default='output_neuron', help='Type of value to be used to calculate entropy')   ##
+    parser.add_argument('--entropy', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')   ##
+    parser.add_argument('--entropy_target_value', choices=['neural_outputs', 'agents_distance'], default='neural_outputs', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--dir', type=str, default='./data/tmp', help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of neurons in agent')    

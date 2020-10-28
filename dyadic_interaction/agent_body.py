@@ -98,7 +98,7 @@ class AgentBody:
             signal_strengths[i] = TotalSignal            
 
             self.timing.add_time('AB2-GVI_compute_inputs', t)
-        return signal_strengths, dist_centers
+        return signal_strengths
 
     def get_delta_xy(self):
         avg_displacement = np.mean(self.wheels)
