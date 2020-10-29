@@ -21,5 +21,8 @@ python -m dyadic_interaction.plot_results --dir data/shannon_entropy_test/tmp0 -
 # plot with ghost
 python -m dyadic_interaction.plot_results --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --ghost 0
 
-# rsync
+# rsync from georgina
+rsync -av deigo:/bucket/FroeseU/georgina/gitlab/* ./data/
+
+# rsync from fede only specific patters
 rsync -av --include="*/" --include="simulation.json" --include="evo_500.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/shannon_entropy ./data/
