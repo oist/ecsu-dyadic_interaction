@@ -18,7 +18,7 @@ tempdir=/flash/FroeseU/georgina/dyadic_exp_${num}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
-cd ~/Code/dyadic_interaction
+cd ~/gitlab/dyadic_interaction
 source env/bin/activate
 python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --cores 125 --seed $SLURM_ARRAY_TASK_ID --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
 
