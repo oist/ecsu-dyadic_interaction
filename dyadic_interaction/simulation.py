@@ -8,8 +8,10 @@ from numpy import pi as pi
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.neural_shannon_entropy import get_norm_entropy
-from dyadic_interaction.neural_transfer_entropy import get_transfer_entropy
+from dyadic_interaction.shannon_entropy import get_shannon_entropy_1d, get_shannon_entropy_2d, get_shannon_entropy_dd
+from dyadic_interaction.transfer_entropy import get_transfer_entropy
+from dyadic_interaction.entropy.entropy import _numba_sampen
+from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_STD
 from dyadic_interaction import utils
 from dataclasses import dataclass, field, asdict, fields
 from typing import Dict, Tuple, List
@@ -17,14 +19,15 @@ import json
 from pyevolver.json_numpy import NumpyListJsonEncoder
 from pyevolver.timing import Timing
 from numpy.random import RandomState
+from numpy.linalg import norm
 from joblib import Parallel, delayed
-import multiprocessing
 
 
 @dataclass
 class Simulation:
-    entropy_type: str = 'shannon' # 'shannon', 'transfer'
-    genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE)
+    entropy_type: str = 'shannon' # 'shannon', 'transfer', 'sample'
+    entropy_target_value: str = 'neural_outputs' # 'neural_outputs', 'agents_distance'
+    genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
     agent_body_radius: int = 4
     agents_pair_initial_distance: int = 20
@@ -36,10 +39,7 @@ class Simulation:
     data_noise_level: float = 1e-8
     timeit: bool = False
 
-    def __post_init__(self):  
-
-        assert self.entropy_type in ['shannon', 'transfer'], \
-            'entropy_type should be shannon or transfer'    
+    def __post_init__(self):          
 
         self.num_brain_neurons = gen_structure.get_num_brain_neurons(self.genotype_structure)
         self.num_data_points = int(self.trial_duration / self.brain_step_size)
@@ -49,6 +49,22 @@ class Simulation:
 
         self.timing = Timing(self.timeit)
 
+        self.__check_params__()
+
+    def __check_params__(self):
+        assert self.entropy_type in ['shannon', 'transfer', 'sample'], \
+            'entropy_type should be shannon or transfer'    
+
+        assert self.entropy_target_value in ['neural_outputs', 'agents_distance'], \
+            'entropy_type should be shannon or transfer'
+
+        if self.entropy_type == 'transfer':
+            assert self.entropy_target_value == 'neural_outputs' and self.num_brain_neurons == 2, \
+                'Transfer entropy currently works only on two dimensional data (i.e., 2 neural outputs per agent)'
+
+        if self.entropy_type == 'sample':  
+            assert self.entropy_target_value == 'agents_distance', \
+                'sample entropy applies only to 1d data (i.e. agents_distance)'
 
     def init_agents_pair(self):
         self.agents_pair_net = []
@@ -139,7 +155,7 @@ class Simulation:
     def compute_performance(self, genotypes_pair=None, rnd_seed=None, 
         data_record=None, ghost_index=None, original_data_record=None):
         '''
-        Main function to compute shannon/transfer entropy performace        
+        Main function to compute shannon/transfer/sample entropy entropy performace        
         '''
 
         tim = self.timing.init_tictoc()
@@ -153,19 +169,32 @@ class Simulation:
         emitter_agents = [None, None]
         prev_delta_xy_agents, prev_angle_agents = None, None # pylint: disable=W0612
 
-        # initialize agents brain output of all trial for computing entropy
-        # list of list (4 trials x 2 agents) each containing array (num_data_points,2)
-        agents_pair_brain_output_trials = [
-            [
-                np.zeros((self.num_data_points, 2)) 
-                for _ in range(2)
-            ] for _ in range(self.num_trials)
-        ]
+        # TODO: check entropy_target_values to see if we are interested in brain_outputs or distance
+        # and initialize variable accordingly
+
+
+        if self.entropy_target_value == 'neural_outputs':
+            # initialize agents brain output of all trial for computing entropy
+            # list of list (4 trials x 2 agents) each containing array (num_data_points,num_brain_neurons)
+            values_for_computing_entropy = [
+                [
+                    np.zeros((self.num_data_points, self.num_brain_neurons)) 
+                    for _ in range(2)
+                ] for _ in range(self.num_trials)
+            ]
+        else:
+            # entropy is computed based on distances
+            # 4 list (one per trial) with the agent distances
+            values_for_computing_entropy = [
+                np.zeros((self.num_data_points,1))
+                for _ in range(self.num_trials)
+            ]
 
         def init_data():
             if data_record is  None:                       
                 return
             data_record['position'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['distance'] = [None for _ in range(self.num_trials)]
             data_record['angle'] = [[None,None] for _ in range(self.num_trials)]
             data_record['delta_xy'] = [[None,None] for _ in range(self.num_trials)]
             data_record['signal_strength'] = [[None,None] for _ in range(self.num_trials)]
@@ -180,6 +209,7 @@ class Simulation:
         def init_data_trial(t):
             if data_record is None:            
                 return
+            data_record['distance'][t] = np.zeros(self.num_data_points)
             for a in range(2):
                 if ghost_index == a:
                     # copy all ghost agent's values from original_data_record
@@ -201,6 +231,7 @@ class Simulation:
         def save_data(t, i):
             if data_record is None: 
                 return
+            data_record['distance'][t][i] = get_agents_distance()
             for a in range(2):    
                 if ghost_index == a:                    
                     continue # do not save data for ghost: already saved in init_data_trial
@@ -238,18 +269,31 @@ class Simulation:
                     emitter_agents[a] = motor_outputs[1] # index 1: EMITTER
             self.timing.add_time('SIM_compute_motors_emitter', tim)
 
+        def get_agents_distance():
+            return max(
+                norm(self.agents_pair_body[0].position - self.agents_pair_body[1].position), 
+                2 * self.agent_body_radius
+            )
+
+        def store_values_for_entropy(t,i):
+            if self.entropy_target_value == 'neural_outputs': #neural outputs 
+                for a in [x for x in range(2) if x != ghost_index]:
+                    values_for_computing_entropy[t][a][i] = self.agents_pair_net[a].brain.output  
+            else: # agents_distance
+                values_for_computing_entropy[t][i] = get_agents_distance()
+                    
         def prepare_agents_for_trial(t):
             for a in range(2):
                 agent_net = self.agents_pair_net[a]
                 agent_body = self.agents_pair_body[a]
                 # reset params that are due to change during the experiment
                 agent_body.init_params(
-                    wheels = np.array([0., 0.]),
+                    wheels = np.zeros(2),
                     flag_collision = False
                 )
                 # set initial states to zeros
                 agent_net.init_params(
-                    brain_states = np.array([0., 0.]),
+                    brain_states = np.zeros(self.num_brain_neurons),
                 )
                 agent_pos = np.copy(self.agents_pair_start_pos_trials[t][a])
                 agent_angle = self.agents_pair_start_angle_trials[t][a]
@@ -259,7 +303,9 @@ class Simulation:
             # compute motor outpus    
             update_wheels_emitter_agents(t, 0)                          
             # compute signal streng
-            compute_signal_strength_agents()
+
+            store_values_for_entropy(t,0) #
+
             self.timing.add_time('SIM_prepare_agents_for_trials', tim)     
 
         def compute_brain_input_agents():
@@ -311,14 +357,13 @@ class Simulation:
             # INIT DATA for TRIAL
             init_data_trial(t)           
 
-            # 0) Save data at time 0
             save_data(t, 0)
 
             # TRIAL START
             for i in range(1, self.num_data_points):                
 
                 # 1) Agent senses strength of emitter from the two sensors
-                compute_signal_strength_agents()
+                compute_signal_strength_agents() # deletece dist_centers
 
                 # 2) compute brain input
                 compute_brain_input_agents()
@@ -327,27 +372,27 @@ class Simulation:
                 compute_brain_euler_step_agents()
 
                 # 4) Agent updates wheels and  emitter
-                update_wheels_emitter_agents(t,i)
+                update_wheels_emitter_agents(t,i)                            
 
-                # 5) Store brain outputs
-                for a in [x for x in range(2) if x != ghost_index]:              
-                    agents_pair_brain_output_trials[t][a][i,:] = self.agents_pair_net[a].brain.output                        
-
-                # 6) Move one step  agents
+                # 5) Move one step  agents
                 move_one_step_agents()
+
+                # 6) Store the values for computing entropy
+                store_values_for_entropy(t,i)  # deletece dist_centers
 
                 save_data(t, i)             
 
             # TRIAL END
 
             if self.entropy_type=='transfer':
+                # it only applies to neural_outputs (with 2 neurons)
                 # add random noise to data before calculating transfer entropy
                 for a in range(2):
                     if ghost_index == a:
                         continue
                     rs = RandomState(rnd_seed)
-                    agents_pair_brain_output_trials[t][a] = utils.add_noise(
-                        agents_pair_brain_output_trials[t][a], 
+                    values_for_computing_entropy[t][a] = utils.add_noise(
+                        values_for_computing_entropy[t][a], 
                         rs, 
                         noise_level=self.data_noise_level
                     )
@@ -355,41 +400,44 @@ class Simulation:
                 # calculate performance        
                 # TODO: understand what happens if reciprocal=False
                 performance_agent_AB = ([               
-                    get_transfer_entropy(agents_pair_brain_output_trials[t][a], binning=True) 
+                    get_transfer_entropy(values_for_computing_entropy[t][a], binning=True) 
                     for a in range(2) if a != ghost_index
                 ])
 
-                agents_perf = np.mean(performance_agent_AB)
+            elif self.entropy_type=='shannon':
+                if self.entropy_target_value == 'agents_distance':
+                    min_v, max_v= 0., 100.
+                    performance_agent_AB = ([
+                        get_shannon_entropy_dd(values_for_computing_entropy[t], min_v, max_v)
+                    ])
+                else: # neural_outputs
+                    min_v, max_v= 0., 1.
+                    performance_agent_AB = ([
+                        get_shannon_entropy_dd(values_for_computing_entropy[t][a], min_v, max_v)
+                        for a in range(2) if a != ghost_index
+                    ])
+            
+            else:
+                # sample entropy
+                # only applies to 1d data (i.e., the agents distance)
+                mean = values_for_computing_entropy[t].mean()
+                std = values_for_computing_entropy[t].std()
+                normalize_values = (values_for_computing_entropy[t] - mean) / std
+                performance_agent_AB = [
+                    _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_STD))
+                ]
 
-                # appending mean performance between two agents in trial_performances
-                trial_performances.append(agents_perf)
+            agents_perf = np.mean(performance_agent_AB)
 
-                self.timing.add_time('SIM_compute_performace', tim)
+            # appending mean performance between two agents in trial_performances
+            trial_performances.append(agents_perf)
+
+            self.timing.add_time('SIM_compute_performace', tim)
 
         # EXPERIMENT END
 
-        if self.entropy_type=='shannon':
-            # concatenate data from all trials
-            # resulting in a list of 2 elements (agents) each having num_trials * num_data_points
-            agents_pair_brain_output_concat = [
-                np.concatenate([
-                    agents_pair_brain_output_trials[t][a]
-                    for t in range(4)
-                ])
-                for a in range(2) if a != ghost_index
-            ]
-            # calculate performance         
-            performance_agent_AB = ([
-                get_norm_entropy(agents_brain_output_concat)
-                for agents_brain_output_concat in agents_pair_brain_output_concat
-            ])
-            avg_performance = np.mean([performance_agent_AB])
-            self.timing.add_time('SIM_compute_performace', tim)
-            return avg_performance
-        else: 
-            # transfer entropy:
-            # returning mean performances between all trials
-            return np.mean(trial_performances)
+        # returning mean performances between all trials
+        return np.mean(trial_performances)
 
     '''
     POPULATION EVALUATION FUNCTION
@@ -400,9 +448,6 @@ class Simulation:
 
         if self.num_cores > 1:
             # run parallel job
-            assert population_size % self.num_cores == 0, \
-                "Population size ({}) must be a multiple of num_cores ({})".format(
-                    population_size, self.num_cores)
 
             sim_array = [Simulation(**asdict(self)) for _ in range(self.num_cores)]
             performances = Parallel(n_jobs=self.num_cores)( # prefer="threads" does not work
@@ -411,6 +456,7 @@ class Simulation:
             )
 
         else:
+            # single core
             performances = [
                 self.compute_performance(genotype, rnd_seed)
                 for genotype, rnd_seed in zip(population, random_seeds)

@@ -236,10 +236,10 @@ def plot_activity(data_record, to_plot):
         ax4.spines["right"].set_visible(False)
         ax4.spines["bottom"].set_visible(True)
 
-    # plt.show()
+    plt.show()
     # plt.savefig('plots/shannon_activity.eps', format='eps')
     # plt.savefig('plots/transfer_activity.eps', format='eps')
-    plt.savefig('plots/transfer_activity_bin.eps', format='eps')
+    # plt.savefig('plots/transfer_activity_bin.eps', format='eps')
 
 
 def plot_inputs(data_record):
@@ -307,11 +307,11 @@ def plot_simultation_results(evo, data_record):
     # plot_angles(data_record)
     # plot_norm_x(data_record)
     plot_behavior(data_record)
-    # plot_activity(data_record)    
-    # plot_signal(data_record)
+    plot_activity(data_record, 'all')    
+    plot_signal(data_record)
     # plot_inputs(data_record)
-    # plot_motor_output(data_record)
-    # plot_emitters(data_record)
+    plot_motor_output(data_record)
+    plot_emitters(data_record)
     # plot_motor_output(data_record)
     # plot_performances(evo)
     # plot_behavior(data_record, '1')
@@ -323,7 +323,7 @@ def plot_simultation_results(evo, data_record):
 
 
 def plot_random_simulation_results():
-    genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
+    genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE(2)
     gen_size = gen_structure.get_genotype_size(genotype_structure)
     random_genotype = Evolution.get_random_genotype(RandomState(None),
                                                     gen_size * 2)  # pairs of agents in a single genotype

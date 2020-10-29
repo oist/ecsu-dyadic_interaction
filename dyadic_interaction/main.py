@@ -7,7 +7,7 @@ import sys
 from joblib import Parallel, delayed
 from dyadic_interaction import gen_structure
 from dyadic_interaction.simulation import Simulation
-from dyadic_interaction import neural_transfer_entropy
+from dyadic_interaction import transfer_entropy
 from pyevolver.evolution import Evolution
 import numpy as np
 from numpy.random import RandomState
@@ -15,18 +15,19 @@ from pyevolver import utils
 import argparse
 from pytictoc import TicToc
 
-def run_experiment(seed, entropy_type, folder_path, num_cores, performance_objective,
-    population_size=96, max_generation=500, trial_duration=200):
+def run_experiment(seed, entropy_type, entropy_target_value, folder_path, num_cores, performance_objective,
+    num_neurons=2, population_size=96, max_generation=500, trial_duration=200): ##
 
     random_seed = seed
 
-    genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE
+    genotype_structure = gen_structure.DEFAULT_GEN_STRUCTURE(num_neurons)
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
 
     utils.make_dir_if_not_exists(folder_path)
 
     sim = Simulation(
         entropy_type = entropy_type,
+        entropy_target_value = entropy_target_value,
         genotype_structure = genotype_structure,
         agent_body_radius = 4,
         agents_pair_initial_distance = 20,
@@ -64,7 +65,7 @@ def run_experiment(seed, entropy_type, folder_path, num_cores, performance_objec
 
     if entropy_type == 'transfer':
         # shutdown JVM
-        neural_transfer_entropy.shutdown_JVM()
+        transfer_entropy.shutdown_JVM() 
 
 
 if __name__ == "__main__":
@@ -74,9 +75,11 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
-    parser.add_argument('--entropy', choices=['shannon', 'transfer'], default='shannon', help='Type of entropy measure to use')    
+    parser.add_argument('--entropy', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')   ##
+    parser.add_argument('--entropy_target_value', choices=['neural_outputs', 'agents_distance'], default='neural_outputs', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--dir', type=str, default='./data/tmp', help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
+    parser.add_argument('--num_neurons', type=int, default=2, help='Number of neurons in agent')    
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    
     parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
     parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
@@ -87,7 +90,8 @@ if __name__ == "__main__":
     t = TicToc()
     t.tic()
 
-    run_experiment(args.seed, args.entropy, args.dir, args.cores, args.perf_obj,
-        args.popsize, args.num_gen, args.trial_duration)
+    run_experiment(args.seed, args.entropy, args.entropy_target_value, 
+        args.dir, args.cores, args.perf_obj,
+        args.num_neurons, args.popsize, args.num_gen, args.trial_duration) ##
 
     print('Ellapsed time: {}'.format(t.tocvalue()))

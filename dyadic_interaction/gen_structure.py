@@ -77,7 +77,7 @@ def save_genotype_structure(genotype_structure, json_filepath):
 
 
 
-DEFAULT_GEN_STRUCTURE = load_genotype_structure('config/genotype_structure.json')
+DEFAULT_GEN_STRUCTURE = lambda x: load_genotype_structure('config/genotype_structure_{}n.json'.format(x))
 
 if __name__ == "__main__":
     print("Size: {}".format(get_genotype_size(DEFAULT_GEN_STRUCTURE)))

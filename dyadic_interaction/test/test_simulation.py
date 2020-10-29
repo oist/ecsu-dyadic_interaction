@@ -5,7 +5,7 @@ from dyadic_interaction import utils
 from dyadic_interaction.agent_network import AgentNetwork
 import json
 
-GEORGINA_GEN_STRUCTURE = gen_structure.load_genotype_structure('config/georgina_genotype_structure.json')
+GEORGINA_GEN_STRUCTURE = gen_structure.load_genotype_structure('config/genotype_structure_2n.json')
 
 '''
 Check the performance are reproducible with the same Simulation object

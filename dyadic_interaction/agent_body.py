@@ -71,20 +71,21 @@ class AgentBody:
 
         t = self.timing.init_tictoc()
 
-        visual_inputs = [0, 0]
+        signal_strengths = [0, 0]
         # print()
         # print("Emitter position: {}".format(emitter_position))
         self.timing.add_time('AB2-GVI_emitter_pos', t)
+
+        dist_centers = max(norm(self.position - emitter_position), 2 * self.agent_body_radius)
 
         for i, sp in enumerate(self.get_abs_sensors_pos()):
             self.timing.add_time('AB2-GVI_emitter_translated_angle', t)
             # print("SENSOR POSITION {}: {}".format(i+1, sp))
             self.timing.add_time('AB2-GVI_check_in_vision', t)
             # TODO: check the following
-            dist_sensor_emitter = norm(sp - emitter_position)            
+            dist_sensor_emitter = max(norm(sp - emitter_position),  self.agent_body_radius)           
             N = dist_sensor_emitter / self.agent_body_radius
-            Is = emitter_strenght / np.power(N - 1, 2)
-            dist_centers = norm(self.position - emitter_position)
+            Is = emitter_strenght / np.power(N, 2)
             self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
             pow_D_centers = np.power(dist_centers,2)
             pow_Radius = np.power(self.agent_body_radius,2)
@@ -94,10 +95,10 @@ class AgentBody:
             AttenuationFactor = (-0.1125 * Dsh) + 1
             TotalSignal = Is * AttenuationFactor
             # print("emitter signal to sensor {}: {}".format(i+1, TotalSignal))
-            visual_inputs[i] = TotalSignal            
+            signal_strengths[i] = TotalSignal            
 
             self.timing.add_time('AB2-GVI_compute_inputs', t)
-        return visual_inputs
+        return signal_strengths
 
     def get_delta_xy(self):
         avg_displacement = np.mean(self.wheels)
