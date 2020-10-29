@@ -21,8 +21,8 @@ tempdir=/flash/FroeseU/georgina/dyadic_exp_1
 cd ~/Code/dyadic_interaction
 source env/bin/activate
 # ruse
-# python -m dyadic_interaction.main --entropy shannon --dir $tempdir --seed 1 --cores 96
-python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed 1 --cores 96 --perf_obj MAX
+python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --cores 125 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
+
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
