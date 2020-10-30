@@ -13,8 +13,8 @@ module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
-num=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/fede/dyadic_exp_${num}
+seed=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
+tempdir=/flash/FroeseU/fede/seed_${seed}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
