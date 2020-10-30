@@ -20,8 +20,8 @@ tempdir=/flash/FroeseU/fede/seed_${seed}
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
 source env/bin/activate
-# python -m dyadic_interaction.main --entropy shannon --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96
-python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96 --perf_obj MAX
+python -m dyadic_interaction.main --entropy shannon --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96
+# python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96 --perf_obj MAX
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
