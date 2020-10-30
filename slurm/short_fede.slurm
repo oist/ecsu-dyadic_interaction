@@ -26,7 +26,7 @@ cd ~/Code/dyadic_interaction
 source env/bin/activate
 
 # ruse
-python -m dyadic_interaction.main --entropy shannon --dir $tempdir --seed {$seed} --cores 96
+python -m dyadic_interaction.main --entropy shannon --dir $tempdir --seed {$seed} --cores 96 --num_gen 2000
 # python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed {$seed} --cores 96
 
 # copy our result back to Bucket. We use "scp" to copy the data 
