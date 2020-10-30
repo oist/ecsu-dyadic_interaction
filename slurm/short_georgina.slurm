@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --partition=short
-#SBATCH --time=1:00:00
+#SBATCH --time=2:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --mem=500G
 #SBATCH --cpus-per-task=128
@@ -21,7 +21,8 @@ tempdir=/flash/FroeseU/georgina/dyadic_exp_1
 cd ~/gitlab/dyadic_interaction
 source env/bin/activate
 # ruse
-python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --cores 125 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
+#python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --cores 96 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
+python -m dyadic_interaction.main --dir $tempdir --entropy shannon --entropy_target_value neural_outputs --cores 96 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
 
 
 # copy our result back to Bucket. We use "scp" to copy the data 
