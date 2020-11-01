@@ -36,7 +36,7 @@ python -m dyadic_interaction.main \
 --seed ${seed} \
 --num_neurons=2 \
 --popsize 96 \
---num_gen 2000 \
+--num_gen 500 \
 --trial_duration 200
 
 # copy our result back to Bucket. We use "scp" to copy the data 

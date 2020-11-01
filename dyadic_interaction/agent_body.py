@@ -77,9 +77,11 @@ class AgentBody:
         # print("Emitter position: {}".format(emitter_position))
         self.timing.add_time('AB2-GVI_emitter_pos', t)
 
-        dist_centers = max(norm(self.position - emitter_position), 2 * self.agent_body_radius)
+        dist_centers = norm(self.position - emitter_position)
         if self.collision_type == 'edge_bounded':
             dist_centers = max(dist_centers, 2 * self.agent_body_radius)
+        self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
+        pow_D_centers = np.power(dist_centers,2)
 
         for i, sp in enumerate(self.get_abs_sensors_pos()):
             self.timing.add_time('AB2-GVI_emitter_translated_angle', t)
@@ -92,9 +94,7 @@ class AgentBody:
             N = dist_sensor_emitter / self.agent_body_radius
             if self.collision_type == 'overlapping':
                 N -= 1 # as in the original version
-            Is = emitter_strenght / np.power(N, 2)
-            self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
-            pow_D_centers = np.power(dist_centers,2)
+            Is = emitter_strenght / np.power(N, 2)            
             pow_Radius = np.power(self.agent_body_radius,2)
             pow_Dsen = np.power(dist_sensor_emitter,2)
             A = (pow_D_centers - pow_Radius)/pow_Dsen                        
