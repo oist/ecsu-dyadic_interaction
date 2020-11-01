@@ -280,7 +280,7 @@ class Simulation:
             self.timing.add_time('SIM_compute_motors_emitter', tim)
 
         def get_agents_distance():
-            dist = self.agents_pair_body[0].position - self.agents_pair_body[1].position
+            dist = norm(self.agents_pair_body[0].position - self.agents_pair_body[1].position)
             if self.collision_type=='edge_bounded':
                 dist = max(dist, 2 * self.agent_body_radius)
             return dist

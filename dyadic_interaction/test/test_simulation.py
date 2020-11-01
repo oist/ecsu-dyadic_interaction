@@ -76,11 +76,13 @@ def test_data(entropy_type):
 
     sim = Simulation(
         entropy_type=entropy_type,
+        entropy_target_value='neural_outputs',
+        concatenate=True,
         genotype_structure=GEORGINA_GEN_STRUCTURE,
         num_cores=1
     )
 
-    utils.make_dir_if_not_exists('data/test/')
+    utils.make_dir_if_not_exists('data/master/')
 
     data_record = {}
     perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
@@ -89,7 +91,7 @@ def test_data(entropy_type):
     # t = 0    
         for k,v in data_record.items():
             for a in range(2):
-                utils.save_numpy_data(v[t][a], 'data/test/{}_{}_{}.json'.format(k,t+1,a+1))
+                utils.save_numpy_data(v[t][a], 'data/master/{}_{}_{}.json'.format(k,t+1,a+1))
 
 
 def test_visual(entropy_type):
