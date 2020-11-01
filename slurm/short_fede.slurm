@@ -26,7 +26,7 @@ cd ~/Code/dyadic_interaction
 source env/bin/activate
 
 # ruse
-python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --collision_type overlapping --cores 96 --seed $SLURM_ARRAY_TASK_ID --num_neurons=2 --popsize 96 --num_gen 500 --trial_duration 200
+python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --collision_type overlapping --cores 96 --seed ${seed} --num_neurons=2 --popsize 96 --num_gen 500 --trial_duration 200
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
