@@ -27,7 +27,7 @@ from joblib import Parallel, delayed
 class Simulation:
     entropy_type: str = 'shannon' # 'shannon', 'transfer', 'sample'
     entropy_target_value: str = 'neural_outputs' # 'neural_outputs', 'agents_distance'
-    concatenate: bool = False # whether to concatenate values in entropy_target_value
+    concatenate: bool = True # whether to concatenate values in entropy_target_value
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
     collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge_bounded'
