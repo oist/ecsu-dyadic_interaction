@@ -62,6 +62,10 @@ class Simulation:
         assert self.entropy_target_value in ['neural_outputs', 'agents_distance'], \
             'entropy_type should be shannon or transfer'
 
+        if self.entropy_type == 'shannon':
+            assert self.entropy_target_value == 'neural_outputs', \
+                'Shannon entropy currently works only on neural outputs'
+
         if self.entropy_type == 'transfer':
             assert self.entropy_target_value == 'neural_outputs' and self.num_brain_neurons == 2, \
                 'Transfer entropy currently works only on two dimensional data (i.e., 2 neural outputs per agent)'
