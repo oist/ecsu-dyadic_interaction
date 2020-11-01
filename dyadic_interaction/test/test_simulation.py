@@ -80,6 +80,8 @@ def test_data(entropy_type):
         num_cores=1
     )
 
+    utils.make_dir_if_not_exists('data/test/')
+
     data_record = {}
     perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
     print('Performance: {}'.format(perf))

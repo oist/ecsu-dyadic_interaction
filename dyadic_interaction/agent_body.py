@@ -27,6 +27,7 @@ class AgentBody:
     position: list = None
     angle: float = None
     wheels: np.ndarray = field(default_factory=lambda: np.array([0., 0.]))  # wheel displacement at next step
+    collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge_bounded'
     flag_collision: float = False
     timeit: bool = False
 
@@ -77,14 +78,20 @@ class AgentBody:
         self.timing.add_time('AB2-GVI_emitter_pos', t)
 
         dist_centers = max(norm(self.position - emitter_position), 2 * self.agent_body_radius)
+        if self.collision_type == 'edge_bounded':
+            dist_centers = max(dist_centers, 2 * self.agent_body_radius)
 
         for i, sp in enumerate(self.get_abs_sensors_pos()):
             self.timing.add_time('AB2-GVI_emitter_translated_angle', t)
             # print("SENSOR POSITION {}: {}".format(i+1, sp))
             self.timing.add_time('AB2-GVI_check_in_vision', t)
             # TODO: check the following
-            dist_sensor_emitter = max(norm(sp - emitter_position),  self.agent_body_radius)           
+            dist_sensor_emitter = norm(sp - emitter_position)
+            if self.collision_type == 'edge_bounded':
+                dist_sensor_emitter = max(dist_sensor_emitter,  self.agent_body_radius)           
             N = dist_sensor_emitter / self.agent_body_radius
+            if self.collision_type == 'overlapping':
+                N -= 1 # as in the original version
             Is = emitter_strenght / np.power(N, 2)
             self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
             pow_D_centers = np.power(dist_centers,2)
@@ -109,7 +116,7 @@ class AgentBody:
     # see equation 6 in http://rossum.sourceforge.net/papers/DiffSteer/#d6
     def move_one_step(self, other_delta_xy, other_angle):
 
-        if self.flag_collision:
+        if self.collision_type != 'none' and self.flag_collision:
             # if self.flag_collision:
             #     print("Collision!")
             self.position += other_delta_xy

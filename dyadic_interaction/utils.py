@@ -5,6 +5,7 @@ TODO: Missing module docstring
 import string
 import numpy as np
 from numpy import pi
+import os
 
 # CONSTANTS
 TWO_PI = 2 * pi
@@ -80,3 +81,8 @@ def random_int(random_state=None, size=None):
     else:
         return random_state.randint(0, 2 ** 32 - 1, size)
     
+def make_dir_if_not_exists(dir_path):
+    if os.path.exists(dir_path):
+        assert os.path.isdir(dir_path), 'Path {} is not a directory'.format(dir_path)
+        return
+    os.makedirs(dir_path)

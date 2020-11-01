@@ -302,7 +302,7 @@ def plot_emitters(data_record):
 
 def plot_simultation_results(evo, data_record):
     
-    # plot_performances(evo)
+    plot_performances(evo)
     # plot_activity_scatter(data_record)
     # plot_angles(data_record)
     # plot_norm_x(data_record)

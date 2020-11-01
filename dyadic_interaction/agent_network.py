@@ -127,10 +127,20 @@ class AgentNetwork:
                     i += 1
     
     def compute_brain_input(self, signal_strength):
+        # let n be the number of neurons in the brain
+        # sensor_output shape is (2, ): [O1, O2]        
+        # sensor_weights shape is (2, n): [[W11,W12, ..., W1n],[W21,W22, ..., W2n]]
+        # np.dot(sensor_output, sensor_weights) returns a vector of shape (n,): (2,)·(2,n) = (n,)
+        # [O1·W11+O2·W21, O1·W12+O2·W22, ..., O1·W1n+O2·W2n]        
         sensor_outputs = np.multiply(self.sensor_gains, expit(signal_strength + self.sensor_biases))  # [o1, o2]
-        self.brain.input = np.dot(sensor_outputs, self.sensor_weights)  # [1,2]·[2,n] = [1,n] where n is the number of neurons
+        self.brain.input = np.dot(sensor_outputs, self.sensor_weights)          
 
     def compute_motor_outputs(self):
+        # let n be the number of neurons in the brain
+        # brain_outputs shape is (n, ): [O1, O2, ..., On]        
+        # motor_weights shape is (num_neurons=n, 3): [[W11,W12,W13],[W21,W22,W23],...,[Wn1,Wn2,Wn3]]
+        # np.dot(brain_output, motor_weights) returns a vector of shape (3,): (n,)·(n,3) = (3,)
+        # [O1·W11 + O2·W21 + ... + On·Wn1, O1·W12 + O2·W22 + ... + On·Wn2, O1·W13 + O2·W23 + ... + On·Wn3]
         self.motors_outputs = np.multiply(
             self.motor_gains,
             expit(np.dot(self.brain.output, self.motor_weights) + self.motor_biases)

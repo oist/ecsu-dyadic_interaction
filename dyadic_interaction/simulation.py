@@ -29,6 +29,7 @@ class Simulation:
     entropy_target_value: str = 'neural_outputs' # 'neural_outputs', 'agents_distance'
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
+    collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge_bounded'
     agent_body_radius: int = 4
     agents_pair_initial_distance: int = 20
     agent_sensors_divergence_angle: float = np.radians(45)  # angle between sensors and axes of symmetry
@@ -52,6 +53,9 @@ class Simulation:
         self.__check_params__()
 
     def __check_params__(self):
+        assert self.collision_type in ['none', 'overlapping', 'edge_bounded'], \
+            "collision_type should be one of ['none', 'overlapping', 'edge_bounded']"
+
         assert self.entropy_type in ['shannon', 'transfer', 'sample'], \
             'entropy_type should be shannon or transfer'    
 
@@ -81,6 +85,7 @@ class Simulation:
                 AgentBody(
                     self.agent_body_radius,
                     self.agent_sensors_divergence_angle,
+                    collision_type=self.collision_type,
                     timeit = self.timeit
                 )
             )
@@ -270,10 +275,10 @@ class Simulation:
             self.timing.add_time('SIM_compute_motors_emitter', tim)
 
         def get_agents_distance():
-            return max(
-                norm(self.agents_pair_body[0].position - self.agents_pair_body[1].position), 
-                2 * self.agent_body_radius
-            )
+            dist = self.agents_pair_body[0].position - self.agents_pair_body[1].position
+            if self.collision_type=='edge_bounded':
+                dist = max(dist, 2 * self.agent_body_radius)
+            return dist
 
         def store_values_for_entropy(t,i):
             if self.entropy_target_value == 'neural_outputs': #neural outputs 
