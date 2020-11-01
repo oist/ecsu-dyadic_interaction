@@ -24,6 +24,7 @@ if __name__ == "__main__":
     parser.add_argument('--entropy', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')
     parser.add_argument('--entropy_target_value', choices=['neural_outputs', 'agents_distance'], default='neural_outputs', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge_bounded'], default='overlapping', help='Type of collison')
+    parser.add_argument('--concatenate', choices=['on', 'off'], default='off', help='Whether values are concatenated across trials')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of neurons in agent')    
@@ -46,6 +47,7 @@ if __name__ == "__main__":
     sim = Simulation(
         entropy_type = args.entropy,
         entropy_target_value = args.entropy_target_value,
+        concatenate=args.concatenate=='on',
         collision_type=args.collision_type,
         genotype_structure = genotype_structure,
         agent_body_radius = 4,

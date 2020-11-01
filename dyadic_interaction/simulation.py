@@ -27,6 +27,7 @@ from joblib import Parallel, delayed
 class Simulation:
     entropy_type: str = 'shannon' # 'shannon', 'transfer', 'sample'
     entropy_target_value: str = 'neural_outputs' # 'neural_outputs', 'agents_distance'
+    concatenate: bool = False # whether to concatenate values in entropy_target_value
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
     collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge_bounded'
@@ -392,46 +393,81 @@ class Simulation:
                 save_data(t, i)             
 
             # TRIAL END
+            if self.concatenate and t!=3:
+                continue
 
             if self.entropy_type=='transfer':
                 # it only applies to neural_outputs (with 2 neurons)
                 # add random noise to data before calculating transfer entropy
+                performance_agent_AB = []
                 for a in range(2):
                     if ghost_index == a:
                         continue
                     rs = RandomState(rnd_seed)
-                    values_for_computing_entropy[t][a] = utils.add_noise(
-                        values_for_computing_entropy[t][a], 
+                    
+                    if self.concatenate:
+                        all_values_for_computing_entropy = np.concatenate([
+                            values_for_computing_entropy[t][a]
+                            for t in range(self.num_trials)
+                        ])
+                    else:
+                        all_values_for_computing_entropy = values_for_computing_entropy[t][a]
+                     
+                    all_values_for_computing_entropy = utils.add_noise(
+                        all_values_for_computing_entropy, 
                         rs, 
                         noise_level=self.data_noise_level
                     )
 
-                # calculate performance        
-                # TODO: understand what happens if reciprocal=False
-                performance_agent_AB = ([               
-                    get_transfer_entropy(values_for_computing_entropy[t][a], binning=True) 
-                    for a in range(2) if a != ghost_index
-                ])
+                    # calculate performance        
+                    # TODO: understand what happens if reciprocal=False
+                    performance_agent_AB.append(
+                        get_transfer_entropy(all_values_for_computing_entropy, binning=True) 
+                    )
 
             elif self.entropy_type=='shannon':
                 if self.entropy_target_value == 'agents_distance':
+                    if self.concatenate:
+                        all_values_for_computing_entropy = np.concatenate([
+                            values_for_computing_entropy[t]
+                            for t in range(self.num_trials)
+                        ])
+                    else:
+                        all_values_for_computing_entropy = values_for_computing_entropy[t]
                     min_v, max_v= 0., 100.
                     performance_agent_AB = ([
-                        get_shannon_entropy_dd(values_for_computing_entropy[t], min_v, max_v)
+                        get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
                     ])
                 else: # neural_outputs
                     min_v, max_v= 0., 1.
-                    performance_agent_AB = ([
-                        get_shannon_entropy_dd(values_for_computing_entropy[t][a], min_v, max_v)
-                        for a in range(2) if a != ghost_index
-                    ])
+                    performance_agent_AB = []
+                    for a in range(2):
+                        if ghost_index == a:
+                            continue
+                        if self.concatenate:
+                            all_values_for_computing_entropy = np.concatenate([
+                                values_for_computing_entropy[t][a]
+                                for t in range(self.num_trials)
+                            ])
+                        else:
+                            all_values_for_computing_entropy = values_for_computing_entropy[t][a]
+                        performance_agent_AB.append(
+                            get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)                        
+                        )
             
             else:
                 # sample entropy
                 # only applies to 1d data (i.e., the agents distance)
-                mean = values_for_computing_entropy[t].mean()
-                std = values_for_computing_entropy[t].std()
-                normalize_values = (values_for_computing_entropy[t] - mean) / std
+                if self.concatenate:
+                    all_values_for_computing_entropy = np.concatenate([
+                        values_for_computing_entropy[t]
+                        for t in range(self.num_trials)
+                    ])
+                else:
+                    all_values_for_computing_entropy = values_for_computing_entropy[t]
+                mean = all_values_for_computing_entropy.mean()
+                std = all_values_for_computing_entropy.std()
+                normalize_values = (all_values_for_computing_entropy - mean) / std
                 performance_agent_AB = [
                     _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_STD))
                 ]

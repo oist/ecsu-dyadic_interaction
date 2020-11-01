@@ -30,6 +30,7 @@ python -m dyadic_interaction.main \
 --dir $tempdir \
 --entropy shannon \
 --entropy_target_value neural_outputs \
+--concatenate on \
 --collision_type overlapping \
 --cores 96 \
 --seed ${seed} \

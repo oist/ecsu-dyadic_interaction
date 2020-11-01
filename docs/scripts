@@ -1,5 +1,5 @@
 # test shannon entropy, 2 neuron, neural output
-python -m dyadic_interaction.main --dir ./data/shannon_test/seed_1 --entropy shannon --entropy_target_value neural_outputs --collision_type overlapping --cores 5 --seed 1 --num_neurons=2 --popsize 40 --num_gen 10 --trial_duration 20
+python -m dyadic_interaction.main --dir ./data/shannon_test/seed_1 --entropy shannon --entropy_target_value neural_outputs --concatenate on --collision_type overlapping --cores 5 --seed 1 --num_neurons=2 --popsize 20 --num_gen 10 --trial_duration 20
 
 # test shannon entropy, 3 neuron, neural output
 python -m dyadic_interaction.main --dir ./data/shannon_entropy_test/3n_neural --entropy shannon --entropy_target_value neural_outputs --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
