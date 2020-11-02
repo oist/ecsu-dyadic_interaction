@@ -34,7 +34,7 @@ python -m dyadic_interaction.main \
 --collision_type overlapping \
 --cores 96 \
 --seed ${seed} \
---num_neurons=2 \
+--num_neurons 2 \
 --popsize 96 \
 --num_gen 500 \
 --trial_duration 200
