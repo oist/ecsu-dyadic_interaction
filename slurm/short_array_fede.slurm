@@ -13,8 +13,8 @@ module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
-seed=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/fede/seed_${seed}
+# seed=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
+tempdir=/flash/FroeseU/fede
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
@@ -37,7 +37,7 @@ python -m dyadic_interaction.main \
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
-rsync -avq $tempdir deigo:/bucket/FroeseU/fede/tmp_exp/
+rsync -avq $tempdir deigo:/bucket/FroeseU/fede/dyadic_interaction
 
 # Clean up by removing our temporary directory
 rm -r $tempdir

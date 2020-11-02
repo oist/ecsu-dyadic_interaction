@@ -23,7 +23,7 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
     parser.add_argument('--entropy_type', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')
     parser.add_argument('--entropy_target_value', choices=['neural_outputs', 'agents_distance'], default='neural_outputs', help='Type of value to be used to calculate entropy')   ##
-    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge_bounded'], default='overlapping', help='Type of collison')
+    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default='overlapping', help='Type of collison')
     parser.add_argument('--concatenate', choices=['on', 'off'], default='on', help='Whether values are concatenated across trials')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
@@ -42,8 +42,14 @@ if __name__ == "__main__":
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
 
     if args.dir is not None:
-        utils.make_dir_if_not_exists(args.dir)
-
+        subdir = '{}n_{}_{}'.format(args.num_neurons, args.entropy_type, args.entropy_target_value)
+        subsubdir = 'concat-{}_collision-{}'.format(args.concatenate, args.collision_type)
+        seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
+        outdir = os.path.join(args.dir,subdir,subsubdir,seed_dir)
+        utils.make_dir_if_not_exists(outdir)
+    else:
+        outdir = None
+        
     sim = Simulation(
         entropy_type = args.entropy_type,
         entropy_target_value = args.entropy_target_value,
@@ -58,9 +64,10 @@ if __name__ == "__main__":
         num_cores = args.cores     
     )
 
-    if args.dir is not None:
-        sim_config_json = os.path.join(args.dir, 'simulation.json')
+    if args.dir is not None:        
+        sim_config_json = os.path.join(outdir, 'simulation.json')
         sim.save_to_file(sim_config_json)
+    
 
     evo = Evolution(
         random_seed=args.seed,
@@ -78,7 +85,7 @@ if __name__ == "__main__":
         crossover_probability=0.1,
         crossover_mode='UNIFORM',
         crossover_points= None, #genotype_structure['crossover_points'],
-        folder_path=args.dir,
+        folder_path=outdir,
         max_generation=args.num_gen,
         termination_function=None,
         checkpoint_interval=np.ceil(args.num_gen/100),

@@ -30,7 +30,7 @@ class Simulation:
     concatenate: bool = True # whether to concatenate values in entropy_target_value
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
-    collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge_bounded'
+    collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge'
     agent_body_radius: int = 4
     agents_pair_initial_distance: int = 20
     agent_sensors_divergence_angle: float = np.radians(45)  # angle between sensors and axes of symmetry
@@ -54,8 +54,8 @@ class Simulation:
         self.__check_params__()
 
     def __check_params__(self):
-        assert self.collision_type in ['none', 'overlapping', 'edge_bounded'], \
-            "collision_type should be one of ['none', 'overlapping', 'edge_bounded']"
+        assert self.collision_type in ['none', 'overlapping', 'edge'], \
+            "collision_type should be one of ['none', 'overlapping', 'edge']"
 
         assert self.entropy_type in ['shannon', 'transfer', 'sample'], \
             'entropy_type should be shannon or transfer'    
@@ -281,7 +281,7 @@ class Simulation:
 
         def get_agents_distance():
             dist = norm(self.agents_pair_body[0].position - self.agents_pair_body[1].position)
-            if self.collision_type=='edge_bounded':
+            if self.collision_type=='edge':
                 dist = max(dist, 2 * self.agent_body_radius)
             return dist
 
@@ -600,7 +600,7 @@ def get_argparse():
     parser.add_argument('--entropy_type', type=str, choices=['shannon', 'transfer', 'sample'], default=None, help='Whether to change the entropy_type')
     parser.add_argument('--entropy_target_value', type=str, default=None, help='To change the entropy_target_value')    
     parser.add_argument('--concatenate', choices=['on', 'off'], default=None, help='To change the concatenation')
-    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge_bounded'], default=None, help='To change the type of collison')
+    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default=None, help='To change the type of collison')
     parser.add_argument('--initial_distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
     parser.add_argument('--ghost_index', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
     parser.add_argument('--outdir', type=str, default=None, help='Directory where to save the data')
