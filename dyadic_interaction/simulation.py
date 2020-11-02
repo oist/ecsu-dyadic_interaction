@@ -435,7 +435,7 @@ class Simulation:
                     else:
                         all_values_for_computing_entropy = values_for_computing_entropy[t]
                     min_v, max_v= 0., 100.
-                    performance_agent_AB = ([
+                    performance_agent_AB = ([                        
                         get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
                     ])
                 else: # neural_outputs
@@ -452,7 +452,8 @@ class Simulation:
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
                         performance_agent_AB.append(
-                            get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)                        
+                            get_shannon_entropy_2d(all_values_for_computing_entropy, min_v, max_v)
+                            # get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
                         )
             
             else:
