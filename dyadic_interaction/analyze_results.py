@@ -2,14 +2,19 @@ import os
 import json
 import matplotlib.pyplot as plt
 from scipy import stats
+import sys
 
-def analyze_shannon_entropy():
-    base_dir = 'data/shannon_entropy/MAX'
+def analyze_shannon_entropy(base_dir):    
     # base_dir = 'data/transfer_entropy/MAX'
     exp_dirs = sorted(os.listdir(base_dir))
     best_exp_performance = []
+    last_evo_file = None
     for exp in exp_dirs:
-        evo_file = os.path.join(base_dir, exp, 'evo_500.json')
+        exp_dir = os.path.join(base_dir, exp)
+        if last_evo_file is None:
+            last_evo_file = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])[-1]
+            print('Selected evo: {}'.format(last_evo_file))
+        evo_file = os.path.join(exp_dir, last_evo_file)
         with open(evo_file) as f_in:
             exp_evo_data = json.load(f_in)
             gen_best_perf = exp_evo_data['best_performances']
@@ -25,4 +30,6 @@ def analyze_shannon_entropy():
     plt.show()
 
 if __name__ == "__main__":
-    analyze_shannon_entropy()
+    assert len(sys.argv)==2, "You need to specify the directory with the various runs to analyze"    
+    base_dir = sys.argv[1]
+    analyze_shannon_entropy(base_dir)
