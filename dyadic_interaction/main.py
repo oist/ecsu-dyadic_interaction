@@ -45,7 +45,7 @@ if __name__ == "__main__":
         utils.make_dir_if_not_exists(args.dir)
 
     sim = Simulation(
-        entropy_type = args.entropy,
+        entropy_type = args.entropy_type,
         entropy_target_value = args.entropy_target_value,
         concatenate=args.concatenate=='on',
         collision_type=args.collision_type,
@@ -85,7 +85,7 @@ if __name__ == "__main__":
     )
     evo.run()
 
-    if args.entropy == 'transfer':
+    if args.entropy_type == 'transfer':
         # shutdown JVM
         transfer_entropy.shutdown_JVM() 
 

@@ -1,11 +1,11 @@
 # test shannon entropy, 2 neuron, neural output
-python -m dyadic_interaction.main --dir ./data/shannon_test/seed_1 --entropy_type shannon --entropy_target_value neural_outputs --concatenate on --collision_type overlapping --cores 5 --seed 1 --num_neurons=2 --popsize 20 --num_gen 10 --trial_duration 20
+python -m dyadic_interaction.main --dir ./data/2n_shannon/test/seed_1 --entropy_type shannon --entropy_target_value neural_outputs --concatenate off --collision_type edge_bounded --cores 5 --seed 1 --num_neurons=2 --popsize 20 --num_gen 10 --trial_duration 20
 
 # test shannon entropy, 3 neuron, neural output
-python -m dyadic_interaction.main --dir ./data/shannon_entropy_test/3n_neural --entropy_type shannon --entropy_target_value neural_outputs --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
+python -m dyadic_interaction.main --dir ./data/3n_shannon/test/seed_1 --entropy_type shannon --entropy_target_value neural_outputs --concatenate off --collision_type edge_bounded --cores 5 --seed 1 --num_neurons=3 --popsize 20 --num_gen 10 --trial_duration 20
 
 # test shannon entropy, 3 neurons, agents distance
-python -m dyadic_interaction.main --dir ./data/shannon_entropy_test/3n_distance --entropy_type shannon --entropy_target_value agents_distance --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
+python -m dyadic_interaction.main --dir ./data/shannon_test/3n_distance --entropy_type shannon --entropy_target_value agents_distance --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
 
 # test transfer entropy, 2 neurons, neural output
 python -m dyadic_interaction.main --dir ./data/transfer_entropy_test/n2_neural --entropy_type transfer --entropy_target_value neural_outputs --cores 40 --seed 0 --num_neurons=2 --popsize 40 --num_gen 10 --trial_duration 200
@@ -17,16 +17,16 @@ python -m dyadic_interaction.main --dir ./data/sample_entropy_test/3n_distance -
 python -m dyadic_interaction.analyze_results
 
 # visual
-python -m dyadic_interaction.visual_run_from_data --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --trial 0
+python -m dyadic_interaction.visual_run_from_data --dir data/shannon_test/tmp0 --generation 10 --genotype 0 --trial 0
 
 # visual with ghost
-python -m dyadic_interaction.visual_run_from_data --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --trial 0 --ghost 0
+python -m dyadic_interaction.visual_run_from_data --dir data/shannon_test/tmp0 --generation 10 --genotype 0 --trial 0 --ghost 0
 
 # plot
-python -m dyadic_interaction.plot_results --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0
+python -m dyadic_interaction.plot_results --dir data/shannon_test/tmp0 --generation 10 --genotype 0
 
 # plot with ghost
-python -m dyadic_interaction.plot_results --dir data/shannon_entropy_test/tmp0 --generation 10 --genotype 0 --ghost 0
+python -m dyadic_interaction.plot_results --dir data/shannon_test/tmp0 --generation 10 --genotype 0 --ghost 0
 
 # rsync from georgina
 rsync -av deigo:/bucket/FroeseU/georgina/gitlab/* ./data/
