@@ -28,7 +28,7 @@ source env/bin/activate
 # ruse
 python -m dyadic_interaction.main \
 --dir $tempdir \
---entropy shannon \
+--entropy_type shannon \
 --entropy_target_value neural_outputs \
 --concatenate on \
 --collision_type overlapping \

@@ -21,8 +21,8 @@ tempdir=/flash/FroeseU/georgina/dyadic_exp_1
 cd ~/gitlab/dyadic_interaction
 source env/bin/activate
 # ruse
-#python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --cores 96 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
-python -m dyadic_interaction.main --dir $tempdir --entropy shannon --entropy_target_value neural_outputs --cores 96 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
+#python -m dyadic_interaction.main --dir $tempdir --entropy_type sample --entropy_target_value agents_distance --cores 96 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
+python -m dyadic_interaction.main --dir $tempdir --entropy_type shannon --entropy_target_value neural_outputs --cores 96 --seed 1 --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
 
 
 # copy our result back to Bucket. We use "scp" to copy the data 

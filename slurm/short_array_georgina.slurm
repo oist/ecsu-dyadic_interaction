@@ -21,7 +21,7 @@ tempdir=/flash/FroeseU/georgina/dyadic_exp_${num}
 cd ~/gitlab/dyadic_interaction
 source env/bin/activate
 
-python -m dyadic_interaction.main --dir $tempdir --entropy sample --entropy_target_value agents_distance --cores 96 --seed $SLURM_ARRAY_TASK_ID --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
+python -m dyadic_interaction.main --dir $tempdir --entropy_type sample --entropy_target_value agents_distance --cores 96 --seed $SLURM_ARRAY_TASK_ID --num_neurons=3 --popsize 96 --num_gen 2000 --trial_duration 200
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
