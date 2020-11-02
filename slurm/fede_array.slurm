@@ -25,7 +25,7 @@ source env/bin/activate
 python -m dyadic_interaction.main \
 --dir $tempdir \
 --entropy_type shannon \
---entropy_target_value neural_outputs \
+--entropy_target_value neural \
 --concatenate on \
 --collision_type overlapping \
 --cores 96 \

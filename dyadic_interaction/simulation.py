@@ -26,7 +26,7 @@ from joblib import Parallel, delayed
 @dataclass
 class Simulation:
     entropy_type: str = 'shannon' # 'shannon', 'transfer', 'sample'
-    entropy_target_value: str = 'neural_outputs' # 'neural_outputs', 'agents_distance'
+    entropy_target_value: str = 'neural' # 'neural', 'agents_distance'
     concatenate: bool = True # whether to concatenate values in entropy_target_value
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
@@ -60,15 +60,15 @@ class Simulation:
         assert self.entropy_type in ['shannon', 'transfer', 'sample'], \
             'entropy_type should be shannon or transfer'    
 
-        assert self.entropy_target_value in ['neural_outputs', 'agents_distance'], \
+        assert self.entropy_target_value in ['neural', 'agents_distance'], \
             'entropy_type should be shannon or transfer'
 
         if self.entropy_type == 'shannon':
-            assert self.entropy_target_value == 'neural_outputs', \
+            assert self.entropy_target_value == 'neural', \
                 'Shannon entropy currently works only on neural outputs'
 
         if self.entropy_type == 'transfer':
-            assert self.entropy_target_value == 'neural_outputs' and self.num_brain_neurons == 2, \
+            assert self.entropy_target_value == 'neural' and self.num_brain_neurons == 2, \
                 'Transfer entropy currently works only on two dimensional data (i.e., 2 neural outputs per agent)'
 
         if self.entropy_type == 'sample':  
@@ -183,7 +183,7 @@ class Simulation:
         # and initialize variable accordingly
 
 
-        if self.entropy_target_value == 'neural_outputs':
+        if self.entropy_target_value == 'neural':
             # initialize agents brain output of all trial for computing entropy
             # list of list (4 trials x 2 agents) each containing array (num_data_points,num_brain_neurons)
             values_for_computing_entropy = [
@@ -286,7 +286,7 @@ class Simulation:
             return dist
 
         def store_values_for_entropy(t,i):
-            if self.entropy_target_value == 'neural_outputs': #neural outputs 
+            if self.entropy_target_value == 'neural': #neural outputs 
                 for a in [x for x in range(2) if x != ghost_index]:
                     values_for_computing_entropy[t][a][i] = self.agents_pair_net[a].brain.output  
             else: # agents_distance
@@ -438,7 +438,7 @@ class Simulation:
                     performance_agent_AB = ([                        
                         get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
                     ])
-                else: # neural_outputs
+                else: # neural
                     min_v, max_v= 0., 1.
                     performance_agent_AB = []
                     for a in range(2):

@@ -121,7 +121,7 @@ def test_data(entropy_type):
 
     sim = Simulation(
         entropy_type=entropy_type,
-        entropy_target_value='neural_outputs',
+        entropy_target_value='neural',
         concatenate=True,
         genotype_structure=GEORGINA_GEN_STRUCTURE,
         num_cores=1
