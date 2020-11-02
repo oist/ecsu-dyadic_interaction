@@ -156,7 +156,7 @@ class Visualization:
         clock = pygame.time.Clock()
         
         duration = self.simulation.num_data_points        
-        print("Duration: {}".format(duration))
+        # print("Duration: {}".format(duration))
 
         agent_pair_pos = data_record['position'][trial_index]
         agent_pair_angle = data_record['angle'][trial_index]

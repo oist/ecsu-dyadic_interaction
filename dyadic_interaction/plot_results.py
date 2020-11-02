@@ -346,38 +346,13 @@ def plot_random_simulation_results():
 
 
 if __name__ == "__main__":
-    import argparse
 
-    # plot_simultation_results()
-    # plot_random_simulation_results()
-
-    parser = argparse.ArgumentParser(
-        description='Plot results'
-    )
-
-    parser.add_argument('--dir', type=str, help='Directory path')
-    parser.add_argument('--generation', type=int, help='number of generation to plot')
-    parser.add_argument('--genotype', type=int, help='Index of agent in population')
-    parser.add_argument('--random', action='store_true', help='Whether to randomize result')
-    parser.add_argument('--invert', action='store_true', help='Whether to invert the simulation type (shannon <-> transfer)')
-    parser.add_argument('--distance', type=int, default=-1, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
-    parser.add_argument('--ghost', type=int, default=-1, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
+    from dyadic_interaction.simulation import get_argparse, obtain_trial_data
+    
+    parser = get_argparse()
 
     args = parser.parse_args()
-    evo, _, data_record = simulation.obtain_trial_data(
-        dir=args.dir, 
-        num_generation=args.generation, 
-        genotype_index=args.genotype, 
-        random_position=args.random, 
-        invert_sim_type=args.invert,
-        initial_distance=args.distance if args.distance>=0 else None,
-        ghost_index=args.ghost if args.ghost in (0,1) else None        
-    )
+    evo, _, data_record = obtain_trial_data(**vars(args))
 
     plot_simultation_results(evo, data_record)
 
-    # output_file_path = 'sim_original.json' if args.ghost<0 else 'sim_ghost_random.json' if args.random else 'sim_ghost_norandom.json'
-    # output_file_path = 'data/' + output_file_path
-    # trial_index = 0
-    # trial_data_record = {k:v[trial_index] for k,v in data_record.items()}
-    # utils.save_numpy_data(data_record, output_file_path)

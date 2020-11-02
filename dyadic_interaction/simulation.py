@@ -8,7 +8,7 @@ from numpy import pi as pi
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.shannon_entropy import get_shannon_entropy_1d, get_shannon_entropy_2d, get_shannon_entropy_dd
+from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd
 from dyadic_interaction.transfer_entropy import get_transfer_entropy
 from dyadic_interaction.entropy.entropy import _numba_sampen
 from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_STD
@@ -452,8 +452,7 @@ class Simulation:
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
                         performance_agent_AB.append(
-                            get_shannon_entropy_2d(all_values_for_computing_entropy, min_v, max_v)
-                            # get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
+                            get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
                         )
             
             else:
@@ -510,9 +509,9 @@ class Simulation:
 
         return performances
 
-def obtain_trial_data(dir, num_generation, genotype_index, 
-    random_position=False, invert_sim_type=False, 
-    ghost_index=None, initial_distance=None,
+def obtain_trial_data(dir, generation, genotype_idx, 
+    random_pos_angle=None, entropy_type=None, entropy_target_value=None,
+    concatenate=None, collision_type=None, ghost_index=None, initial_distance=None,
     outdir=None):    
     ''' 
     utitity function to get data from a simulation
@@ -520,31 +519,42 @@ def obtain_trial_data(dir, num_generation, genotype_index,
     func_arguments = locals()
     from pyevolver.evolution import Evolution
     file_num_zfill = len(next(f for f in os.listdir(dir) if f.startswith('evo')).split('_')[1].split('.')[0])
-    num_generation = str(num_generation).zfill(file_num_zfill)
+    generation = str(generation).zfill(file_num_zfill)
     sim_json_filepath = os.path.join(dir, 'simulation.json')
-    evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(num_generation))
+    evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
-    genotype = evo.population[genotype_index]
+    genotype = evo.population[genotype_idx]
 
     if initial_distance is not None:
-        print("Changing initial distance to: {}".format(initial_distance))
+        print("Forcing initial distance to: {}".format(initial_distance))
         sim.agents_pair_initial_distance = initial_distance
         sim.set_initial_positions_angles()
-    
-    if invert_sim_type:        
-        sim.entropy_type = 'shannon' if sim.entropy_type == 'transfer' else 'transfer'
-        print("Inverting sim entropy type to: {}".format(sim.entropy_type))
 
-    if random_position:
+    if random_pos_angle:
         print("Randomizing positions and angles")
         rs = RandomState()
         sim.set_initial_positions_angles(rs)
-        random_seed = utils.random_int(rs)
-    else:
-        random_seed = evo.pop_eval_random_seed[genotype_index]
+
+    if entropy_type is not None:
+        sim.entropy_type = entropy_type
+        print("Forcing entropy type: {}".format(sim.entropy_type))
+
+    if entropy_target_value is not None:
+        sim.entropy_target_value = entropy_target_value
+        print("Forcing entropy target value: {}".format(sim.entropy_target_value))
+
+    if concatenate is not None:
+        sim.concatenate = concatenate == 'on'
+        print("Forcing concatenation: {}".format(sim.concatenate))
+
+    if collision_type is not None:
+        sim.collision_type = collision_type
+        sim.init_agents_pair()
+        print("Forcing collision_type: {}".format(sim.collision_type))
     
     data_record = {}
+    random_seed = evo.pop_eval_random_seed[genotype_idx] # only used for noice in transfer entropy
 
     if ghost_index is not None:
         assert ghost_index in [0,1], 'ghost_index must be 0 or 1'        
@@ -565,15 +575,18 @@ def obtain_trial_data(dir, num_generation, genotype_index,
         utils.make_dir_if_not_exists(outdir)
         for t in range(4):
             for k,v in data_record.items():
-                for a in range(2):
-                    outfile = os.path.join(outdir, '{}_{}_{}.json'.format(k,t+1,a+1))
-                    utils.save_numpy_data(v[t][a], outfile)
+                if len(v[0])==2:
+                    for a in range(2):
+                        outfile = os.path.join(outdir, '{}_{}_{}.json'.format(k,t+1,a+1))
+                        utils.save_numpy_data(v[t][a], outfile)
+                else:
+                    outfile = os.path.join(outdir, '{}_{}.json'.format(k,t+1))
+                    utils.save_numpy_data(v[t], outfile)
 
 
     return evo, sim, data_record
 
-
-if __name__ == "__main__":
+def get_argparse():
     import argparse
 
     parser = argparse.ArgumentParser(
@@ -582,21 +595,19 @@ if __name__ == "__main__":
 
     parser.add_argument('--dir', type=str, help='Directory path')
     parser.add_argument('--generation', type=int, help='number of generation to load')
-    parser.add_argument('--genotype', type=int, help='Index of agent in population to load')
-    parser.add_argument('--random', action='store_true', help='Whether to randomize result')
-    parser.add_argument('--invert', action='store_true', help='Whether to invert the simulation type (shannon <-> transfer)')
-    parser.add_argument('--distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
-    parser.add_argument('--ghost', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
+    parser.add_argument('--genotype_idx', type=int, help='Index of agent in population to load')
+    parser.add_argument('--random_pos_angle', action='store_true', help='Whether to randomize initial pos and angle')
+    parser.add_argument('--entropy_type', type=str, choices=['shannon', 'transfer', 'sample'], default=None, help='Whether to change the entropy_type')
+    parser.add_argument('--entropy_target_value', type=str, default=None, help='To change the entropy_target_value')    
+    parser.add_argument('--concatenate', choices=['on', 'off'], default=None, help='To change the concatenation')
+    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge_bounded'], default=None, help='To change the type of collison')
+    parser.add_argument('--initial_distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
+    parser.add_argument('--ghost_index', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
     parser.add_argument('--outdir', type=str, default=None, help='Directory where to save the data')
 
+    return parser
+
+if __name__ == "__main__":
+    parser = get_argparse()
     args = parser.parse_args()
-    evo, _, data_record = obtain_trial_data(
-        dir=args.dir, 
-        num_generation=args.generation, 
-        genotype_index=args.genotype, 
-        random_position=args.random, 
-        invert_sim_type=args.invert,
-        initial_distance=args.distance,
-        ghost_index=args.ghost,
-        outdir=args.outdir
-    )
+    evo, _, data_record = obtain_trial_data(**vars(args))
