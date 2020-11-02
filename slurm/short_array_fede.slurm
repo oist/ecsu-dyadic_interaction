@@ -20,8 +20,20 @@ tempdir=/flash/FroeseU/fede/seed_${seed}
 # and output to our temporary directory
 cd ~/Code/dyadic_interaction
 source env/bin/activate
-python -m dyadic_interaction.main --entropy shannon --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96 --num_gen 2000
-# python -m dyadic_interaction.main --entropy transfer --dir $tempdir --seed $SLURM_ARRAY_TASK_ID --cores 96 --perf_obj MAX
+
+# ruse
+python -m dyadic_interaction.main \
+--dir $tempdir \
+--entropy shannon \
+--entropy_target_value neural_outputs \
+--concatenate on \
+--collision_type overlapping \
+--cores 96 \
+--seed ${seed} \
+--num_neurons=2 \
+--popsize 96 \
+--num_gen 500 \
+--trial_duration 200
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
