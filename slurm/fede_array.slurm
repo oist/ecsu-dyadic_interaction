@@ -13,8 +13,8 @@ module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
-# seed=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/fede
+seed_dir=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
+tempdir=/flash/FroeseU/fede/${seed_dir}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
@@ -29,7 +29,7 @@ python -m dyadic_interaction.main \
 --concatenate on \
 --collision_type overlapping \
 --cores 96 \
---seed ${seed} \
+--seed ${SLURM_ARRAY_TASK_ID} \
 --num_neurons 2 \
 --popsize 96 \
 --num_gen 2000 \
@@ -37,7 +37,7 @@ python -m dyadic_interaction.main \
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
-rsync -avq $tempdir deigo:/bucket/FroeseU/fede/dyadic_interaction
+rsync -avq $tempdir/* deigo:/bucket/FroeseU/fede/dyadic_interaction
 
 # Clean up by removing our temporary directory
 rm -r $tempdir
