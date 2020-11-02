@@ -512,7 +512,8 @@ class Simulation:
 
 def obtain_trial_data(dir, num_generation, genotype_index, 
     random_position=False, invert_sim_type=False, 
-    ghost_index=None, initial_distance=None):    
+    ghost_index=None, initial_distance=None,
+    outdir=None):    
     ''' 
     utitity function to get data from a simulation
     '''
@@ -546,20 +547,28 @@ def obtain_trial_data(dir, num_generation, genotype_index,
     data_record = {}
 
     if ghost_index is not None:
-        assert ghost_index in [0,1], 'ghost_index must be 0 or 1'
-        
+        assert ghost_index in [0,1], 'ghost_index must be 0 or 1'        
         # get original results without ghost condition and no random
         func_arguments['ghost_index'] = None
         func_arguments['random_position'] = False
         func_arguments['initial_distance'] = None
+        func_arguments['outdir'] = None
         _, _, original_data_record = obtain_trial_data(**func_arguments) 
         perf = sim.compute_performance(genotype, random_seed, data_record, 
             ghost_index=ghost_index, original_data_record=original_data_record)
         print("Performance recomputed (non-ghost agent only): {}".format(perf))
-
     else:                
         perf = sim.compute_performance(genotype, random_seed, data_record)
         print("Performance recomputed: {}".format(perf))
+
+    if outdir is not None:
+        utils.make_dir_if_not_exists(outdir)
+        for t in range(4):
+            for k,v in data_record.items():
+                for a in range(2):
+                    outfile = os.path.join(outdir, '{}_{}_{}.json'.format(k,t+1,a+1))
+                    utils.save_numpy_data(v[t][a], outfile)
+
 
     return evo, sim, data_record
 
@@ -576,8 +585,9 @@ if __name__ == "__main__":
     parser.add_argument('--genotype', type=int, help='Index of agent in population to load')
     parser.add_argument('--random', action='store_true', help='Whether to randomize result')
     parser.add_argument('--invert', action='store_true', help='Whether to invert the simulation type (shannon <-> transfer)')
-    parser.add_argument('--distance', type=int, default=-1, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
-    parser.add_argument('--ghost', type=int, default=-1, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
+    parser.add_argument('--distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
+    parser.add_argument('--ghost', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
+    parser.add_argument('--outdir', type=str, default=None, help='Directory where to save the data')
 
     args = parser.parse_args()
     evo, _, data_record = obtain_trial_data(
@@ -586,6 +596,7 @@ if __name__ == "__main__":
         genotype_index=args.genotype, 
         random_position=args.random, 
         invert_sim_type=args.invert,
-        initial_distance=args.distance if args.distance>=0 else None,
-        ghost_index=args.ghost if args.ghost in (0,1) else None        
+        initial_distance=args.distance,
+        ghost_index=args.ghost,
+        outdir=args.outdir
     )
