@@ -356,7 +356,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--dir', type=str, help='Directory path')
-    parser.add_argument('--generation', type=int, help='number of genration')
+    parser.add_argument('--generation', type=int, help='number of generation to plot')
     parser.add_argument('--genotype', type=int, help='Index of agent in population')
     parser.add_argument('--random', action='store_true', help='Whether to randomize result')
     parser.add_argument('--invert', action='store_true', help='Whether to invert the simulation type (shannon <-> transfer)')
