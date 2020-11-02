@@ -24,14 +24,14 @@ if __name__ == "__main__":
     parser.add_argument('--entropy', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')
     parser.add_argument('--entropy_target_value', choices=['neural_outputs', 'agents_distance'], default='neural_outputs', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge_bounded'], default='overlapping', help='Type of collison')
-    parser.add_argument('--concatenate', choices=['on', 'off'], default='off', help='Whether values are concatenated across trials')
+    parser.add_argument('--concatenate', choices=['on', 'off'], default='on', help='Whether values are concatenated across trials')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of neurons in agent')    
     parser.add_argument('--popsize', type=int, default=96, help='Population size')    
     parser.add_argument('--num_gen', type=int, default=500, help='Number of generations')    
     parser.add_argument('--trial_duration', type=int, default=200, help='Trial duration')    
-    parser.add_argument('--perf_obj', default='MAX', help='Fitness normalization mode') # 'MAX', 'MIN', 'ZERO', 'ABS_MAX' or float value
+    parser.add_argument('--perf_obj', default='MAX', help='Performance objective') # 'MAX', 'MIN', 'ZERO', 'ABS_MAX' or float value
 
     args = parser.parse_args()
 
