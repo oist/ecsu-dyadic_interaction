@@ -1,6 +1,6 @@
 #!/bin/bash
-#SBATCH --partition=short
-#SBATCH --time=2:00:00
+#SBATCH --partition=compute
+#SBATCH --time=4:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --output=slurm_%A-%a.out
 #SBATCH --mem=500G
@@ -32,7 +32,7 @@ python -m dyadic_interaction.main \
 --seed ${seed} \
 --num_neurons 2 \
 --popsize 96 \
---num_gen 500 \
+--num_gen 2000 \
 --trial_duration 200
 
 # copy our result back to Bucket. We use "scp" to copy the data 
