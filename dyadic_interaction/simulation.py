@@ -2,7 +2,6 @@
 TODO: Missing module docstring
 """
 
-from dyadic_interaction import main
 import os
 import numpy as np
 from numpy import pi as pi
