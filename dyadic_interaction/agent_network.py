@@ -112,7 +112,7 @@ class AgentNetwork:
                         gene_values = np.tile(gene_values, num_units) # same tau/bias values for all sensors/motors
                     phenotype_value = linmap(gene_values, EVOLVE_GENE_RANGE, val['range'])                    
                 else:
-                    phenotype_value = np.copy(val['default'])                    
+                    phenotype_value = np.array(val['default'])                    
                 setattr(self, k, phenotype_value)
             if phenotype is not None and 'indexes' in val:
                 if type(phenotype_value) == np.ndarray:
