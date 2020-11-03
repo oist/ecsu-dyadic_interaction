@@ -42,11 +42,17 @@ if __name__ == "__main__":
     genotype_size = gen_structure.get_genotype_size(genotype_structure)
 
     if args.dir is not None:
-        subdir = '{}n_{}_{}'.format(args.num_neurons, args.entropy_type, args.entropy_target_value)
-        subsubdir = 'concat-{}_collision-{}'.format(args.concatenate, args.collision_type)
-        seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
-        outdir = os.path.join(args.dir,subdir,subsubdir,seed_dir)
+        # create default path if it specified dir already exists
+        if os.path.isdir(args.dir):
+            subdir = '{}n_{}_{}'.format(args.num_neurons, args.entropy_type, args.entropy_target_value)
+            subsubdir = 'concat-{}_collision-{}'.format(args.concatenate, args.collision_type)
+            seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
+            outdir = os.path.join(args.dir,subdir,subsubdir,seed_dir)            
+        else:
+            # use the specified dir if it doesn't exist 
+            outdir = args.dir
         utils.make_dir_if_not_exists(outdir)
+        
     else:
         outdir = None
         

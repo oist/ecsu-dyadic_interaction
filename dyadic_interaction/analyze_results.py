@@ -9,6 +9,7 @@ def analyze_shannon_entropy(base_dir):
     exp_dirs = sorted(os.listdir(base_dir))
     best_exp_performance = []
     last_evo_file = None
+    seeds = []
     for exp in exp_dirs:
         exp_dir = os.path.join(base_dir, exp)
         if last_evo_file is None:
@@ -17,6 +18,7 @@ def analyze_shannon_entropy(base_dir):
         evo_file = os.path.join(exp_dir, last_evo_file)
         with open(evo_file) as f_in:
             exp_evo_data = json.load(f_in)
+            seeds.append(exp_evo_data['random_seed'])
             gen_best_perf = exp_evo_data['best_performances']
             
             # make sure it's monotonic increasing(otherwise there is a bug)
@@ -26,7 +28,10 @@ def analyze_shannon_entropy(base_dir):
             print('{} {:.3f}'.format(exp, last_best_performance))
             best_exp_performance.append(last_best_performance)
     print(stats.describe(best_exp_performance))
-    plt.plot(best_exp_performance, label='Best')
+    plt.bar(seeds, best_exp_performance)
+    plt.xlabel('Seeds')
+    plt.ylabel('Performance')
+    plt.xticks(seeds)
     plt.show()
 
 if __name__ == "__main__":
