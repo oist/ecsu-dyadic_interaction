@@ -61,6 +61,11 @@ class AgentBody:
     def get_abs_sensors_pos(self):
         return [self.position + ep for ep in self.sensors_pos]
 
+    def get_dist_centers(self, other_agent_pos):
+        dist_centers = norm(self.position - other_agent_pos)
+        if self.collision_type == 'edge':
+            dist_centers = max(dist_centers, 2 * self.agent_body_radius)
+        return dist_centers      
 
     def get_signal_strength(self, emitter_position, emitter_strenght):
         """
@@ -77,10 +82,9 @@ class AgentBody:
         # print("Emitter position: {}".format(emitter_position))
         self.timing.add_time('AB2-GVI_emitter_pos', t)
 
-        dist_centers = norm(self.position - emitter_position)
-        if self.collision_type == 'edge':
-            dist_centers = max(dist_centers, 2 * self.agent_body_radius)
-        self.flag_collision = dist_centers <= 2*self.agent_body_radius # collision detection
+        dist_centers = self.get_dist_centers(emitter_position)
+
+        self.flag_collision = dist_centers <= 2 * self.agent_body_radius # collision detection
         pow_D_centers = np.power(dist_centers,2)
 
         for i, sp in enumerate(self.get_abs_sensors_pos()):

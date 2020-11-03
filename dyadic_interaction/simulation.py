@@ -280,10 +280,7 @@ class Simulation:
             self.timing.add_time('SIM_compute_motors_emitter', tim)
 
         def get_agents_distance():
-            dist = norm(self.agents_pair_body[0].position - self.agents_pair_body[1].position)
-            if self.collision_type=='edge':
-                dist = max(dist, 2 * self.agent_body_radius)
-            return dist
+            return self.agents_pair_body[0].get_dist_centers(self.agents_pair_body[1].position)
 
         def store_values_for_entropy(t,i):
             if self.entropy_target_value == 'neural': #neural outputs 
