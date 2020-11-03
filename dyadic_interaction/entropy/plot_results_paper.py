@@ -2,6 +2,8 @@
 TODO: Missing module docstring
 """
 
+# TODO: clean this code and move it somewhere else
+
 import os
 import matplotlib.pyplot as plt
 from dyadic_interaction import simulation
@@ -25,7 +27,7 @@ def plot_performances(evo):
     plt.show()
 
 
-def plot_behavior(data_record, trial='all'):
+def plot_behavior(data_record, to_plot='all'):
     agent_pos = [
         [x[0].transpose(), x[1].transpose()]
         for x in data_record['position']
@@ -33,7 +35,7 @@ def plot_behavior(data_record, trial='all'):
     num_trials = len(agent_pos)
     # print("agent_pos shape: {}".format(agent_pos[0].shape))
     num_cols = num_trials
-    if trial == 'all':
+    if to_plot == 'all':
         fig = plt.figure(figsize=(12, 5))
         fig.suptitle("Agents behavior")
         for t in range(num_trials):
@@ -55,14 +57,14 @@ def plot_behavior(data_record, trial='all'):
         fig = plt.figure(figsize=(6, 5))
         # fig.suptitle("Agents behavior")
         for a in range(2):
-            plt.scatter(agent_pos[trial - 1][a][0][0],
-                        agent_pos[trial - 1][a][1][0], label='Tracker start',
+            plt.scatter(agent_pos[int(to_plot) - 1][a][0][0],
+                        agent_pos[int(to_plot) - 1][a][1][0], label='Tracker start',
                         color='orange')
-            plt.scatter(agent_pos[trial - 1][a][0][-1],
-                        agent_pos[trial - 1][a][1][-1], label='Tracker stop')
+            plt.scatter(agent_pos[int(to_plot) - 1][a][0][-1],
+                        agent_pos[int(to_plot) - 1][a][1][-1], label='Tracker stop')
         for a in range(2):
-            plt.plot(agent_pos[trial - 1][a][0],
-                     agent_pos[trial - 1][a][1],
+            plt.plot(agent_pos[int(to_plot) - 1][a][0],
+                     agent_pos[int(to_plot) - 1][a][1],
                      label='Tracker position')
         # plt.xlim((-4, 31))
         # plt.ylim((-15, 20))
@@ -82,47 +84,55 @@ def plot_angles(data_record):
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Angles")
     for t in range(num_trials):
+        ax = fig.add_subplot(1, num_cols, t + 1)
         for a in range(2):
-            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
             ax.plot(angle_data[t][a], label='Angle agent {}'.format(a))
+    # ax = fig.add_subplot(1, 1, 1)
+    # for a in range(2):
+    #     ax.plot(angle_data[0][a], label='Angle agent {}'.format(a))
     plt.legend()
     plt.show()
 
-def plot_norm_pos_x(data_record, trial='all'):    
+def plot_norm_x(data_record):    
     pos_data = data_record['position']    
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("X Pos")
-    if trial == 'all':
-        num_cols = num_trials = len(pos_data)            
-        for t in range(num_trials):            
-            for a in range(2):
-                ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
-                ax.plot(pos_data[t][a][:,0]) # label='Angle agent {}'.format(a)
-    else:        
-        for a in range(2):
-            ax = fig.add_subplot(2, 1, a+1)
-            x_data = pos_data[trial][a][:,0]
-            x_data = (x_data - x_data.min()) / (x_data.max() - x_data.min())
-            ax.plot(x_data) # label='X agent {}'.format(a)
+    # num_trials = len(pos_data)    
+    # num_cols = num_trials
+    # for t in range(num_trials):
+    #     ax = fig.add_subplot(1, num_cols, t + 1)
+    #     for a in range(2):
+    #         ax.plot(x_data[t][a], label='Angle agent {}'.format(a))
+    ax = fig.add_subplot(1, 1, 1)
+    for a in range(2):
+        x_data = pos_data[0][a][:,0]
+        x_data = (x_data - x_data.min()) / (x_data.max() - x_data.min())
+        ax.plot(x_data, label='X agent {}'.format(a))
     plt.legend()
     plt.show()
 
-def plot_neural_activity_scatter(data_record):
-    num_trials = num_cols = len(data_record['position'])
+def plot_activity_scatter(data_record):
+    num_trials = len(data_record['position'])
+    num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Brain activity")
     for t in range(num_trials):       
         for a in range(2):
             ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
-            brain_output = data_record['brain_output'][t][a]            
-            ax.scatter(brain_output[0][0], brain_output[0][1], color='orange', zorder=1)
-            ax.plot(brain_output[:, 0], brain_output[:, 1], zorder=0)
+            brain_output = data_record['brain_output'][t][a]
+            ax.scatter(brain_output[0][0], brain_output[0][1], label='Tracker start', color='orange')            
+            ax.plot(brain_output[:, 0], brain_output[:, 1], label='Output of n1 agent {}'.format(a))            
+        # data_record['brain_state'][t]
+        # data_record['derivatives'][t]
+    # handles, labels = ax.get_legend_handles_labels()
+    # fig.legend(handles, labels, loc='upper right')
+    plt.legend()
     plt.show()
 
-def plot_neural_activity(data_record, trial='all'):
+def plot_activity(data_record, to_plot):
     num_trials = len(data_record['position'])
     num_cols = num_trials
-    if trial == 'all':
+    if to_plot == 'all':
         fig = plt.figure(figsize=(10, 6))
         fig.suptitle("Brain activity")
         for t in range(num_trials):
@@ -131,11 +141,13 @@ def plot_neural_activity(data_record, trial='all'):
                 brain_output = data_record['brain_output'][t][a]
                 ax.plot(brain_output[:, 0], label='Output of n1 agent {}'.format(a))
                 ax.plot(brain_output[:, 1], label='Output of n2 agent {}'.format(a))
+            # data_record['brain_state'][t]
+            # data_record['derivatives'][t]
     else:
         # fig = plt.figure(figsize=(10, 6))
         # fig.suptitle("Brain activity")
         # for a in range(2):
-        #     brain_output = data_record['brain_output'][trial][a]
+        #     brain_output = data_record['brain_output'][int(to_plot)][a]
         #     ax = fig.add_subplot(1, 2, a + 1)
         #     ax.set_title('Agent {}'.format(a))
         #     ax.plot(brain_output[1000:1500, 0], label='N1 output')
@@ -157,8 +169,8 @@ def plot_neural_activity(data_record, trial='all'):
         #                    xticklabels=np.arange(900, 1600, step=100),
         #                    ylim=(0.00011, 0.00014))
         #
-        # brain_output1 = data_record['brain_output'][trial][0]
-        # brain_output2 = data_record['brain_output'][trial][1]
+        # brain_output1 = data_record['brain_output'][int(to_plot)][0]
+        # brain_output2 = data_record['brain_output'][int(to_plot)][1]
         # ax1.plot(brain_output1[1000:1500, 0])
         # ax1.set_title('Agent 1, N1 output', y=0.9)
         # ax1.spines["top"].set_visible(False)
@@ -200,8 +212,8 @@ def plot_neural_activity(data_record, trial='all'):
                            xticklabels=np.arange(900, 1600, step=100),
                            ylim=(-0.2, 1.2))
 
-        brain_output1 = data_record['brain_output'][trial][0]
-        brain_output2 = data_record['brain_output'][trial][1]
+        brain_output1 = data_record['brain_output'][int(to_plot)][0]
+        brain_output2 = data_record['brain_output'][int(to_plot)][1]
         ax1.plot(brain_output1[1000:1500, 0])
         # ax1.set_title('Agent 1, N1 output', y=0.9)
         ax1.spines["top"].set_visible(False)
@@ -238,40 +250,42 @@ def plot_inputs(data_record):
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Inputs")
     for t in range(num_trials):
+        ax = fig.add_subplot(1, num_cols, t + 1)
         for a in range(2):
-            ax = fig.add_subplot(2, num_cols, (a * num_trials) + t + 1)
-            ax.plot(data_record['brain_input'][t][a][:, 0], label='Brain Input to n1')
-            ax.plot(data_record['brain_input'][t][a][:, 1], label='Brain Input to n2')
-    handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper right')
+            # ax.plot(data_record['signal_strength'][t][a][:, 0], label='Signal strength to s1 agent {}'.format(a))
+            # ax.plot(data_record['signal_strength'][t][a][:, 1], label='Signal strength to s2 agent {}'.format(a))
+            ax.plot(data_record['brain_input'][t][a][:, 0], label='Brain Input to n1 agent {}'.format(a))
+            ax.plot(data_record['brain_input'][t][a][:, 1], label='Brain Input to n2 agent {}'.format(a))
+    plt.legend()
     plt.show()
 
-def plot_perceived_signal_strength(data_record):
+def plot_signal(data_record):
     num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
-    fig.suptitle("Perceived Signal Strength (left/right sensor)")
+    fig.suptitle("Signal Strength")
     for t in range(num_trials):
-        for a in range(2):            
+        for a in range(2):
             ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
-            ax.plot(data_record['signal_strength'][t][a][:, 0]) # label='Signal strength to s1 agent {}'.format(a)
-            ax.plot(data_record['signal_strength'][t][a][:, 1]) # label='Signal strength to s2 agent {}'.format(a)
+            ax.plot(data_record['signal_strength'][t][a][:, 0], label='Signal strength to s1 agent {}'.format(a))
+            ax.plot(data_record['signal_strength'][t][a][:, 1], label='Signal strength to s2 agent {}'.format(a))
     plt.legend()
     plt.show()
 
 
-def plot_wheels(data_record):
+def plot_motor_output(data_record):
     num_trials = len(data_record['position'])
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Wheels")
     for t in range(num_trials):
+        ax = fig.add_subplot(1, num_cols, t + 1)
         for a in range(2):
-            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
-            ax.plot(data_record['wheels'][t][a][:, 0], label='Left wheel') 
-            ax.plot(data_record['wheels'][t][a][:, 1], label='Right wheel')
-    handles, labels = ax.get_legend_handles_labels()
-    fig.legend(handles, labels, loc='upper right')
+            ax.plot(data_record['wheels'][t][a][:, 0], label='Wheel 1 agent {}'.format(a))
+            ax.plot(data_record['wheels'][t][a][:, 1], label='Wheel 2 agent {}'.format(a))
+            # ax.plot(data_record['wheels'][t][a][:, 1], label='Emitter agent {}'.format(a))
+            # ax.plot(data_record['wheels'][t][a][:, 2], label='Wheel 2 agent {}'.format(a))
+    plt.legend()
     plt.show()
 
 
@@ -280,25 +294,34 @@ def plot_emitters(data_record):
     num_cols = num_trials
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Emitters")
-    for t in range(num_trials):        
+    for t in range(num_trials):
+        ax = fig.add_subplot(1, num_cols, t + 1)
         for a in range(2):
-            ax = fig.add_subplot(2, num_cols, (a * num_trials) + t + 1)
-            ax.plot(data_record['emitter'][t][a]) # label='Emitter agent {}'.format(a)
+            ax.plot(data_record['emitter'][t][a], label='Emitter agent {}'.format(a))
+    plt.legend()
     plt.show()
 
 
-def plot_results(evo, data_record, trial='all'):
+def plot_simultation_results(evo, data_record):
     
     plot_performances(evo)
-    plot_neural_activity_scatter(data_record)
-    plot_neural_activity(data_record, trial)    
-    plot_angles(data_record)
-    plot_norm_pos_x(data_record, trial)
-    plot_behavior(data_record, trial)    
+    # plot_activity_scatter(data_record)
+    # plot_angles(data_record)
+    # plot_norm_x(data_record)
+    plot_behavior(data_record)
+    plot_activity(data_record, 'all')    
+    plot_signal(data_record)
+    # plot_inputs(data_record)
+    plot_motor_output(data_record)
     plot_emitters(data_record)
-    plot_perceived_signal_strength(data_record)
-    plot_inputs(data_record)
-    plot_wheels(data_record)
+    # plot_motor_output(data_record)
+    # plot_performances(evo)
+    # plot_behavior(data_record, '1')
+    # plot_activity(data_record, '1')
+    # plot_inputs(data_record)
+    # plot_motor_output(data_record)
+    # plot_emitters(data_record)
+    # utils.save_numpy_data(data_record['brain_output'], 'data/tmp_brains.json')    
 
 
 def plot_random_simulation_results():
@@ -329,15 +352,9 @@ if __name__ == "__main__":
     from dyadic_interaction.simulation import get_argparse, obtain_trial_data
     
     parser = get_argparse()
-    parser.add_argument('--trial', type=int, choices=[1,2,3,4], default=None, help='Trial index')    
-    args = parser.parse_args()
-
-    args_dict = vars(args)
-    trial_index = 'all' if args_dict['trial'] is None else args_dict['trial'] - 1
-    del args_dict['trial']
 
     args = parser.parse_args()
-    evo, _, data_record = obtain_trial_data(**args_dict)
+    evo, _, data_record = obtain_trial_data(**vars(args))
 
-    plot_results(evo, data_record, trial_index)
+    plot_simultation_results(evo, data_record)
 
