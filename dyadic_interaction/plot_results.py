@@ -108,20 +108,19 @@ def plot_norm_pos_x(data_record, trial='all'):
     plt.show()
 
 def plot_neural_activity_scatter(data_record):
-    num_trials = num_cols = len(data_record['position'])
+    num_trials = num_cols = 4
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Brain activity")
     for t in range(num_trials):       
         for a in range(2):
-            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
+            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1) # projection='3d'
             brain_output = data_record['brain_output'][t][a]            
             ax.scatter(brain_output[0][0], brain_output[0][1], color='orange', zorder=1)
-            ax.plot(brain_output[:, 0], brain_output[:, 1], zorder=0)
+            ax.plot(brain_output[:, 0], brain_output[:, 1], zorder=0) # brain_output[:, 2]
     plt.show()
 
 def plot_neural_activity(data_record, trial='all'):
-    num_trials = len(data_record['position'])
-    num_cols = num_trials
+    num_cols = num_trials = 4
     if trial == 'all':
         fig = plt.figure(figsize=(10, 6))
         fig.suptitle("Brain activity")
@@ -129,8 +128,8 @@ def plot_neural_activity(data_record, trial='all'):
             for a in range(2):
                 ax = fig.add_subplot(2, num_cols, (a * num_trials) + t + 1)
                 brain_output = data_record['brain_output'][t][a]
-                ax.plot(brain_output[:, 0], label='Output of n1 agent {}'.format(a))
-                ax.plot(brain_output[:, 1], label='Output of n2 agent {}'.format(a))
+                for n in range(brain_output.shape[1]):
+                    ax.plot(brain_output[:, n], label='Output of n{}'.format(n+1))                    
     else:
         # fig = plt.figure(figsize=(10, 6))
         # fig.suptitle("Brain activity")
@@ -232,23 +231,22 @@ def plot_neural_activity(data_record, trial='all'):
     # plt.savefig('plots/transfer_activity_bin.eps', format='eps')
 
 
-def plot_inputs(data_record):
-    num_trials = len(data_record['position'])
-    num_cols = num_trials
+def plot_inputs(data_record):    
+    num_cols = num_trials = 4
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Inputs")
     for t in range(num_trials):
-        for a in range(2):
+        for a in range(2):            
             ax = fig.add_subplot(2, num_cols, (a * num_trials) + t + 1)
-            ax.plot(data_record['brain_input'][t][a][:, 0], label='Brain Input to n1')
-            ax.plot(data_record['brain_input'][t][a][:, 1], label='Brain Input to n2')
+            brain_input = data_record['brain_input'][t][a]
+            for n in range(brain_input.shape[1]):
+                ax.plot(brain_input[:, n], label='Brain Input to n{}'.format(n+1))
     handles, labels = ax.get_legend_handles_labels()
     fig.legend(handles, labels, loc='upper right')
     plt.show()
 
 def plot_perceived_signal_strength(data_record):
-    num_trials = len(data_record['position'])
-    num_cols = num_trials
+    num_cols = num_trials = 4
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Perceived Signal Strength (left/right sensor)")
     for t in range(num_trials):
@@ -261,8 +259,7 @@ def plot_perceived_signal_strength(data_record):
 
 
 def plot_wheels(data_record):
-    num_trials = len(data_record['position'])
-    num_cols = num_trials
+    num_cols = num_trials = 4
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Wheels")
     for t in range(num_trials):
@@ -276,8 +273,7 @@ def plot_wheels(data_record):
 
 
 def plot_emitters(data_record):
-    num_trials = len(data_record['position'])
-    num_cols = num_trials
+    num_cols = num_trials = 4
     fig = plt.figure(figsize=(10, 6))
     fig.suptitle("Emitters")
     for t in range(num_trials):        
@@ -290,10 +286,10 @@ def plot_emitters(data_record):
 def plot_results(evo, data_record, trial='all'):
     
     plot_performances(evo)
-    plot_neural_activity_scatter(data_record)
+    # plot_neural_activity_scatter(data_record)
     plot_neural_activity(data_record, trial)    
     plot_angles(data_record)
-    plot_norm_pos_x(data_record, trial)
+    # plot_norm_pos_x(data_record, trial)
     plot_behavior(data_record, trial)    
     plot_emitters(data_record)
     plot_perceived_signal_strength(data_record)
