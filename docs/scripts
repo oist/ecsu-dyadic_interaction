@@ -5,13 +5,13 @@ python -m dyadic_interaction.main --dir ./data/2n_shannon/test/seed_1 --entropy_
 python -m dyadic_interaction.main --dir ./data/3n_shannon/test/seed_1 --entropy_type shannon --entropy_target_value neural --concatenate off --collision_type edge --cores 5 --seed 1 --num_neurons=3 --popsize 20 --num_gen 10 --trial_duration 20
 
 # test shannon entropy, 3 neurons, agents distance
-python -m dyadic_interaction.main --dir ./data/shannon_test/3n_distance --entropy_type shannon --entropy_target_value agents_distance --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
+python -m dyadic_interaction.main --dir ./data/shannon_test/3n_distance --entropy_type shannon --entropy_target_value distance --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
 
 # test transfer entropy, 2 neurons, neural output
 python -m dyadic_interaction.main --dir ./data/transfer_entropy_test/n2_neural --entropy_type transfer --entropy_target_value neural --cores 40 --seed 0 --num_neurons=2 --popsize 40 --num_gen 10 --trial_duration 200
 
 # test sample entropy, 3 neurons, agents distance
-python -m dyadic_interaction.main --dir ./data/sample_entropy_test/3n_distance --entropy_type sample --entropy_target_value agents_distance --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
+python -m dyadic_interaction.main --dir ./data/sample_entropy_test/3n_distance --entropy_type sample --entropy_target_value distance --cores 40 --seed 0 --num_neurons=3 --popsize 40 --num_gen 10 --trial_duration 200
 
 # compare results of different runs (modify dir in the code)
 python -m dyadic_interaction.analyze_results

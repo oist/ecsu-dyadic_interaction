@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
     parser.add_argument('--entropy_type', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')
-    parser.add_argument('--entropy_target_value', choices=['neural', 'agents_distance'], default='neural', help='Type of value to be used to calculate entropy')   ##
+    parser.add_argument('--entropy_target_value', choices=['neural', 'distance'], default='neural', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default='overlapping', help='Type of collison')
     parser.add_argument('--concatenate', choices=['on', 'off'], default='on', help='Whether values are concatenated across trials')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
@@ -52,7 +52,7 @@ if __name__ == "__main__":
             # use the specified dir if it doesn't exist 
             outdir = args.dir
         utils.make_dir_if_not_exists(outdir)
-        
+
     else:
         outdir = None
         
