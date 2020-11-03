@@ -512,13 +512,15 @@ class Simulation:
 def obtain_trial_data(dir, generation, genotype_idx, 
     random_pos_angle=None, entropy_type=None, entropy_target_value=None,
     concatenate=None, collision_type=None, ghost_index=None, initial_distance=None,
-    outdir=None):    
+    write_data=None):    
     ''' 
     utitity function to get data from a simulation
     '''
     func_arguments = locals()
     from pyevolver.evolution import Evolution
-    file_num_zfill = len(next(f for f in os.listdir(dir) if f.startswith('evo')).split('_')[1].split('.')[0])
+    evo_files = [f for f in os.listdir(dir) if f.startswith('evo_')]
+    assert len(evo_files)>0, "Can't find evo files in dir {}".format(dir)
+    file_num_zfill = len(evo_files[0].split('_')[1].split('.')[0])
     generation = str(generation).zfill(file_num_zfill)
     sim_json_filepath = os.path.join(dir, 'simulation.json')
     evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
@@ -562,7 +564,7 @@ def obtain_trial_data(dir, generation, genotype_idx,
         func_arguments['ghost_index'] = None
         func_arguments['random_position'] = False
         func_arguments['initial_distance'] = None
-        func_arguments['outdir'] = None
+        func_arguments['write_data'] = None
         _, _, original_data_record = obtain_trial_data(**func_arguments) 
         perf = sim.compute_performance(genotype, random_seed, data_record, 
             ghost_index=ghost_index, original_data_record=original_data_record)
@@ -571,7 +573,8 @@ def obtain_trial_data(dir, generation, genotype_idx,
         perf = sim.compute_performance(genotype, random_seed, data_record)
         print("Performance recomputed: {}".format(perf))
 
-    if outdir is not None:
+    if write_data:
+        outdir = os.path.join(dir, 'data')
         utils.make_dir_if_not_exists(outdir)
         for t in range(4):
             for k,v in data_record.items():
@@ -603,7 +606,7 @@ def get_argparse():
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default=None, help='To change the type of collison')
     parser.add_argument('--initial_distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
     parser.add_argument('--ghost_index', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
-    parser.add_argument('--outdir', type=str, default=None, help='Directory where to save the data')
+    parser.add_argument('--write_data', action='store_true', help='Whether to output data (same directory as input)')
 
     return parser
 
