@@ -3,8 +3,6 @@ TODO: Missing module docstring
 """
 
 import json
-import numpy as np
-from pyevolver.json_numpy import NumpyListJsonEncoder
 
 def get_num_brain_neurons(genotype_structure):
     """
@@ -22,9 +20,9 @@ def get_genotype_size(genotype_structure):
     return 1 + max(x for v in genotype_structure.values() \
         if 'indexes' in v for x in v['indexes'])  # last index
 
-def process_genotype_structure(genotype_structure):
+def check_genotype_structure(genotype_structure):
     """
-    TODO: Missing function docstring
+    Check consistency of genotype structure
     """
     num_genes = 1 + max(x for v in genotype_structure.values() \
         if 'indexes' in v for x in v['indexes'])  # last index
@@ -45,7 +43,6 @@ def process_genotype_structure(genotype_structure):
             assert 'default' in v
             assert type(v['default']) == list
             assert type(v['default'][0]) == float
-            v['default'] = np.array(v['default'])
         # only neural have taus (sensor and motor don't)
 
     # check if all values in sensor* and motor* have the same number of indexes/default values
@@ -64,16 +61,8 @@ def load_genotype_structure(json_filepath, process=True):
         genotype_structure = json.load(f_in)
 
     if process:
-        process_genotype_structure(genotype_structure)
+        check_genotype_structure(genotype_structure)
     return genotype_structure
-
-
-def save_genotype_structure(genotype_structure, json_filepath):
-    """
-    TODO: Missing function docstring
-    """
-    with open(json_filepath, 'w') as f_out:
-        json.dump(genotype_structure, f_out, indent=3, cls=NumpyListJsonEncoder)
 
 
 

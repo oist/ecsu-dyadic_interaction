@@ -144,7 +144,7 @@ class Simulation:
             obj_dict.update(kwargs)
 
         sim = Simulation(**obj_dict)
-        gen_structure.process_genotype_structure(sim.genotype_structure)
+        gen_structure.check_genotype_structure(sim.genotype_structure)
         return sim        
 
     def set_agents_phenotype(self, genotypes_pair):

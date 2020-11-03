@@ -97,7 +97,7 @@ class AgentNetwork:
                         gene_values = np.tile(gene_values, self.brain.num_neurons) 
                     phenotype_value = linmap(gene_values, EVOLVE_GENE_RANGE, val['range'])                                        
                 else:
-                    phenotype_value = np.copy(val['default'])
+                    phenotype_value = np.array(val['default'])
                 setattr(self.brain, brain_field, phenotype_value)                
             else:  # sensor*, motor*
                 # using same fields as in genotype_structure
