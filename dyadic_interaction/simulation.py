@@ -8,7 +8,7 @@ from numpy import pi as pi
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd
+from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd, get_shannon_entropy_1d
 from dyadic_interaction.transfer_entropy import get_transfer_entropy
 from dyadic_interaction.entropy.entropy import _numba_sampen
 from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_STD
@@ -465,9 +465,12 @@ class Simulation:
                             ])
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
-                        performance_agent_AB.append(
-                            get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
-                        )
+
+                        for c in range(self.num_brain_neurons):
+                            column_values = all_values_for_computing_entropy[:,c]
+                            performance_agent_AB.append(
+                                get_shannon_entropy_1d(column_values, min_v, max_v)                                
+                            )
             
             else:
                 # sample entropy
