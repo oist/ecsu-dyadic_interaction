@@ -27,8 +27,9 @@ python -m dyadic_interaction.main \
 --dir $tempdir \
 --entropy_type shannon \
 --entropy_target_value neural \
---concatenate on \
---collision_type overlapping \
+--concatenate off \
+--isolation on \
+--collision_type edge \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \
 --num_neurons 2 \

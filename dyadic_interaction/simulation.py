@@ -28,6 +28,7 @@ class Simulation:
     entropy_type: str = 'shannon' # 'shannon', 'transfer', 'sample'
     entropy_target_value: str = 'neural' # 'neural', 'distance'
     concatenate: bool = True # whether to concatenate values in entropy_target_value
+    isolation: bool = False # whether to run simulation on a single agent
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
     collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge'
@@ -169,8 +170,7 @@ class Simulation:
 
   
     def compute_performance(self, genotypes_pair=None, rnd_seed=None, 
-        data_record=None, ghost_index=None, original_data_record=None,
-        isolated=False):
+        data_record=None, ghost_index=None, original_data_record=None):
         '''
         Main function to compute shannon/transfer/sample entropy entropy performace        
         '''
@@ -280,7 +280,7 @@ class Simulation:
             for a in range(2):
                 if a == ghost_index:
                     emitter_agents[a] = original_data_record['emitter'][t][a][i]
-                if isolated and a==1:
+                if self.isolation and a==1:
                     emitter_agents[a] = 0
                 else:
                     motor_outputs = self.agents_pair_net[a].compute_motor_outputs()
@@ -409,7 +409,7 @@ class Simulation:
                 for a in range(2):
                     if ghost_index == a:
                         continue
-                    if isolated and a==1:
+                    if self.isolation and a==1:
                         continue
                     rs = RandomState(rnd_seed)
                     
@@ -452,7 +452,7 @@ class Simulation:
                     for a in range(2):
                         if ghost_index == a:
                             continue
-                        if isolated and a==1:
+                        if self.isolation and a==1:
                             continue
                         if self.concatenate:
                             all_values_for_computing_entropy = np.concatenate([
