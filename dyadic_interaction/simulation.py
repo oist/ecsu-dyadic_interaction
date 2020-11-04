@@ -169,7 +169,8 @@ class Simulation:
 
   
     def compute_performance(self, genotypes_pair=None, rnd_seed=None, 
-        data_record=None, ghost_index=None, original_data_record=None):
+        data_record=None, ghost_index=None, original_data_record=None,
+        isolated=False):
         '''
         Main function to compute shannon/transfer/sample entropy entropy performace        
         '''
@@ -279,6 +280,8 @@ class Simulation:
             for a in range(2):
                 if a == ghost_index:
                     emitter_agents[a] = original_data_record['emitter'][t][a][i]
+                if isolated and a==1:
+                    emitter_agents[a] = 0
                 else:
                     motor_outputs = self.agents_pair_net[a].compute_motor_outputs()
                     self.agents_pair_body[a].wheels = np.take(motor_outputs, [0,2]) # index 0,2: MOTORS  
@@ -406,6 +409,8 @@ class Simulation:
                 for a in range(2):
                     if ghost_index == a:
                         continue
+                    if isolated and a==1:
+                        continue
                     rs = RandomState(rnd_seed)
                     
                     if self.concatenate:
@@ -446,6 +451,8 @@ class Simulation:
                     performance_agent_AB = []
                     for a in range(2):
                         if ghost_index == a:
+                            continue
+                        if isolated and a==1:
                             continue
                         if self.concatenate:
                             all_values_for_computing_entropy = np.concatenate([

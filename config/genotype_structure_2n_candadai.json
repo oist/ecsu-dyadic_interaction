@@ -1,7 +1,7 @@
 {
    "sensor_gains": {
       "indexes": [0],
-      "range": [1, 20]
+      "range": [1, 5]
    },
    "sensor_biases": {
       "indexes": [1],

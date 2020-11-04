@@ -23,8 +23,8 @@ if __name__ == "__main__":
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
     parser.add_argument('--entropy_type', choices=['shannon', 'transfer', 'sample'], default='shannon', help='Type of entropy measure to use')
     parser.add_argument('--entropy_target_value', choices=['neural', 'distance'], default='neural', help='Type of value to be used to calculate entropy')   ##
-    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default='overlapping', help='Type of collison')
-    parser.add_argument('--concatenate', choices=['on', 'off'], default='on', help='Whether values are concatenated across trials')
+    parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default='edge', help='Type of collison')
+    parser.add_argument('--concatenate', choices=['on', 'off'], default='off', help='Whether values are concatenated across trials')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of neurons in agent')    
@@ -45,9 +45,8 @@ if __name__ == "__main__":
         # create default path if it specified dir already exists
         if os.path.isdir(args.dir):
             subdir = '{}n_{}_{}'.format(args.num_neurons, args.entropy_type, args.entropy_target_value)
-            subsubdir = 'concat-{}_collision-{}'.format(args.concatenate, args.collision_type)
             seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
-            outdir = os.path.join(args.dir,subdir,subsubdir,seed_dir)            
+            outdir = os.path.join(args.dir,subdir,seed_dir)            
         else:
             # use the specified dir if it doesn't exist 
             outdir = args.dir
