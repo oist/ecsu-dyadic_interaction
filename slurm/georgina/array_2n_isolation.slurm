@@ -19,7 +19,7 @@ mkdir ${tempdir}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
-cd ~/Code/dyadic_interaction
+cd ~/gitlab/dyadic_interaction
 source env/bin/activate
 
 # ruse
