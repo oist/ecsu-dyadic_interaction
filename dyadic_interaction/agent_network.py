@@ -73,7 +73,7 @@ class AgentNetwork:
     def init_params(self, brain_states):
         self.brain.states = brain_states
 
-    def genotype_to_phenotype(self, genotype, phenotype=None):
+    def genotype_to_phenotype(self, genotype, phenotype_list=None, phenotype_dict=None):
         '''
         map genotype to brain values (self.brain) and sensor/motor (self)
         '''
@@ -98,7 +98,9 @@ class AgentNetwork:
                     phenotype_value = linmap(gene_values, EVOLVE_GENE_RANGE, val['range'])                                        
                 else:
                     phenotype_value = np.array(val['default'])
-                setattr(self.brain, brain_field, phenotype_value)                
+                setattr(self.brain, brain_field, phenotype_value)  
+                if phenotype_dict is not None:
+                    phenotype_dict[k] = phenotype_value        
             else:  # sensor*, motor*
                 # using same fields as in genotype_structure
                 if 'indexes' in val:
@@ -114,16 +116,18 @@ class AgentNetwork:
                 else:
                     phenotype_value = np.array(val['default'])                    
                 setattr(self, k, phenotype_value)
-            if phenotype is not None and 'indexes' in val:
+                if phenotype_dict is not None:
+                    phenotype_dict[k] = phenotype_value
+            if phenotype_list is not None and 'indexes' in val:
                 if type(phenotype_value) == np.ndarray:
                     if k.endswith('_weights'):
-                        phenotype[i:i+phenotype_value.size] = phenotype_value.flatten()
+                        phenotype_list[i:i+phenotype_value.size] = phenotype_value.flatten()
                         i += phenotype_value.size
                     else:
-                        phenotype[i] = phenotype_value[0] # tiled value, take only one
+                        phenotype_list[i] = phenotype_value[0] # tiled value, take only one
                         i += 1
                 else:
-                    phenotype[i] = phenotype_value
+                    phenotype_list[i] = phenotype_value
                     i += 1
     
     def compute_brain_input(self, signal_strength):

@@ -147,7 +147,7 @@ class Simulation:
         gen_structure.check_genotype_structure(sim.genotype_structure)
         return sim        
 
-    def set_agents_phenotype(self, genotypes_pair):
+    def set_agents_phenotype(self, genotypes_pair, data_record):
         '''
         Split genotype and set phenotype of the two agents
         :param np.ndarray genotypes_pair: sequence with two genotypes (one after the other)
@@ -155,9 +155,15 @@ class Simulation:
 
         tim = self.timing.init_tictoc()
 
+        phenotypes = [None,None]
         genotypes_split = np.array_split(genotypes_pair, 2)
+        if data_record is not None:
+            data_record['genotype'] = genotypes_split
+            phenotypes = [{},{}]
+            data_record['phenotype'] = phenotypes
         for a in range(2):
-            self.agents_pair_net[a].genotype_to_phenotype(genotypes_split[a])
+            self.agents_pair_net[a].genotype_to_phenotype(
+                genotypes_split[a], phenotype_dict=phenotypes[a])
             
         self.timing.add_time('SIM-INIT_genotype_to_phenotype', tim)
 
@@ -171,7 +177,7 @@ class Simulation:
         tim = self.timing.init_tictoc()
 
         if genotypes_pair is not None:
-            self.set_agents_phenotype(genotypes_pair)    
+            self.set_agents_phenotype(genotypes_pair, data_record)    
             self.timing.add_time('SIM_init_agent_phenotypes', tim)    
 
         trial_performances = []
@@ -202,7 +208,7 @@ class Simulation:
 
         def init_data():
             if data_record is  None:                       
-                return
+                return            
             data_record['position'] = [[None,None] for _ in range(self.num_trials)]
             data_record['distance'] = [None for _ in range(self.num_trials)]
             data_record['angle'] = [[None,None] for _ in range(self.num_trials)]
@@ -575,13 +581,21 @@ def obtain_trial_data(dir, generation, genotype_idx,
         utils.make_dir_if_not_exists(outdir)
         for t in range(4):
             for k,v in data_record.items():
-                if len(v[0])==2:
-                    for a in range(2):
-                        outfile = os.path.join(outdir, '{}_{}_{}.json'.format(k,t+1,a+1))
-                        utils.save_numpy_data(v[t][a], outfile)
+                if len(v)!=4:
+                    # genotype/phenotype
+                    outfile = os.path.join(outdir, '{}.json'.format(k))
+                    utils.save_numpy_data(v, outfile)
                 else:
-                    outfile = os.path.join(outdir, '{}_{}.json'.format(k,t+1))
-                    utils.save_numpy_data(v[t], outfile)
+                    # data for each trial
+                    if len(v[0])==2:
+                        # data for each agent
+                        for a in range(2):
+                            outfile = os.path.join(outdir, '{}_{}_{}.json'.format(k,t+1,a+1))
+                            utils.save_numpy_data(v[t][a], outfile)
+                    else:
+                        # single data for both agent (e.g., distance)
+                        outfile = os.path.join(outdir, '{}_{}.json'.format(k,t+1))
+                        utils.save_numpy_data(v[t], outfile)
 
 
     return evo, sim, data_record
