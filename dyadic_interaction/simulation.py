@@ -50,7 +50,11 @@ class Simulation:
         self.init_agents_pair()
         self.set_initial_positions_angles()
 
-        self.timing = Timing(self.timeit)
+        if self.isolation:
+            # if we run agents in isolation we want to ignore collisions
+            self.collision_type = 'none'
+
+        self.timing = Timing(self.timeit)        
 
         self.__check_params__()
 
