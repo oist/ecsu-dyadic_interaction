@@ -107,6 +107,23 @@ def plot_norm_pos_x(data_record, trial='all'):
     plt.legend()
     plt.show()
 
+def plot_distances(data_record, trial='all'):    
+    # from dyadic_interaction.entropy.entropy import _numba_sampen
+    pos_data = data_record['position']    
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Distances")
+    num_cols = num_trials = len(pos_data)            
+    for t in range(num_trials):            
+        distances = data_record['distance'][t]                
+        # std = distances.std()        
+        # normalize_values = (distances - distances.mean()) / std
+        # e = _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * std))
+        # print("Trial {}: Distance Std: {} e:{}".format(t, std,e))        
+        ax = fig.add_subplot(1, num_cols, t+1)
+        ax.plot(distances) # label='Angle agent {}'.format(a)
+    plt.legend()
+    plt.show()
+
 def plot_neural_activity_scatter(data_record):
     num_trials = num_cols = 4
     fig = plt.figure(figsize=(10, 6))
@@ -289,6 +306,7 @@ def plot_results(evo, data_record, trial='all'):
     # plot_neural_activity_scatter(data_record)
     plot_neural_activity(data_record, trial)    
     plot_angles(data_record)
+    plot_distances(data_record, trial)
     # plot_norm_pos_x(data_record, trial)
     plot_behavior(data_record, trial)    
     plot_emitters(data_record)
