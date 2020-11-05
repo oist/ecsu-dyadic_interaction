@@ -4,8 +4,8 @@ import pandas as pd
 from numpy.random import RandomState
 from matplotlib import pyplot as plt
 from dyadic_interaction.utils import add_noise
-from dyadic_interaction.neural_transfer_entropy import get_transfer_entropy, shutdown_JVM
-from dyadic_interaction.neural_shannon_entropy import get_norm_entropy, BINS
+from dyadic_interaction.transfer_entropy import get_transfer_entropy, shutdown_JVM
+from dyadic_interaction.shannon_entropy import get_shannon_entropy_2d, BINS
 
 
 def generate_correlated_data(num_data_points, cov, delay, rs):
@@ -33,12 +33,12 @@ def test_neural_entropy_random(num_experiments, num_data_points, distribution='u
     if distribution == 'normal':
         brain_output = rs.normal(0, 1, (num_experiments, num_data_points, 2))
         for i in range(num_experiments):
-            norm_entropy.append(get_norm_entropy(brain_output[i, :, :], min_v=-3., max_v=3.))
+            norm_entropy.append(get_shannon_entropy_2d(brain_output[i, :, :], min_v=-3., max_v=3.))
             transfer_entropy.append(get_transfer_entropy(brain_output[i, :, :], min_v=-3., max_v=3.))
     else:
         brain_output = rs.rand(num_experiments, num_data_points, 2)
         for i in range(num_experiments):
-            norm_entropy.append(get_norm_entropy(brain_output[i, :, :]))
+            norm_entropy.append(get_shannon_entropy_2d(brain_output[i, :, :]))
             transfer_entropy.append(get_transfer_entropy(brain_output[i, :, :]))
     print("Simulated {} experiments of {} data points".format(num_experiments, num_data_points))
     print("Transfer Entropy on random {} data: {}".format(distribution, transfer_entropy))
@@ -56,7 +56,7 @@ def test_neural_entropy_single(num_experiments, num_data_points):
     for i in range(num_experiments):
         rs = RandomState(1)
         brain_output = add_noise(brain_output, rs, noise_level=1e-8)
-        norm_entropy.append(get_norm_entropy(brain_output))
+        norm_entropy.append(get_shannon_entropy_2d(brain_output))
         transfer_entropy.append(get_transfer_entropy(brain_output))
     print("Transfer Entropy on 1D constant data: {}".format(transfer_entropy))
     print("Shannon Entropy on 1D constant data: {}".format(norm_entropy))
@@ -75,7 +75,7 @@ def test_neural_entropy_constant(num_experiments, num_data_points):
     for _ in range(num_experiments):
         rs = RandomState(1)
         brain_output = add_noise(brain_output, rs, noise_level=1e-8)  # does rs keep going?
-        norm_entropy.append(get_norm_entropy(brain_output))
+        norm_entropy.append(get_shannon_entropy_2d(brain_output))
         transfer_entropy.append(get_transfer_entropy(brain_output))
     print("Transfer Entropy on 2D constant data: {}".format(transfer_entropy))
     print("Shannon Entropy on 2D constant data: {}".format(norm_entropy))
@@ -89,23 +89,28 @@ def test_neural_entropy_uniform(num_experiments, scramble=True):
     transfer_entropy = []
     norm_entropy = []
     data_per_bin = 1
-    num_data_points = data_per_bin * BINS * BINS
+    num_data_points = int(.2 * BINS * BINS)
+    print('num_data_points:{}'.format(num_data_points))
     brain_output = np.zeros((num_data_points, 2))
     row = 0
+    counter = 0
     for i in range(BINS):
         for j in range(BINS):
             for _ in range(data_per_bin):
+                counter += 1
+                if counter >= num_data_points:
+                    break
                 brain_output[row, :] = [i / 100 + 0.0001, j / 100 + 0.0001]
                 row += 1
     if scramble:
         rs = RandomState(1)
         for _ in range(num_experiments):
             rs.shuffle(brain_output)
-            norm_entropy.append(get_norm_entropy(brain_output))
+            norm_entropy.append(get_shannon_entropy_2d(brain_output))
             transfer_entropy.append(get_transfer_entropy(brain_output))
     else:
         for _ in range(num_experiments):
-            norm_entropy.append(get_norm_entropy(brain_output))
+            norm_entropy.append(get_shannon_entropy_2d(brain_output))
             transfer_entropy.append(get_transfer_entropy(brain_output))
 
     print("Transfer Entropy on uniform bin data: {}".format(transfer_entropy))
@@ -124,7 +129,7 @@ def test_neural_entropy_correlated(num_experiments, num_data_points, cov=0.99, d
     rs = RandomState(0)
     for _ in range(num_experiments):
         brain_output = generate_correlated_data(num_data_points, cov, delay, rs)
-        norm_entropy.append(get_norm_entropy(brain_output, min_v=-3., max_v=3.))
+        norm_entropy.append(get_shannon_entropy_2d(brain_output, min_v=-3., max_v=3.))
         transfer_entropy.append(get_transfer_entropy(brain_output, delay, log=True,
                                                      min_v=-3., max_v=3.))
 
@@ -154,7 +159,7 @@ def test_coupled_oscillators(num_experiments):
                                          lengths=rs.uniform(0.1, 5.0, 2))
         pos = np.column_stack((spring_data[:, 0], spring_data[:, 2]))
         # transfer_entropy, local_te = get_transfer_entropy(pos, local=True)
-        norm_entropy.append(get_norm_entropy(pos, min_v=pos.min(), max_v=pos.max()))
+        norm_entropy.append(get_shannon_entropy_2d(pos, min_v=pos.min(), max_v=pos.max()))
         transfer_entropy.append(get_transfer_entropy(pos, min_v=pos.min(), max_v=pos.max()))
 
         print("Transfer Entropy of spring positions: {}".format(transfer_entropy))
@@ -163,7 +168,7 @@ def test_coupled_oscillators(num_experiments):
         # plt.show()
         # vel = np.column_stack((spring_data[:, 1], spring_data[:, 3]))
         # transfer_entropy = get_transfer_entropy(vel, log=True)
-        # norm_entropy = get_norm_entropy(vel)
+        # norm_entropy = get_shannon_entropy_2d(vel)
         # print("Transfer Entropy of spring velocities: {}".format(transfer_entropy))
         # print("Shannon Entropy of spring velocities: {}".format(norm_entropy))
         # plt.plot(vel)
@@ -231,7 +236,7 @@ def analyze_brain_freqs():
     plt.show()
 
 
-if __name__ == "__main__":
+def run_all():
     entropies = dict()
     num_exp = 100
     data_size = 2000
@@ -269,3 +274,7 @@ if __name__ == "__main__":
     # analyze_sample_brain()
     # analyze_brain_freqs()
     shutdown_JVM()
+
+if __name__ == "__main__":
+    # run_all()
+    test_neural_entropy_uniform(num_experiments=1, scramble=False)

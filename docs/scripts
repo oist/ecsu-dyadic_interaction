@@ -32,4 +32,7 @@ python -m dyadic_interaction.plot_results --dir data/shannon_test/tmp0 --generat
 rsync -av deigo:/bucket/FroeseU/georgina/gitlab/* ./data/
 
 # rsync from fede only specific patters
-rsync -av --include="*/" --include="simulation.json" --include="evo_500.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/dyadic_interaction/* ./data/
+rsync -av --include="*/" --include="simulation.json" --include="evo_2000.json" --exclude="*" deigo-ext:/bucket/FroeseU/fede/dyadic_interaction/* ./data/
+
+# rsync from georgina only specific patters
+rsync -av --include="*/" --include="simulation.json" --include="evo_2000.json" --exclude="*" deigo:/bucket/FroeseU/georgina/gitlab/ ./data/

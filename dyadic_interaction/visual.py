@@ -17,7 +17,7 @@ from pyevolver.json_numpy import NumpyListJsonEncoder
 import json
 
 MAX_CANVAS_SIZE = 500
-ZOOM_FACTOR = 4
+ZOOM_FACTOR = 1
 REFRESH_RATE = 40
 
 CANVAS_CENTER = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
