@@ -17,7 +17,7 @@ module load java-jdk/14
 seed=1
 
 # create a temporary directory for this job and save the name
-dir_seed=`printf "%03d" ${seed}`
+seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${seed}`
 tempdir=/flash/FroeseU/georgina/seed_${dir_seed}
 
 # Start 'myprog' with input from bucket,
