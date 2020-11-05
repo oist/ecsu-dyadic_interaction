@@ -1,4 +1,5 @@
 import numpy as np
+from collections import defaultdict
 
 BINS = 100
 
@@ -61,11 +62,59 @@ def get_shannon_entropy_dd(data, min_v=0., max_v=1.):
     norm_entropy = entropy / np.log2(BINS ** dimensions)
     return norm_entropy
 
+def get_shannon_entropy_dd_simplified(data, min_v=0., max_v=1.):
+    num_data_points = len(data)
+    dimensions = data.shape[1]
+    binning_space = np.linspace(min_v, max_v, BINS)
+
+    histo_columns = []
+    for d in range(dimensions):                
+        column_data = data[:,[d]]
+        digitized_column_data = np.digitize(column_data, binning_space)
+        histo_columns.append(digitized_column_data)
+    
+    dim_bins = np.column_stack(histo_columns)
+    # shape is still (num_data_points, dimensions)
+    # i,j is an index between 0 and BINS-1 corresponding to the binning of data[i][j]
+    # print(dim_bins.shape)
+    assert dim_bins.shape == (num_data_points, dimensions)
+    bin_dict = defaultdict(float)
+    for i in range(num_data_points):
+        binned_row = tuple(dim_bins[i,:])
+        bin_dict[binned_row] += 1
+    histo = np.array(list(bin_dict.values()))
+    histo_prob = histo / num_data_points
+    histo_neg_prob = np.negative(histo_prob)
+    hist_log_prob = np.log2(histo_prob)
+    histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
+    entropy = np.nansum(histo_neg_prob_log_prob)
+    norm_entropy = entropy / np.log2(BINS ** dimensions)
+    return norm_entropy
+
+
+    # print(histo)
+    # with np.errstate(divide='ignore'):
+    #     histo_prob = histo / num_data_points
+    #     histo_neg_prob = np.negative(histo_prob)
+    #     hist_log_prob = np.log2(histo_prob)
+    # with np.errstate(invalid='ignore'):
+    #     histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
+    # entropy = np.nansum(histo_neg_prob_log_prob)
+    # norm_entropy = entropy / np.log2(BINS ** dimensions)
+    # return norm_entropy
+
 def test_1d():
     a = np.array([1.1, 2.2, 3.3, 4.4])
     print(a)
     distance_entropy = get_shannon_entropy_1d(a)
     print(distance_entropy)
+
+def test_2d():
+    a = np.array([[.1, .2, .3, .4],[.1, .2, .3, .4]])
+    a = np.transpose(a)
+    print(a)
+    norm_entropy = get_shannon_entropy_2d(a)
+    print(norm_entropy)
 
 def test_dd():
     a = np.array([
@@ -75,14 +124,15 @@ def test_dd():
     norm_entropy = get_shannon_entropy_dd(a)
     print(norm_entropy)
 
-def test_2d():
-    a = np.array([[.1, .2, .3, .4],[.1, .2, .3, .4]])
-    a = np.transpose(a)
-    print(a)
-    norm_entropy = get_shannon_entropy_2d(a)
-    print(norm_entropy)
+def test_dd_simple():
+    data = np.random.random((100,5))
+    # entropy_dd = get_shannon_entropy_dd(data)
+    entropy_dd_simple = get_shannon_entropy_dd_simple(data)
+    # print('entropy_dd: {}'.format(entropy_dd))
+    print('entropy_dd_simple: {}'.format(entropy_dd_simple))
 
 if __name__ == "__main__":
-    test_1d()    
+    # test_1d()    
     # test_2d()
     # test_dd()
+    test_dd_simple()

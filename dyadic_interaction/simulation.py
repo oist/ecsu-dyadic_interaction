@@ -8,7 +8,7 @@ from numpy import pi as pi
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd, get_shannon_entropy_1d
+from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd_simplified, get_shannon_entropy_1d
 from dyadic_interaction.transfer_entropy import get_transfer_entropy
 from dyadic_interaction.entropy.entropy import _numba_sampen
 from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_STD
@@ -449,7 +449,7 @@ class Simulation:
                         all_values_for_computing_entropy = values_for_computing_entropy[t]
                     min_v, max_v= 0., 100.
                     performance_agent_AB = ([                        
-                        get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
+                        get_shannon_entropy_dd_simplified(all_values_for_computing_entropy, min_v, max_v)
                     ])
                 else: # neural
                     min_v, max_v= 0., 1.
@@ -469,7 +469,7 @@ class Simulation:
 
                         if self.entropy_type == 'shannon-dd':
                             performance_agent_AB.append(
-                                get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
+                                get_shannon_entropy_dd_simplified(all_values_for_computing_entropy, min_v, max_v)
                             )
                         else:
                             # shannon-1d
