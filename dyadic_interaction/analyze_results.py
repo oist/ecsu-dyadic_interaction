@@ -13,9 +13,15 @@ def analyze_shannon_entropy(base_dir):
     for exp in exp_dirs:
         exp_dir = os.path.join(base_dir, exp)
         if last_evo_file is None:
-            last_evo_file = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])[-1]
+            evo_files = sorted([f for f in os.listdir(exp_dir) if 'evo_' in f])
+            if len(evo_files)==0:
+                # no evo files
+                continue
+            last_evo_file = evo_files[-1]
             print('Selected evo: {}'.format(last_evo_file))
         evo_file = os.path.join(exp_dir, last_evo_file)
+        if not os.path.isfile(evo_file):
+            continue
         with open(evo_file) as f_in:
             exp_evo_data = json.load(f_in)
             seeds.append(exp_evo_data['random_seed'])

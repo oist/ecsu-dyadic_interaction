@@ -13,7 +13,7 @@ module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
-seed_dir=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
+seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
 tempdir=/flash/FroeseU/georgina/${seed_dir}
 mkdir ${tempdir}
 
