@@ -8,7 +8,7 @@ from numpy import pi as pi
 from dyadic_interaction.agent_body import AgentBody
 from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction import gen_structure
-from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd, get_shannon_entropy_1d
+from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd_simplified, get_shannon_entropy_1d
 from dyadic_interaction.transfer_entropy import get_transfer_entropy
 from dyadic_interaction.entropy.entropy import _numba_sampen
 from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_STD
@@ -25,7 +25,7 @@ from joblib import Parallel, delayed
 
 @dataclass
 class Simulation:
-    entropy_type: str = 'shannon' # 'shannon', 'transfer', 'sample'
+    entropy_type: str = 'shannon-dd' # 'shannon-1d', 'shannon-dd', 'transfer', 'sample'
     entropy_target_value: str = 'neural' # 'neural', 'distance'
     concatenate: bool = True # whether to concatenate values in entropy_target_value
     isolation: bool = False # whether to run simulation on a single agent
@@ -62,8 +62,8 @@ class Simulation:
         assert self.collision_type in ['none', 'overlapping', 'edge'], \
             "collision_type should be one of ['none', 'overlapping', 'edge']"
 
-        assert self.entropy_type in ['shannon', 'transfer', 'sample'], \
-            'entropy_type should be shannon or transfer'    
+        assert self.entropy_type in ['shannon-1d', 'shannon-dd', 'transfer', 'sample'], \
+            "entropy_type should be in ['shannon-1d', 'shannon-dd', 'transfer', 'sample']"
 
         assert self.entropy_target_value in ['neural', 'distance'], \
             'entropy_type should be shannon or transfer'
@@ -437,7 +437,8 @@ class Simulation:
                         get_transfer_entropy(all_values_for_computing_entropy, binning=True) 
                     )
 
-            elif self.entropy_type=='shannon':
+            elif self.entropy_type.startswith('shannon'):
+                # shannon-1d, shannon-dd
                 if self.entropy_target_value == 'distance':
                     if self.concatenate:
                         all_values_for_computing_entropy = np.concatenate([
@@ -448,7 +449,7 @@ class Simulation:
                         all_values_for_computing_entropy = values_for_computing_entropy[t]
                     min_v, max_v= 0., 100.
                     performance_agent_AB = ([                        
-                        get_shannon_entropy_dd(all_values_for_computing_entropy, min_v, max_v)
+                        get_shannon_entropy_dd_simplified(all_values_for_computing_entropy, min_v, max_v)
                     ])
                 else: # neural
                     min_v, max_v= 0., 1.
@@ -466,11 +467,17 @@ class Simulation:
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
 
-                        for c in range(self.num_brain_neurons):
-                            column_values = all_values_for_computing_entropy[:,c]
+                        if self.entropy_type == 'shannon-dd':
                             performance_agent_AB.append(
-                                get_shannon_entropy_1d(column_values, min_v, max_v)                                
+                                get_shannon_entropy_dd_simplified(all_values_for_computing_entropy, min_v, max_v)
                             )
+                        else:
+                            # shannon-1d
+                            for c in range(self.num_brain_neurons):
+                                column_values = all_values_for_computing_entropy[:,c]
+                                performance_agent_AB.append(
+                                    get_shannon_entropy_1d(column_values, min_v, max_v)
+                                )
             
             else:
                 # sample entropy
