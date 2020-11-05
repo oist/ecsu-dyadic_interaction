@@ -13,8 +13,8 @@ module load java-jdk/14
 # module load ruse
 
 # create a temporary directory for this job and save the name
-seed_dir=`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/fede/${seed_dir}
+seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
+tempdir=/flash/FroeseU/georgina/${seed_dir}
 mkdir ${tempdir}
 
 # Start 'myprog' with input from bucket,
@@ -27,8 +27,9 @@ python -m dyadic_interaction.main \
 --dir $tempdir \
 --entropy_type shannon \
 --entropy_target_value neural \
---concatenate on \
---collision_type overlapping \
+--concatenate off \
+--isolation off \
+--collision_type edge \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \
 --num_neurons 2 \
