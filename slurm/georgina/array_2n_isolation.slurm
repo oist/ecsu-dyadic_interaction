@@ -25,7 +25,7 @@ source env/bin/activate
 # ruse
 python -m dyadic_interaction.main \
 --dir $tempdir \
---entropy_type shannon \
+--entropy_type shannon-1d \
 --entropy_target_value neural \
 --concatenate off \
 --isolation on \
