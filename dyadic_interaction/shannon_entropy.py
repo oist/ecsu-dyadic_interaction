@@ -20,7 +20,7 @@ def get_shannon_entropy_1d(data_1d, min_v=0., max_v=100.):
         histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
     entropy = np.nansum(histo_neg_prob_log_prob)
 
-    distance_shannon_entropy = entropy / np.log2(BINS)
+    distance_shannon_entropy = entropy / np.log2(num_data_points)
     return distance_shannon_entropy
 
 
@@ -40,7 +40,7 @@ def get_shannon_entropy_2d(brain_output, min_v=0., max_v=1.):
     with np.errstate(invalid='ignore'):
         histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
     entropy = np.nansum(histo_neg_prob_log_prob)
-    norm_entropy = entropy / np.log2(BINS * BINS)
+    norm_entropy = entropy / np.log2(num_data_points)
     return norm_entropy
 
 def get_shannon_entropy_dd(data, min_v=0., max_v=1.):
@@ -59,7 +59,7 @@ def get_shannon_entropy_dd(data, min_v=0., max_v=1.):
     with np.errstate(invalid='ignore'):
         histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
     entropy = np.nansum(histo_neg_prob_log_prob)
-    norm_entropy = entropy / np.log2(BINS ** dimensions)
+    norm_entropy = entropy / np.log2(num_data_points)
     return norm_entropy
 
 def get_shannon_entropy_dd_simplified(data, min_v=0., max_v=1.):
@@ -88,7 +88,7 @@ def get_shannon_entropy_dd_simplified(data, min_v=0., max_v=1.):
     hist_log_prob = np.log2(histo_prob)
     histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
     entropy = np.nansum(histo_neg_prob_log_prob)
-    norm_entropy = entropy / np.log2(BINS ** dimensions)
+    norm_entropy = entropy / np.log2(num_data_points)
     return norm_entropy
 
 
@@ -135,14 +135,16 @@ def shannon_plot(dim=2):
     import matplotlib.pyplot as plt
     import math
     data_points = 2000
-    bins_per_dim = 100
-    total_bins = bins_per_dim ** dim
+    bins_per_dim = 100    
     X = list(range(1,data_points+1))
-    # Y = [- x/data_points * math.log2(1/data_points) / math.log2(total_bins) for x in X] 
-    # Y = [- x/total_bins * math.log2(1/total_bins) / math.log2(total_bins) for x in X] 
+    
+    # original implementation by candadai (wrong)
+    #Y = [- x/data_points * math.log2(1/data_points) / math.log2(bins_per_dim ** dim) for x in X] 
+    
+    # new implementation (correct)
     Y = [- x/data_points * math.log2(1/data_points) / math.log2(data_points) for x in X] 
+    
     print(Y[1999])
-    plt.plot(X,Y)
     plt.show()
     
 
@@ -151,4 +153,4 @@ if __name__ == "__main__":
     # test_2d()
     # test_dd()
     # test_dd_simple()
-    shannon_plot(4)
+    shannon_plot(2)
