@@ -14,7 +14,7 @@ module load java-jdk/14
 
 # create a temporary directory for this job and save the name
 seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/georgina/${seed_dir}
+tempdir=/flash/FroeseU/fede/${seed_dir}
 mkdir ${tempdir}
 
 # Start 'myprog' with input from bucket,
@@ -25,7 +25,7 @@ source env/bin/activate
 # ruse
 python -m dyadic_interaction.main \
 --dir $tempdir \
---entropy_type shannon \
+--entropy_type shannon-dd \
 --entropy_target_value neural \
 --concatenate off \
 --isolation off \

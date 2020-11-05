@@ -18,7 +18,7 @@ seed=1
 
 # create a temporary directory for this job and save the name
 seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${seed}`
-tempdir=/flash/FroeseU/georgina/seed_${dir_seed}
+tempdir=/flash/FroeseU/fede/seed_${dir_seed}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
@@ -28,7 +28,7 @@ source env/bin/activate
 # ruse
 python -m dyadic_interaction.main \
 --dir $tempdir \
---entropy_type shannon \
+--entropy_type shannon-dd \
 --entropy_target_value neural \
 --concatenate off \
 --isolation off \
