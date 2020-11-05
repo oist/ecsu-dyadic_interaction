@@ -127,12 +127,28 @@ def test_dd():
 def test_dd_simple():
     data = np.random.random((100,5))
     # entropy_dd = get_shannon_entropy_dd(data)
-    entropy_dd_simple = get_shannon_entropy_dd_simple(data)
+    entropy_dd_simple = get_shannon_entropy_dd_simplified(data)
     # print('entropy_dd: {}'.format(entropy_dd))
     print('entropy_dd_simple: {}'.format(entropy_dd_simple))
+
+def shannon_plot(dim=2):
+    import matplotlib.pyplot as plt
+    import math
+    data_points = 2000
+    bins_per_dim = 100
+    total_bins = bins_per_dim ** dim
+    X = list(range(1,data_points+1))
+    # Y = [- x/data_points * math.log2(1/data_points) / math.log2(total_bins) for x in X] 
+    # Y = [- x/total_bins * math.log2(1/total_bins) / math.log2(total_bins) for x in X] 
+    Y = [- x/data_points * math.log2(1/data_points) / math.log2(data_points) for x in X] 
+    print(Y[1999])
+    plt.plot(X,Y)
+    plt.show()
+    
 
 if __name__ == "__main__":
     # test_1d()    
     # test_2d()
     # test_dd()
-    test_dd_simple()
+    # test_dd_simple()
+    shannon_plot(4)
