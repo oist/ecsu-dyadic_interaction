@@ -11,7 +11,7 @@ from dyadic_interaction import gen_structure
 from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd_simplified, get_shannon_entropy_1d
 from dyadic_interaction.transfer_entropy import get_transfer_entropy
 from dyadic_interaction.entropy.entropy import _numba_sampen
-from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_DISTANCE_STD, DEFAULT_SAMPLE_ENTROPY_ANGLE_STD
+from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_DISTANCE_STD, DEFAULT_SAMPLE_ENTROPY_ANGLE_STD, DEFAULT_SAMPLE_ENTROPY_NEURAL_STD
 from dyadic_interaction import utils
 from dyadic_interaction.utils import assert_string_in_values
 from dataclasses import dataclass, field, asdict, fields
@@ -72,11 +72,6 @@ class Simulation:
         if self.entropy_type == 'transfer':
             assert self.entropy_target_value == 'neural' and self.num_brain_neurons == 2, \
                 'Transfer entropy currently works only on two dimensional data (i.e., 2 neural outputs per agent)'
-
-        if self.entropy_type == 'sample':  
-            accepted_entropy_target_values = ['distance', 'angle']
-            assert self.entropy_target_value in accepted_entropy_target_values, \
-                'sample entropy applies only to 1d data, i.e., when entropy_target_value in {}'.format(accepted_entropy_target_values)
 
         if self.entropy_target_value == 'angle':
             assert self.entropy_type in ['shannon-1d','sample'], \
@@ -516,22 +511,8 @@ class Simulation:
                                 )            
             else:
                 # sample entropy
-                # only applies to 1d data (i.e., the agents distance or angle)
-                if self.entropy_target_value == 'distance':
-                    if self.concatenate:
-                        all_values_for_computing_entropy = np.concatenate([
-                            values_for_computing_entropy
-                        ])
-                    else:
-                        all_values_for_computing_entropy = values_for_computing_entropy[t]                    
-                        mean = all_values_for_computing_entropy.mean()
-                        std = all_values_for_computing_entropy.std()
-                        normalize_values = (all_values_for_computing_entropy - mean) / std
-                        performance_agent_AB = [
-                            _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_DISTANCE_STD)) 
-                        ]
-                else:
-                    # angles
+                # only applies to 1d data
+                if self.entropy_target_value == 'neural':
                     for a in range(2):
                         if ghost_index == a:
                             continue
@@ -544,12 +525,49 @@ class Simulation:
                             ])
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
+
+                        for c in range(self.num_brain_neurons):
+                            column_values = all_values_for_computing_entropy[:,c]
+                            mean = column_values.mean()
+                            std = column_values.std()
+                            normalize_values = (column_values - mean) / std
+                            performance_agent_AB.append(
+                                _numba_sampen(normalize_values, order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_NEURAL_STD)) 
+                            )        
+                elif self.entropy_target_value == 'distance':
+                    if self.concatenate:
+                        all_values_for_computing_entropy = np.concatenate([
+                            values_for_computing_entropy
+                        ])
+                    else:
+                        all_values_for_computing_entropy = values_for_computing_entropy[t]                    
+                        mean = all_values_for_computing_entropy.mean()
+                        std = all_values_for_computing_entropy.std()
+                        normalize_values = (all_values_for_computing_entropy - mean) / std
+                        performance_agent_AB = [
+                            _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_DISTANCE_STD)) 
+                        ]
+                else: 
+                    assert self.entropy_target_value == 'angle'
+                    for a in range(2):
+                        if ghost_index == a:
+                            continue
+                        if self.isolation and a==1:
+                            continue
+                        if self.concatenate:
+                            all_values_for_computing_entropy = np.concatenate([
+                                values_for_computing_entropy[t][a]
+                                for t in range(self.num_trials)
+                            ])
+                        else:
+                            all_values_for_computing_entropy = values_for_computing_entropy[t][a]
+                        all_values_for_computing_entropy = np.diff(all_values_for_computing_entropy)
                         mean = all_values_for_computing_entropy.mean()
                         std = all_values_for_computing_entropy.std()
                         normalize_values = (all_values_for_computing_entropy - mean) / std
                         performance_agent_AB.append(
-                            _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * 10.)) 
-                        )                                                
+                            _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_ANGLE_STD)) 
+                        )                                                 
 
             agents_perf = np.mean(performance_agent_AB)
 
