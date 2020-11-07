@@ -468,7 +468,8 @@ class Simulation:
                     ])
                 if self.entropy_target_value == 'angle':
                     # angle (apply modulo angle of 2*pi)
-                    min_v, max_v= 0., 2*np.pi
+                    # min_v, max_v= 0., 2*np.pi
+                    min_v, max_v= -np.pi/4, np.pi/4
                     for a in range(2):
                         if ghost_index == a:
                             continue
@@ -481,7 +482,8 @@ class Simulation:
                             ])
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
-                        all_values_for_computing_entropy = all_values_for_computing_entropy % 2*np.pi
+                        # all_values_for_computing_entropy = all_values_for_computing_entropy % 2*np.pi
+                        all_values_for_computing_entropy = np.diff(all_values_for_computing_entropy)
                         performance_agent_AB = ([                        
                             get_shannon_entropy_1d(all_values_for_computing_entropy, min_v, max_v)
                         ])                 
