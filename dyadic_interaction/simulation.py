@@ -483,6 +483,7 @@ class Simulation:
                         else:
                             all_values_for_computing_entropy = values_for_computing_entropy[t][a]
                         # all_values_for_computing_entropy = all_values_for_computing_entropy % 2*np.pi
+                        all_values_for_computing_entropy = all_values_for_computing_entropy.flatten()
                         all_values_for_computing_entropy = np.diff(all_values_for_computing_entropy)
                         performance_agent_AB = ([                        
                             get_shannon_entropy_1d(all_values_for_computing_entropy, min_v, max_v)
