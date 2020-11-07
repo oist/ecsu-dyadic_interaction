@@ -86,3 +86,6 @@ def make_dir_if_not_exists(dir_path):
         assert os.path.isdir(dir_path), 'Path {} is not a directory'.format(dir_path)
         return
     os.makedirs(dir_path)
+
+def assert_string_in_values(s, s_name, values):
+    assert s in values, '{} should be one of the following: {}. Given value: {}'.format(s_name, values, s)

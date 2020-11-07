@@ -11,8 +11,9 @@ from dyadic_interaction import gen_structure
 from dyadic_interaction.shannon_entropy import get_shannon_entropy_dd_simplified, get_shannon_entropy_1d
 from dyadic_interaction.transfer_entropy import get_transfer_entropy
 from dyadic_interaction.entropy.entropy import _numba_sampen
-from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_STD
+from dyadic_interaction.sample_entropy import DEFAULT_SAMPLE_ENTROPY_DISTANCE_STD, DEFAULT_SAMPLE_ENTROPY_ANGLE_STD
 from dyadic_interaction import utils
+from dyadic_interaction.utils import assert_string_in_values
 from dataclasses import dataclass, field, asdict, fields
 from typing import Dict, Tuple, List
 import json
@@ -26,7 +27,7 @@ from joblib import Parallel, delayed
 @dataclass
 class Simulation:
     entropy_type: str = 'shannon-dd' # 'shannon-1d', 'shannon-dd', 'transfer', 'sample'
-    entropy_target_value: str = 'neural' # 'neural', 'distance'
+    entropy_target_value: str = 'neural' # 'neural', 'distance', 'angle'
     concatenate: bool = True # whether to concatenate values in entropy_target_value
     isolation: bool = False # whether to run simulation on a single agent
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
@@ -59,26 +60,27 @@ class Simulation:
         self.__check_params__()
 
     def __check_params__(self):
-        assert self.collision_type in ['none', 'overlapping', 'edge'], \
-            "collision_type should be one of ['none', 'overlapping', 'edge']"
+        assert_string_in_values(self.collision_type, 'collision_type', ['none', 'overlapping', 'edge'])
+        assert_string_in_values(self.entropy_type, 'entropy_type', ['shannon-1d', 'shannon-dd', 'transfer', 'sample'])
+        assert_string_in_values(self.entropy_target_value, 'entropy_target_value', ['neural', 'distance', 'angle'])
 
-        assert self.entropy_type in ['shannon-1d', 'shannon-dd', 'transfer', 'sample'], \
-            "entropy_type should be in ['shannon-1d', 'shannon-dd', 'transfer', 'sample']"
-
-        assert self.entropy_target_value in ['neural', 'distance'], \
-            'entropy_type should be shannon or transfer'
-
-        if self.entropy_type == 'shannon':
-            assert self.entropy_target_value == 'neural', \
-                'Shannon entropy currently works only on neural outputs'
+        if self.entropy_type in ['shannon-1d', 'shannon-dd']:
+            accepted_entropy_target_values = ['neural', 'distance', 'angle']
+            assert self.entropy_target_value in accepted_entropy_target_values, \
+                "Shannon entropy currently works only when entropy_target_value in {}".format(accepted_entropy_target_values)
 
         if self.entropy_type == 'transfer':
             assert self.entropy_target_value == 'neural' and self.num_brain_neurons == 2, \
                 'Transfer entropy currently works only on two dimensional data (i.e., 2 neural outputs per agent)'
 
         if self.entropy_type == 'sample':  
-            assert self.entropy_target_value == 'distance', \
-                'sample entropy applies only to 1d data (i.e. distance)'
+            accepted_entropy_target_values = ['distance', 'angle']
+            assert self.entropy_target_value in accepted_entropy_target_values, \
+                'sample entropy applies only to 1d data, i.e., when entropy_target_value in {}'.format(accepted_entropy_target_values)
+
+        if self.entropy_target_value == 'angle':
+            assert self.entropy_type in ['shannon-1d','sample'], \
+                "entropy on angle works only for entropy_type in ['shannon-1d','sample']"
 
     def init_agents_pair(self):
         self.agents_pair_net = []
@@ -203,12 +205,22 @@ class Simulation:
                     for _ in range(2)
                 ] for _ in range(self.num_trials)
             ]
-        else:
+        elif self.entropy_target_value == 'distance':
+            # distance (1-d data) per trial            
             # entropy is computed based on distances
             # 4 list (one per trial) with the agent distances
             values_for_computing_entropy = [
                 np.zeros((self.num_data_points,1))
                 for _ in range(self.num_trials)
+            ]
+        else:
+            # angle: (1-d data) per trial per agent
+            assert self.entropy_target_value == 'angle'
+            values_for_computing_entropy = [
+                [
+                    np.zeros((self.num_data_points,1))
+                    for _ in range(2)
+                ] for _ in range(self.num_trials)
             ]
 
         def init_data():
@@ -299,8 +311,12 @@ class Simulation:
             if self.entropy_target_value == 'neural': #neural outputs 
                 for a in [x for x in range(2) if x != ghost_index]:
                     values_for_computing_entropy[t][a][i] = self.agents_pair_net[a].brain.output  
+            elif self.entropy_target_value == 'angle': # angle
+                for a in [x for x in range(2) if x != ghost_index]:
+                    values_for_computing_entropy[t][a][i] = self.agents_pair_body[a].angle
             else: # distance
                 values_for_computing_entropy[t][i] = get_agents_distance()
+            
                     
         def prepare_agents_for_trial(t):
             for a in range(2):
@@ -406,10 +422,10 @@ class Simulation:
             if self.concatenate and t!=3:
                 continue
 
+            performance_agent_AB = []
             if self.entropy_type=='transfer':
                 # it only applies to neural_outputs (with 2 neurons)
                 # add random noise to data before calculating transfer entropy
-                performance_agent_AB = []
                 for a in range(2):
                     if ghost_index == a:
                         continue
@@ -437,13 +453,12 @@ class Simulation:
                         get_transfer_entropy(all_values_for_computing_entropy, binning=True) 
                     )
 
-            elif self.entropy_type.startswith('shannon'):
+            elif self.entropy_type in ['shannon-1d', 'shannon-dd']:
                 # shannon-1d, shannon-dd
                 if self.entropy_target_value == 'distance':
                     if self.concatenate:
                         all_values_for_computing_entropy = np.concatenate([
-                            values_for_computing_entropy[t]
-                            for t in range(self.num_trials)
+                            values_for_computing_entropy
                         ])
                     else:
                         all_values_for_computing_entropy = values_for_computing_entropy[t]
@@ -451,9 +466,27 @@ class Simulation:
                     performance_agent_AB = ([                        
                         get_shannon_entropy_dd_simplified(all_values_for_computing_entropy, min_v, max_v)
                     ])
+                if self.entropy_target_value == 'angle':
+                    # angle (apply modulo angle of 2*pi)
+                    min_v, max_v= 0., 2*np.pi
+                    for a in range(2):
+                        if ghost_index == a:
+                            continue
+                        if self.isolation and a==1:
+                            continue
+                        if self.concatenate:
+                            all_values_for_computing_entropy = np.concatenate([
+                                values_for_computing_entropy[t][a]
+                                for t in range(self.num_trials)
+                            ])
+                        else:
+                            all_values_for_computing_entropy = values_for_computing_entropy[t][a]
+                        all_values_for_computing_entropy = all_values_for_computing_entropy % 2*np.pi
+                        performance_agent_AB = ([                        
+                            get_shannon_entropy_1d(all_values_for_computing_entropy, min_v, max_v)
+                        ])                 
                 else: # neural
                     min_v, max_v= 0., 1.
-                    performance_agent_AB = []
                     for a in range(2):
                         if ghost_index == a:
                             continue
@@ -477,24 +510,43 @@ class Simulation:
                                 column_values = all_values_for_computing_entropy[:,c]
                                 performance_agent_AB.append(
                                     get_shannon_entropy_1d(column_values, min_v, max_v)
-                                )
-            
+                                )            
             else:
                 # sample entropy
-                # only applies to 1d data (i.e., the agents distance)
-                if self.concatenate:
-                    all_values_for_computing_entropy = np.concatenate([
-                        values_for_computing_entropy[t]
-                        for t in range(self.num_trials)
-                    ])
+                # only applies to 1d data (i.e., the agents distance or angle)
+                if self.entropy_target_value == 'distance':
+                    if self.concatenate:
+                        all_values_for_computing_entropy = np.concatenate([
+                            values_for_computing_entropy
+                        ])
+                    else:
+                        all_values_for_computing_entropy = values_for_computing_entropy[t]                    
+                        mean = all_values_for_computing_entropy.mean()
+                        std = all_values_for_computing_entropy.std()
+                        normalize_values = (all_values_for_computing_entropy - mean) / std
+                        performance_agent_AB = [
+                            _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_DISTANCE_STD)) 
+                        ]
                 else:
-                    all_values_for_computing_entropy = values_for_computing_entropy[t]
-                mean = all_values_for_computing_entropy.mean()
-                std = all_values_for_computing_entropy.std()
-                normalize_values = (all_values_for_computing_entropy - mean) / std
-                performance_agent_AB = [
-                    _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * DEFAULT_SAMPLE_ENTROPY_STD))
-                ]
+                    # angles
+                    for a in range(2):
+                        if ghost_index == a:
+                            continue
+                        if self.isolation and a==1:
+                            continue
+                        if self.concatenate:
+                            all_values_for_computing_entropy = np.concatenate([
+                                values_for_computing_entropy[t][a]
+                                for t in range(self.num_trials)
+                            ])
+                        else:
+                            all_values_for_computing_entropy = values_for_computing_entropy[t][a]
+                        mean = all_values_for_computing_entropy.mean()
+                        std = all_values_for_computing_entropy.std()
+                        normalize_values = (all_values_for_computing_entropy - mean) / std
+                        performance_agent_AB.append(
+                            _numba_sampen(normalize_values.flatten(), order=2, r=(0.2 * 10.)) 
+                        )                                                
 
             agents_perf = np.mean(performance_agent_AB)
 
