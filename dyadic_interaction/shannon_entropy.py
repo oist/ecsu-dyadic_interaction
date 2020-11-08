@@ -20,7 +20,8 @@ def get_shannon_entropy_1d(data_1d, min_v=0., max_v=100.):
         histo_neg_prob_log_prob = np.multiply(histo_neg_prob, hist_log_prob)
     entropy = np.nansum(histo_neg_prob_log_prob)
 
-    distance_shannon_entropy = entropy / np.log2(num_data_points)
+    norm_factor = min(BINS, num_data_points)
+    distance_shannon_entropy = entropy / np.log2(norm_factor)
     return distance_shannon_entropy
 
 
@@ -104,9 +105,10 @@ def get_shannon_entropy_dd_simplified(data, min_v=0., max_v=1.):
     # return norm_entropy
 
 def test_1d():
-    a = np.array([1.1, 2.2, 3.3, 4.4])
-    print(a)
-    distance_entropy = get_shannon_entropy_1d(a)
+    # a = np.array([1.1, 2.2, 3.3, 4.4])
+    a = np.random.random(1000)
+    # print(a)
+    distance_entropy = get_shannon_entropy_1d(a, min_v=0., max_v=1.)
     print(distance_entropy)
 
 def test_2d():
@@ -143,14 +145,15 @@ def shannon_plot(dim=2):
     
     # new implementation (correct)
     Y = [- x/data_points * math.log2(1/data_points) / math.log2(data_points) for x in X] 
+    plt.plot(X, Y)
     
     print(Y[1999])
     plt.show()
     
 
 if __name__ == "__main__":
-    # test_1d()    
+    test_1d()    
     # test_2d()
     # test_dd()
     # test_dd_simple()
-    shannon_plot(2)
+    # shannon_plot(1)
