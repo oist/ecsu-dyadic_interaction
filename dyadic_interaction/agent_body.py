@@ -95,10 +95,17 @@ class AgentBody:
             dist_sensor_emitter = norm(sp - emitter_position)
             if self.collision_type == 'edge':
                 dist_sensor_emitter = max(dist_sensor_emitter,  self.agent_body_radius)           
-            N = dist_sensor_emitter / self.agent_body_radius
-            if self.collision_type == 'overlapping':
+                N = dist_sensor_emitter / self.agent_body_radius
+                Is = emitter_strenght / np.power(N, 2) 
+            elif self.collision_type == 'overlapping':
+                dist_sensor_emitter = max(dist_sensor_emitter,  self.agent_body_radius)           
+                N = dist_sensor_emitter / self.agent_body_radius
                 N -= 1 # as in the original version
-            Is = emitter_strenght / np.power(N, 2)            
+                Is = emitter_strenght / np.power(N, 2)            
+            else:
+                # self.collision_type == 'none':
+                dist_sensor_emitter = max(dist_sensor_emitter,  1.)
+                Is = emitter_strenght / np.power(dist_sensor_emitter, 2)
             pow_Radius = np.power(self.agent_body_radius,2)
             pow_Dsen = np.power(dist_sensor_emitter,2)
             A = (pow_D_centers - pow_Radius)/pow_Dsen                        

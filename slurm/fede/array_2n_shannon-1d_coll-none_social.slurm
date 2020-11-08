@@ -26,13 +26,13 @@ source env/bin/activate
 python -m dyadic_interaction.main \
 --dir $tempdir \
 --entropy_type shannon-1d \
---entropy_target_value angle \
+--entropy_target_value neural \
 --concatenate off \
 --isolation off \
---collision_type edge \
+--collision_type none \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \
---num_neurons 5 \
+--num_neurons 2 \
 --popsize 96 \
 --num_gen 2000 \
 --trial_duration 200
