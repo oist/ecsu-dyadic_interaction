@@ -25,14 +25,14 @@ source env/bin/activate
 # ruse
 python -m dyadic_interaction.main \
 --dir $tempdir \
---entropy_type shannon-1d \
+--entropy_type shannon-dd \
 --entropy_target_value neural \
 --concatenate off \
---isolation off \
---collision_type none \
+--isolation on \
+--collision_type edge \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \
---num_neurons 2 \
+--num_neurons 3 \
 --popsize 96 \
 --num_gen 2000 \
 --trial_duration 200

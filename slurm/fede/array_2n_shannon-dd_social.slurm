@@ -29,7 +29,7 @@ python -m dyadic_interaction.main \
 --entropy_target_value neural \
 --concatenate off \
 --isolation off \
---collision_type none \
+--collision_type edge \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \
 --num_neurons 2 \
