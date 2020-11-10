@@ -1,10 +1,10 @@
 #!/bin/bash
 #SBATCH --partition=compute
-#SBATCH --time=6:00:00
+#SBATCH --time=4:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --output=slurm_%A-%a.out
-#SBATCH --mem=500G
-#SBATCH --cpus-per-task=128
+#SBATCH --mem=100G
+#SBATCH --cpus-per-task=100
 #SBATCH --array=1-10%10
 
 # load python module
@@ -28,7 +28,7 @@ python -m dyadic_interaction.main \
 --entropy_type shannon-1d \
 --entropy_target_value neural \
 --concatenate off \
---isolation on \
+--isolation off \
 --collision_type edge \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \

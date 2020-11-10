@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from scipy import stats
 import sys
 
-def analyze_shannon_entropy(base_dir):    
+def get_last_entropies_runs(base_dir, plot=True):    
     # base_dir = 'data/transfer_entropy/MAX'
     exp_dirs = sorted(os.listdir(base_dir))
     best_exp_performance = []
@@ -34,13 +34,15 @@ def analyze_shannon_entropy(base_dir):
             print('{} {:.3f}'.format(exp, last_best_performance))
             best_exp_performance.append(last_best_performance)
     print(stats.describe(best_exp_performance))
-    plt.bar(seeds, best_exp_performance)
-    plt.xlabel('Seeds')
-    plt.ylabel('Performance')
-    plt.xticks(seeds)
-    plt.show()
+    if plot:
+        plt.bar(seeds, best_exp_performance)
+        plt.xlabel('Seeds')
+        plt.ylabel('Performance')
+        plt.xticks(seeds)
+        plt.show()
+    return dict(zip(seeds, best_exp_performance))
 
 if __name__ == "__main__":
     assert len(sys.argv)==2, "You need to specify the directory with the various runs to analyze"    
     base_dir = sys.argv[1]
-    analyze_shannon_entropy(base_dir)
+    get_last_entropies_runs(base_dir)
