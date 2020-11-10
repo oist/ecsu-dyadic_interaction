@@ -7,7 +7,12 @@ import pandas as pd
 from dyadic_interaction.analyze_results import get_last_entropies_runs
 
 def export_results(base_dir):        
-    dirs = sorted(os.listdir(base_dir))    
+    dirs = sorted(
+        [ 
+            dir_name for dir_name in os.listdir(base_dir) 
+            if os.path.isdir(os.path.join(base_dir, dir_name)) 
+        ]
+    )
     data_dict = None
     for exp_name in dirs:
         seed_entropy = get_last_entropies_runs(os.path.join(base_dir,exp_name), plot=False)
@@ -18,7 +23,7 @@ def export_results(base_dir):
     df = pd.DataFrame(data_dict) 
     df.set_index('seeds', inplace=True)
     print(df)
-    df.to_csv(os.path.join(base_dir,'all_results.csv'))
+    df.to_csv(os.path.join(base_dir, 'all_results.csv'))
 
 
 
