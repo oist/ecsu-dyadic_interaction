@@ -136,6 +136,18 @@ def plot_neural_activity_scatter(data_record):
             ax.plot(brain_output[:, 0], brain_output[:, 1], zorder=0) # brain_output[:, 2]
     plt.show()
 
+def plot_neural_states_scatter(data_record):
+    num_trials = num_cols = 4
+    fig = plt.figure(figsize=(10, 6))
+    fig.suptitle("Brain states")
+    for t in range(num_trials):       
+        for a in range(2):
+            ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1) # projection='3d'
+            brain_states = data_record['brain_state'][t][a]            
+            # ax.scatter(brain_states[0][0], brain_states[0][1], color='orange', zorder=1)
+            ax.plot(brain_states[-100:, 0], brain_states[-100:, 1], '-+', zorder=0) # brain_output[:, 2]
+    plt.show()
+
 def plot_neural_activity(data_record, trial='all'):
     num_cols = num_trials = 4
     if trial == 'all':
@@ -304,6 +316,7 @@ def plot_results(evo, data_record, trial='all'):
     
     plot_performances(evo)
     # plot_neural_activity_scatter(data_record)
+    plot_neural_states_scatter(data_record)
     plot_neural_activity(data_record, trial)    
     plot_angles(data_record)
     plot_distances(data_record, trial)
