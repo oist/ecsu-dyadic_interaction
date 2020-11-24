@@ -18,7 +18,7 @@ seed=1
 
 # create a temporary directory for this job and save the name
 seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${seed}`
-tempdir=/flash/FroeseU/fede/seed_${dir_seed}
+tempdir=/flash/FroeseU/fede/seed_${seed_dir}
 mkdir ${tempdir}
 
 # Start 'myprog' with input from bucket,
