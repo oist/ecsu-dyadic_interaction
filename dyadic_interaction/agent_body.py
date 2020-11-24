@@ -28,7 +28,7 @@ class AgentBody:
     angle: float = None
     wheels: np.ndarray = field(default_factory=lambda: np.array([0., 0.]))  # wheel displacement at next step
     collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge'
-    flag_collision: float = False
+    flag_collision: bool = False
     timeit: bool = False
 
     def __post_init__(self):

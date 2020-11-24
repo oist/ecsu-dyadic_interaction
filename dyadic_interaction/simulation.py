@@ -224,6 +224,7 @@ class Simulation:
             data_record['position'] = [[None,None] for _ in range(self.num_trials)]
             data_record['distance'] = [None for _ in range(self.num_trials)]
             data_record['angle'] = [[None,None] for _ in range(self.num_trials)]
+            data_record['collision'] = [[None,None] for _ in range(self.num_trials)]
             data_record['delta_xy'] = [[None,None] for _ in range(self.num_trials)]
             data_record['signal_strength'] = [[None,None] for _ in range(self.num_trials)]
             data_record['brain_input'] = [[None,None] for _ in range(self.num_trials)]
@@ -246,6 +247,7 @@ class Simulation:
                 else:
                     data_record['position'][t][a] = np.zeros((self.num_data_points, 2))
                     data_record['angle'][t][a] = np.zeros(self.num_data_points)
+                    data_record['collision'][t][a] = np.zeros(self.num_data_points)
                     data_record['delta_xy'][t][a] = np.zeros((self.num_data_points, 2))
                     data_record['signal_strength'][t][a] = np.zeros((self.num_data_points, 2))
                     data_record['brain_input'][t][a] = np.zeros((self.num_data_points, self.num_brain_neurons))
@@ -267,6 +269,7 @@ class Simulation:
                 agent_body = self.agents_pair_body[a]
                 data_record['position'][t][a][i] = agent_body.position
                 data_record['angle'][t][a][i] = agent_body.angle
+                data_record['collision'][t][a][i] = 1 if agent_body.flag_collision else 0
                 data_record['delta_xy'][t][a][i] = prev_delta_xy_agents[a]
                 data_record['signal_strength'][t][a][i] = signal_strength_agents[a]
                 data_record['brain_input'][t][a][i] = agent_net.brain.input
