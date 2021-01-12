@@ -49,9 +49,10 @@ if __name__ == "__main__":
         # create default path if it specified dir already exists
         if os.path.isdir(args.dir):
             iso_social = 'iso' if args.isolation=='on' else 'social'
-            subdir = '{}n_{}_{}_{}_coll-{}'.format(
-                args.num_neurons, args.entropy_type, args.entropy_target_value, 
-                iso_social, args.collision_type)
+            subdir = '{}n_rp-{}_{}_{}_{}_coll-{}'.format(
+                args.num_neurons, args.num_random_pairings, args.entropy_type, 
+                args.entropy_target_value, iso_social, args.collision_type
+            )
             seed_dir = 'seed_{}'.format(str(args.seed).zfill(3))
             outdir = os.path.join(args.dir,subdir,seed_dir)            
         else:
