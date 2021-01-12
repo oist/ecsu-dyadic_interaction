@@ -25,6 +25,7 @@ source env/bin/activate
 # ruse
 python -m dyadic_interaction.main \
 --dir $tempdir \
+--num_random_pairings 3 \
 --entropy_type shannon-dd \
 --entropy_target_value neural \
 --concatenate off \
