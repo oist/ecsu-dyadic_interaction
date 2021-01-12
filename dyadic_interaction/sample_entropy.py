@@ -47,8 +47,9 @@ def compute_std_from_random_runs(num_cores, num_good_runs, entropy_target_value)
     random_genotypes = [Evolution.get_random_genotype(rs, gen_size*2) for _ in range(num_all_runs)]
 
     def run_one_core(r):
-        data_record = {}
-        sim_array[r%num_cores].compute_performance(random_genotypes[r], data_record=data_record)        
+        data_record_list = []
+        sim_array[r%num_cores].compute_performance(random_genotypes, r, data_record_list=data_record_list)        
+        data_record = data_record_list[0]
         if entropy_target_value == 'neural': 
             concat_outputs = np.concatenate([
                 data_record['brain_output'][t][a]

@@ -35,22 +35,23 @@ def get_spinning_agents_data():
         agent_net.brain.biases = np.ones((2))
         agent_net.brain.weights = np.ones((2,2))
 
-    data_record = {}
+    data_record_list = []
     
     random_seed = utils.random_int()
 
-    perf = sim.compute_performance(rnd_seed=random_seed, data_record=data_record)
+    perf = sim.compute_performance(rnd_seed=random_seed, data_record_list=data_record_list)
     print("random perf: {}".format(perf))
 
     # from dyadic_interaction.visual import Visualization
     # vis = Visualization(sim)
     # vis.start_simulation_from_data(trial_index=0, data_record=data_record)
 
+    data_record = data_record_list[0]
     from dyadic_interaction import plot_results
     plot_results.plot_behavior(data_record)
-    plot_results.plot_activity(data_record)
+    plot_results.plot_neural_activity_scatter(data_record)
     plot_results.plot_inputs(data_record)
-    plot_results.plot_motor_output(data_record)
+    plot_results.plot_wheels(data_record)
     plot_results.plot_emitters(data_record)
 
     return data_record

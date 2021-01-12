@@ -104,7 +104,7 @@ def plot_norm_pos_x(data_record, trial='all'):
             x_data = pos_data[trial][a][:,0]
             x_data = (x_data - x_data.min()) / (x_data.max() - x_data.min())
             ax.plot(x_data) # label='X agent {}'.format(a)
-    plt.legend()
+    # plt.legend()
     plt.show()
 
 def plot_distances(data_record, trial='all'):    
@@ -121,7 +121,7 @@ def plot_distances(data_record, trial='all'):
         # print("Trial {}: Distance Std: {} e:{}".format(t, std,e))        
         ax = fig.add_subplot(1, num_cols, t+1)
         ax.plot(distances) # label='Angle agent {}'.format(a)
-    plt.legend()
+    # plt.legend()
     plt.show()
 
 def plot_neural_activity_scatter(data_record):
@@ -283,7 +283,7 @@ def plot_perceived_signal_strength(data_record):
             ax = fig.add_subplot(2, num_cols, (a*num_trials)+t+1)
             ax.plot(data_record['signal_strength'][t][a][:, 0]) # label='Signal strength to s1 agent {}'.format(a)
             ax.plot(data_record['signal_strength'][t][a][:, 1]) # label='Signal strength to s2 agent {}'.format(a)
-    plt.legend()
+    # plt.legend()
     plt.show()
 
 
@@ -346,25 +346,52 @@ def plot_random_simulation_results():
 
     random_seed = utils.random_int()
 
-    data_record = {}
-    perf = sim.compute_performance(random_genotype, random_seed, data_record)
+    data_record_list = []
+    
+    perf = sim.compute_performance([random_genotype], 0, random_seed, data_record_list)
     print("random perf: {}".format(perf))
 
 
-if __name__ == "__main__":
+def detect_escape():    
+    from pynput import keyboard
+    import sys
 
-    from dyadic_interaction.simulation import get_argparse, obtain_trial_data
+    def on_release(key):
+        if key == keyboard.Key.esc:
+            # Stop listener
+            sys.exit()
+
+    # Collect events until released    
+    with keyboard.Listener(on_release=on_release) as listener:
+        listener.join()
+
+if __name__ == "__main__":    
+    from dyadic_interaction.simulation import get_argparse, run_simulation_from_dir
+
+    # import threading
+    # threading.Thread(target=detect_escape, args=()).start()
     
     parser = get_argparse()
-    parser.add_argument('--trial', type=int, choices=[1,2,3,4], default=None, help='Trial index')    
+    parser.add_argument('--sim_num', type=int, default=1, help='Index of agent in population to load')
+    parser.add_argument('--trial_num', type=int, choices=[1,2,3,4], default=None, help='Trial index')        
     args = parser.parse_args()
 
-    args_dict = vars(args)
-    trial_index = 'all' if args_dict['trial'] is None else args_dict['trial'] - 1
-    del args_dict['trial']
+    args_dict = vars(args) # return __dict__ attribute of object 'args'
+    trial_index = 'all' if args_dict['trial_num'] is None else args_dict['trial_num'] - 1
+    sim_index = args_dict['sim_num'] - 1
+    del args_dict['trial_num']
+    del args_dict['sim_num']
 
     args = parser.parse_args()
-    evo, _, data_record = obtain_trial_data(**args_dict)
+    evo, _, data_record_list = run_simulation_from_dir(**args_dict)
+    
+    for s in range(len(data_record_list)):
+        sim_performance = data_record_list[s]['summary']['performance_sim']
+        trial_performances = data_record_list[s]['summary']['performance_trials']
+        marker = ' <--' if s == sim_index else ''
+        print("Sim #{} performance: {}{}".format(s+1, sim_performance, marker))
+        print("  Trials performances: {}".format(trial_performances))
 
+    data_record = data_record_list[sim_index]    
     plot_results(evo, data_record, trial_index)
 

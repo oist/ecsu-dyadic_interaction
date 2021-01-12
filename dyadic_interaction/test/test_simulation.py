@@ -84,14 +84,16 @@ def test_data(entropy_type):
 
     utils.make_dir_if_not_exists('data/master/')
 
-    data_record = {}
-    perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
+    data_record_list = []
+    perf = sim.compute_performance([agent_pair_genome], 0, data_record_list=data_record_list)
     print('Performance: {}'.format(perf))
-    for t in range(4):
+
+    data_record = data_record_list[0]
+    for t in range(sim.num_trials):
     # t = 0    
         for k,v in data_record.items():
             for a in range(2):
-                utils.save_numpy_data(v[t][a], 'data/master/{}_{}_{}.json'.format(k,t+1,a+1))
+                utils.save_json_numpy_data(v[t][a], 'data/master/{}_{}_{}.json'.format(k,t+1,a+1))
 
 
 def test_visual(entropy_type):
@@ -103,10 +105,11 @@ def test_visual(entropy_type):
         num_cores=1
     )
 
-    data_record = {}
-    perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
+    data_record_list = []
+    perf = sim.compute_performance(agent_pair_genome, data_record_list=data_record_list)
     print('Performance: {}'.format(perf))
 
+    data_record = data_record_list[0]
     vis = Visualization(sim)
     trial_index = 1
     vis.start_simulation_from_data(trial_index, data_record)
@@ -120,10 +123,11 @@ def test_plot(entropy_type):
         num_cores=1
     )
 
-    data_record = {}
-    perf = sim.compute_performance(agent_pair_genome, data_record=data_record)
+    data_record_list = []
+    perf = sim.compute_performance(agent_pair_genome, data_record_list=data_record_list)
     print('Performance: {}'.format(perf))
 
+    data_record = data_record_list[0]
     plot_results.plot_behavior(data_record)
 
 

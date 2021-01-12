@@ -321,7 +321,7 @@ def plot_simultation_results(evo, data_record):
     # plot_inputs(data_record)
     # plot_motor_output(data_record)
     # plot_emitters(data_record)
-    # utils.save_numpy_data(data_record['brain_output'], 'data/tmp_brains.json')    
+    # utils.save_json_numpy_data(data_record['brain_output'], 'data/tmp_brains.json')    
 
 
 def plot_random_simulation_results():
@@ -342,19 +342,19 @@ def plot_random_simulation_results():
 
     random_seed = utils.random_int()
 
-    data_record = {}
-    perf = sim.compute_performance(random_genotype, random_seed, data_record)
+    data_record_list = []
+    perf = sim.compute_performance([random_genotype], 0, random_seed, data_record_list)
     print("random perf: {}".format(perf))
 
 
 if __name__ == "__main__":
 
-    from dyadic_interaction.simulation import get_argparse, obtain_trial_data
+    from dyadic_interaction.simulation import get_argparse, run_simulation_from_dir
     
     parser = get_argparse()
 
     args = parser.parse_args()
-    evo, _, data_record = obtain_trial_data(**vars(args))
+    evo, _, data_record_list = run_simulation_from_dir(**vars(args))
 
-    plot_simultation_results(evo, data_record)
+    plot_simultation_results(evo, data_record_list[0])
 

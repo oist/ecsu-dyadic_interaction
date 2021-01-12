@@ -1,5 +1,5 @@
 import os
-from dyadic_interaction.simulation import obtain_trial_data
+from dyadic_interaction.simulation import run_simulation_from_dir
 from dyadic_interaction import spinning_agents
 import numpy as np
 from dyadic_interaction import entropy as ent
@@ -50,8 +50,8 @@ def analyze_file_angles(entropy_type):
     all_angles = []
     for exp in exp_dirs:
         exp_file = os.path.join(base_dir, exp)
-        _, _, trial_data = obtain_trial_data(exp_file, 500, 0,
-                                             random_position=False, invert_sim_type=False)
+        _, _, trial_data_list = run_simulation_from_dir(exp_file, 500, 0)
+        trial_data = trial_data_list[0]
         for a in range(2):
             for t in range(4):
                 angle = trial_data['angle'][t][a]

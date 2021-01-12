@@ -2,23 +2,17 @@
 TODO: Missing module docstring
 """
 
-import os
 import numpy as np
-from numpy import pi as pi
 from numpy.random import RandomState
 import pygame
-from dyadic_interaction.agent_body import AgentBody
-from dyadic_interaction import simulation
 from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
 from dyadic_interaction import utils
 from pyevolver.evolution import Evolution
-from pyevolver.json_numpy import NumpyListJsonEncoder
-import json
 
 MAX_CANVAS_SIZE = 500
-ZOOM_FACTOR = 1
-REFRESH_RATE = 40
+ZOOM_FACTOR = 2
+REFRESH_RATE = 20
 
 CANVAS_CENTER = np.array([MAX_CANVAS_SIZE/2, MAX_CANVAS_SIZE/2])
 SHIFT_CENTER_TO_FIRST_AGENT = False
@@ -229,12 +223,14 @@ def run_random_agents():
     )
 
     trial_index = 0
-    data_record = {}
+    data_record_list = []
     random_seed = utils.random_int()
 
-    perf = sim.compute_performance(random_genotype, random_seed, data_record)
+    perf = sim.compute_performance([random_genotype],0, random_seed, data_record_list=data_record_list)
     print("random perf: {}".format(perf))
 
+
+    data_record = data_record_list[0]
     vis = Visualization(sim)
     vis.start_simulation_from_data(trial_index, data_record)
 

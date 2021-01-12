@@ -21,6 +21,9 @@ if __name__ == "__main__":
     )
 
     parser.add_argument('--seed', type=int, default=0, help='Random seed')     
+    parser.add_argument('--num_random_pairings', type=int, default=0, help= \
+        '0 if agents are evolved in pairs (a genotype contains a pair of agents, \
+         N>1 if there is one genotype per agent and each agent will go though a simulation with N other agents (randomly chosen)')
     parser.add_argument('--entropy_type', choices=['shannon-1d', 'shannon-dd', 'transfer', 'sample'], default='shannon-dd', help='Type of entropy measure to use')
     parser.add_argument('--entropy_target_value', choices=['neural', 'distance', 'angle'], default='neural', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default='edge', help='Type of collison')
@@ -60,6 +63,7 @@ if __name__ == "__main__":
         outdir = None
         
     sim = Simulation(
+        num_random_pairings = args.num_random_pairings,
         entropy_type = args.entropy_type,
         entropy_target_value = args.entropy_target_value,
         concatenate=args.concatenate=='on',
@@ -78,11 +82,13 @@ if __name__ == "__main__":
         sim_config_json = os.path.join(outdir, 'simulation.json')
         sim.save_to_file(sim_config_json)
     
+    if args.num_random_pairings==0:
+        genotype_size *= 2 # two agents per genotype
 
     evo = Evolution(
         random_seed=args.seed,
         population_size=args.popsize,
-        genotype_size=genotype_size*2, # two agents per genotype
+        genotype_size=genotype_size, 
         evaluation_function=sim.evaluate,
         performance_objective=args.perf_obj,
         fitness_normalization_mode='NONE', # 'NONE', FPS', 'RANK', 'SIGMA' -> NO NORMALIZATION

@@ -64,7 +64,7 @@ def make_rand_vector(dims, random_state):
     return vec / mag
 
 
-def save_numpy_data(data, file_path):
+def save_json_numpy_data(data, file_path):
     import json
     from pyevolver.json_numpy import NumpyListJsonEncoder
     json.dump(
@@ -77,9 +77,9 @@ def save_numpy_data(data, file_path):
 
 def random_int(random_state=None, size=None):
     if random_state is None:
-        return np.random.randint(0, 2 ** 32 - 1, size)
+        return np.random.randint(0, 2147483647, size)
     else:
-        return random_state.randint(0, 2 ** 32 - 1, size)
+        return random_state.randint(0, 2147483647, size)
     
 def make_dir_if_not_exists(dir_path):
     if os.path.exists(dir_path):
