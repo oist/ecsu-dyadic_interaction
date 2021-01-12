@@ -28,7 +28,7 @@ if __name__ == "__main__":
     parser.add_argument('--entropy_target_value', choices=['neural', 'distance', 'angle'], default='neural', help='Type of value to be used to calculate entropy')   ##
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default='edge', help='Type of collison')
     parser.add_argument('--concatenate', choices=['on', 'off'], default='off', help='Whether values are concatenated across trials')
-    parser.add_argument('--isolation', choices=['on', 'off'], default='off', help='Whether simulation runs on single agents or two agents')
+    parser.add_argument('--isolation', choices=['on', 'off'], default='off', help='Whether simulation runs on single agents (ON - as if second agent does not exits) or two agents (OFF)')
     parser.add_argument('--dir', type=str, default=None, help='Output directory')
     parser.add_argument('--cores', type=int, default=4, help='Number of cores')        
     parser.add_argument('--num_neurons', type=int, default=2, help='Number of neurons in agent')    

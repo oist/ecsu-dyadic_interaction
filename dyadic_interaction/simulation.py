@@ -32,7 +32,7 @@ class Simulation:
     entropy_type: str = 'shannon-dd' # 'shannon-1d', 'shannon-dd', 'transfer', 'sample'
     entropy_target_value: str = 'neural' # 'neural', 'distance', 'angle'
     concatenate: bool = True # whether to concatenate values in entropy_target_value
-    isolation: bool = False # whether to run simulation on a single agent
+    isolation: bool = False # whether to run simulation on a single agent (as if second agent does not exits)
     genotype_structure: Dict = field(default_factory=lambda:gen_structure.DEFAULT_GEN_STRUCTURE(2))
     num_brain_neurons: int = None  # initialized in __post_init__
     collision_type: str = 'overlapping' # 'none', 'overlapping', 'edge'
