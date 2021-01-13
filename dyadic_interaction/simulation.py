@@ -662,7 +662,7 @@ class Simulation:
 def run_simulation_from_dir(dir, generation, genotype_idx, 
     random_pos_angle=False, entropy_type=None, entropy_target_value=None,
     concatenate=None, collision_type=None, ghost_index=None, initial_distance=None,
-    write_data=None):    
+    isolation=False, write_data=None):    
     ''' 
     utitity function to get data from a simulation
     '''
@@ -703,6 +703,10 @@ def run_simulation_from_dir(dir, generation, genotype_idx,
         sim.collision_type = collision_type
         sim.init_agents_pair()
         print("Forcing collision_type: {}".format(sim.collision_type))
+
+    if isolation != sim.isolation:
+        sim.isolation = isolation
+        print("Forcing isolation to: {}".format(isolation))
     
     data_record_list = []
     genotype_idx_unsorted = evo.population_sorted_indexes[genotype_idx]
@@ -772,6 +776,7 @@ def get_argparse():
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default=None, help='To change the type of collison')
     parser.add_argument('--initial_distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
     parser.add_argument('--ghost_index', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
+    parser.add_argument('--isolation', action='store_true', help='Whether simulation runs on single agents (as if second agent does not exits) or two agents')
     parser.add_argument('--write_data', action='store_true', help='Whether to output data (same directory as input)')
 
     return parser
