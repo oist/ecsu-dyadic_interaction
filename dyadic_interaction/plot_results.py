@@ -325,7 +325,9 @@ def plot_genotype_similarity(evo, sim):
         for i,pair in enumerate(population):
             a,b = np.array_split(pair, 2)  
             similarity[0][i] = 1 - np.linalg.norm(a-b)
-            
+        plt.imshow(similarity)
+        plt.colorbar()
+        plt.show()            
 
 def plot_results(evo, sim, data_record, trial='all'):
     
