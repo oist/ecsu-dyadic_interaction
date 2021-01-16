@@ -85,7 +85,7 @@ def test_data(entropy_type):
     utils.make_dir_if_not_exists('data/master/')
 
     data_record_list = []
-    perf = sim.compute_performance([agent_pair_genome], 0, data_record_list=data_record_list)
+    perf = sim.run_simulation([agent_pair_genome], 0, data_record_list=data_record_list)
     print('Performance: {}'.format(perf))
 
     data_record = data_record_list[0]
@@ -106,7 +106,7 @@ def test_visual(entropy_type):
     )
 
     data_record_list = []
-    perf = sim.compute_performance(agent_pair_genome, data_record_list=data_record_list)
+    perf = sim.run_simulation(agent_pair_genome, data_record_list=data_record_list)
     print('Performance: {}'.format(perf))
 
     data_record = data_record_list[0]
@@ -124,7 +124,7 @@ def test_plot(entropy_type):
     )
 
     data_record_list = []
-    perf = sim.compute_performance(agent_pair_genome, data_record_list=data_record_list)
+    perf = sim.run_simulation(agent_pair_genome, data_record_list=data_record_list)
     print('Performance: {}'.format(perf))
 
     data_record = data_record_list[0]

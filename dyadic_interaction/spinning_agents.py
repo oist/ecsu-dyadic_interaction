@@ -39,7 +39,7 @@ def get_spinning_agents_data():
     
     random_seed = utils.random_int()
 
-    perf = sim.compute_performance(rnd_seed=random_seed, data_record_list=data_record_list)
+    perf = sim.run_simulation(rnd_seed=random_seed, data_record_list=data_record_list)
     print("random perf: {}".format(perf))
 
     # from dyadic_interaction.visual import Visualization

@@ -37,7 +37,7 @@ def same_pairs():
         perfomances = []
         distances = [] 
         for i in tqdm(range(pop_size)):
-            perf = sim.compute_performance(evo.population, i)
+            perf = sim.run_simulation(evo.population, i)
             a,b = np.array_split(evo.population[i], 2)  
             perfomances.append(perf)
             distances.append(euclidean_distance(a, b))
@@ -67,7 +67,7 @@ def random_pairs():
             new_population_pairs.append(pair)
             distances.append(euclidean_distance(best_agent, b))
         for i in tqdm(range(pop_size-1)):
-            perf = sim.compute_performance(new_population_pairs, i)
+            perf = sim.run_simulation(new_population_pairs, i)
             perfomances.append(perf)
         write_data_to_file(perfomances, distances, output_file)
     plt.scatter(distances, perfomances)

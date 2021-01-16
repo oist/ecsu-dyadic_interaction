@@ -366,7 +366,7 @@ def plot_random_simulation_results():
 
     data_record_list = []
     
-    perf = sim.compute_performance([random_genotype], 0, random_seed, data_record_list)
+    perf = sim.run_simulation([random_genotype], 0, random_seed, data_record_list)
     print("random perf: {}".format(perf))
 
 

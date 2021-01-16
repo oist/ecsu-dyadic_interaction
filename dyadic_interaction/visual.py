@@ -226,7 +226,7 @@ def run_random_agents():
     data_record_list = []
     random_seed = utils.random_int()
 
-    perf = sim.compute_performance([random_genotype],0, random_seed, data_record_list=data_record_list)
+    perf = sim.run_simulation([random_genotype],0, random_seed, data_record_list=data_record_list)
     print("random perf: {}".format(perf))
 
 
