@@ -6,9 +6,7 @@ from dataclasses import dataclass, field
 import numpy as np
 from numpy import pi as pi
 from numpy.linalg import norm
-import trianglesolver
-from pyevolver.utils import linmap
-from dyadic_interaction.utils import modulo_radians
+from dyadic_interaction.utils import linmap, modulo_radians
 from pyevolver.timing import Timing
 from dyadic_interaction.utils import random_string
 
