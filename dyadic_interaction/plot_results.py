@@ -4,7 +4,6 @@ TODO: Missing module docstring
 
 import os
 import matplotlib.pyplot as plt
-from dyadic_interaction import simulation
 from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
 from dyadic_interaction import utils
@@ -311,11 +310,28 @@ def plot_emitters(data_record):
             ax.plot(data_record['emitter'][t][a]) # label='Emitter agent {}'.format(a)
     plt.show()
 
+def plot_genotype_similarity(evo, sim):
+    from sklearn.metrics.pairwise import pairwise_distances
+    population = evo.population
+    similarity = 1 - pairwise_distances(population)
+    # print(similarity.shape)
+    plt.imshow(similarity)
+    plt.colorbar()
+    plt.show()
 
-def plot_results(evo, data_record, trial='all'):
+    if sim.num_random_pairings==0:
+        # genotypes evolved in pairs
+        similarity = np.zeros((1, len(population)))
+        for i,pair in enumerate(population):
+            a,b = np.array_split(pair, 2)  
+            similarity[0][i] = 1 - np.linalg.norm(a-b)
+            
+
+def plot_results(evo, sim, data_record, trial='all'):
     
     plot_performances(evo)
     # plot_neural_activity_scatter(data_record)
+    # plot_genotype_similarity(evo, sim)
     plot_neural_states_scatter(data_record)
     plot_neural_activity(data_record, trial)    
     plot_angles(data_record)
@@ -383,7 +399,7 @@ if __name__ == "__main__":
     del args_dict['sim_num']
 
     args = parser.parse_args()
-    evo, _, data_record_list = run_simulation_from_dir(**args_dict)
+    evo, sim, data_record_list = run_simulation_from_dir(**args_dict)
     
     for s in range(len(data_record_list)):
         sim_performance = data_record_list[s]['summary']['performance_sim']
@@ -393,5 +409,5 @@ if __name__ == "__main__":
         print("  Trials performances: {}".format(trial_performances))
 
     data_record = data_record_list[sim_index]    
-    plot_results(evo, data_record, trial_index)
+    plot_results(evo, sim, data_record, trial_index)
 

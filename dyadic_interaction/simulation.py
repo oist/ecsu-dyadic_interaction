@@ -22,7 +22,7 @@ from pyevolver.timing import Timing
 from numpy.random import RandomState
 from numpy.linalg import norm
 from joblib import Parallel, delayed
-
+from copy import deepcopy
 
 @dataclass
 class Simulation:
@@ -262,8 +262,9 @@ class Simulation:
                 for a in range(2):
                     if ghost_index == a:
                         # copy all ghost agent's values from original_data_record
-                        for k in data_record:
-                            data_record[k][t][a] = original_data_record[k][t][a]                                
+                        if t == 0:
+                            for k in data_record:
+                                data_record[k] = deepcopy(original_data_record[k])
                     else:
                         data_record['position'][t][a] = np.zeros((self.num_data_points, 2))
                         data_record['angle'][t][a] = np.zeros(self.num_data_points)
@@ -290,24 +291,27 @@ class Simulation:
                     data_record['position'][t][a][i] = agent_body.position
                     data_record['angle'][t][a][i] = agent_body.angle
                     data_record['collision'][t][a][i] = 1 if agent_body.flag_collision else 0
-                    data_record['delta_xy'][t][a][i] = prev_delta_xy_agents[a]
+                    data_record['delta_xy'][t][a][i] = prev_delta_xy_agents[a]                                        
+                    data_record['wheels'][t][a][i] = agent_body.wheels
+                    data_record['emitter'][t][a][i] = emitter_agents[a]
                     data_record['signal_strength'][t][a][i] = signal_strength_agents[a]
-                    data_record['brain_input'][t][a][i] = agent_net.brain.input
+                    data_record['brain_input'][t][a][i] = agent_net.brain.input                    
                     data_record['brain_state'][t][a][i] = agent_net.brain.states
                     data_record['derivatives'][t][a][i] = agent_net.brain.dy_dt
                     data_record['brain_output'][t][a][i] = agent_net.brain.output
-                    data_record['wheels'][t][a][i] = agent_body.wheels
-                    data_record['emitter'][t][a][i] = emitter_agents[a]
                 self.timing.add_time('SIM_save_data', tim)                            
 
             def compute_signal_strength_agents():
                 for a in [x for x in range(2) if x != ghost_index]:    
-                    b = 1 - a
-                    # signal_strength = np.array([0.,0.])  # if we want to mimic zero signal strength
-                    signal_strength_agents[a] = self.agents_pair_body[a].get_signal_strength(
-                        self.agents_pair_body[b].position,
-                        emitter_agents[b]
-                    )
+                    if self.isolation and a==1:
+                        signal_strength_agents[a] = 0
+                    else:
+                        b = 1 - a
+                        # signal_strength = np.array([0.,0.])  # if we want to mimic zero signal strength
+                        signal_strength_agents[a] = self.agents_pair_body[a].get_signal_strength(
+                            self.agents_pair_body[b].position,
+                            emitter_agents[b]
+                        )
                 self.timing.add_time('SIM_get_signal_strength', tim)
 
             def update_wheels_emitter_agents(t,i):
@@ -362,13 +366,17 @@ class Simulation:
 
                 self.timing.add_time('SIM_prepare_agents_for_trials', tim)     
 
-            def compute_brain_input_agents():
+            def compute_brain_input_agents():                
                 for a in [x for x in range(2) if x != ghost_index]:    
+                    if self.isolation and a==1:
+                        continue
                     self.agents_pair_net[a].compute_brain_input(signal_strength_agents[a])
-                    self.timing.add_time('SIM_compute_brain_input', tim)
+                self.timing.add_time('SIM_compute_brain_input', tim)
 
             def compute_brain_euler_step_agents():          
                 for a in [x for x in range(2) if x != ghost_index]:              
+                    if self.isolation and a==1:
+                        continue
                     self.agents_pair_net[a].brain.euler_step()  # this sets agent.brain.output (2-dim vector)
                     self.timing.add_time('SIM_euler_step', tim)
 
@@ -716,15 +724,17 @@ def run_simulation_from_dir(dir, generation, genotype_idx,
         assert ghost_index in [0,1], 'ghost_index must be 0 or 1'        
         # get original results without ghost condition and no random
         func_arguments['ghost_index'] = None
-        func_arguments['random_position'] = False
+        func_arguments['random_pos_angle'] = False
         func_arguments['initial_distance'] = None
         func_arguments['write_data'] = None
         _, _, original_data_record_list = run_simulation_from_dir(**func_arguments) 
-        perf = sim.compute_performance(evo.population_unsorted, genotype_idx_unsorted, random_seed, data_record_list, 
-            ghost_index=ghost_index, original_data_record_list=original_data_record_list)
+        perf = sim.compute_performance(evo.population_unsorted, genotype_idx_unsorted, 
+            random_seed, data_record_list, ghost_index=ghost_index, 
+            original_data_record_list=original_data_record_list)
         print("Overall Performance recomputed (non-ghost agent only): {}".format(perf))
     else:                
-        perf = sim.compute_performance(evo.population_unsorted, genotype_idx_unsorted, random_seed, data_record_list)
+        perf = sim.compute_performance(evo.population_unsorted, genotype_idx_unsorted, 
+            random_seed, data_record_list)
         print("Overall Performance recomputed: {}".format(perf))
 
     if write_data:        
@@ -754,8 +764,6 @@ def run_simulation_from_dir(dir, generation, genotype_idx,
                         # single data for both agent (e.g., distance)
                         outfile = os.path.join(outdir, '{}_{}.json'.format(k,t+1))
                         utils.save_json_numpy_data(v[t], outfile)                      
-
-
 
     return evo, sim, data_record_list
 

@@ -5,7 +5,7 @@ TODO: Missing module docstring
 import numpy as np
 from scipy.special import expit # pylint: disable-msg=E0611
 from pyevolver.ctrnn import BrainCTRNN
-from pyevolver.utils import linmap
+from dyadic_interaction.utils import linmap
 from pyevolver.evolution import MIN_SEARCH_VALUE, MAX_SEARCH_VALUE
 
 # range of each site in the genotype (pyevolver)

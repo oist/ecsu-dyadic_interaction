@@ -11,7 +11,21 @@ import os
 TWO_PI = 2 * pi
 RANDOM_CHAR_SET = string.ascii_uppercase + string.digits
 
-
+def linmap(vin, rin, rout):
+    """
+    Map a vector between 2 ranges.
+    :param vin: input vector to be mapped
+    :param rin: range of vin to map from
+    :param rout: range to map to
+    :return: mapped output vector
+    :rtype np.ndarray
+    """
+    a = rin[0]
+    b = rin[1]
+    c = rout[0]
+    d = rout[1]
+    return ((c + d) + (d - c) * ((2 * vin - (a + b)) / (b - a))) / 2
+    
 def discretize(a, bins, min_v=0, max_v=1):
     a[a > max_v] = max_v
     a[a < min_v] = min_v
