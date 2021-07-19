@@ -680,9 +680,14 @@ def run_simulation_from_dir(dir, generation, genotype_idx,
     evo_files = [f for f in os.listdir(dir) if f.startswith('evo_')]
     assert len(evo_files)>0, "Can't find evo files in dir {}".format(dir)
     file_num_zfill = len(evo_files[0].split('_')[1].split('.')[0])
-    generation = str(generation).zfill(file_num_zfill)
-    sim_json_filepath = os.path.join(dir, 'simulation.json')
-    evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
+    if generation is None:
+        # assumes last generation
+        evo_files = sorted([f for f in os.listdir(dir) if f.startswith('evo')])
+        evo_json_filepath = os.path.join(dir, evo_files[-1])
+    else:
+        generation = str(generation).zfill(file_num_zfill)
+        evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
+    sim_json_filepath = os.path.join(dir, 'simulation.json')    
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
 
