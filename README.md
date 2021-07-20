@@ -29,7 +29,7 @@ The [paper](https://www.frontiersin.org/articles/10.3389/fnbot.2021.634085/full)
 
 ### Steps to reproduce the results:
 1. Install `python 3.7.3`
-2. Clone repository and checkout version tag `0.1.0`
+2. Clone repository and checkout version tag `1.0.0`
    - `git clone https://github.com/oist/ecsu-dyadic_interaction`
    - `cd ecsu-dyadic_interaction`
    - `git checkout 1.0.0`
