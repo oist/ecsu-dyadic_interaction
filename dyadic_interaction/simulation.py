@@ -242,7 +242,12 @@ class Simulation:
             for a in range(2):
                 if ghost_index == a:
                     # copy all ghost agent's values from original_data_record
-                    for k in data_record:
+                    data_record_keys = [
+                        'position', 'angle', 'collision', 'delta_xy', 'signal_strength', 
+                        'brain_input', 'brain_state', 'derivatives', 'brain_output', 
+                        'wheels', 'emitter'
+                    ]
+                    for k in data_record_keys:
                         data_record[k][t][a] = original_data_record[k][t][a]                                
                 else:
                     data_record['position'][t][a] = np.zeros((self.num_data_points, 2))
@@ -609,7 +614,7 @@ class Simulation:
 
         return performances
 
-def obtain_trial_data(dir, generation, genotype_idx, 
+def obtain_trial_data(dir, generation, genotype_idx=0, 
     random_pos_angle=None, entropy_type=None, entropy_target_value=None,
     concatenate=None, collision_type=None, ghost_index=None, initial_distance=None,
     write_data=None):    
@@ -621,9 +626,14 @@ def obtain_trial_data(dir, generation, genotype_idx,
     evo_files = [f for f in os.listdir(dir) if f.startswith('evo_')]
     assert len(evo_files)>0, "Can't find evo files in dir {}".format(dir)
     file_num_zfill = len(evo_files[0].split('_')[1].split('.')[0])
-    generation = str(generation).zfill(file_num_zfill)
-    sim_json_filepath = os.path.join(dir, 'simulation.json')
-    evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
+    if generation is None:
+        # assumes last generation
+        evo_files = sorted([f for f in os.listdir(dir) if f.startswith('evo')])
+        evo_json_filepath = os.path.join(dir, evo_files[-1])
+    else:
+        generation = str(generation).zfill(file_num_zfill)
+        evo_json_filepath = os.path.join(dir, 'evo_{}.json'.format(generation))
+    sim_json_filepath = os.path.join(dir, 'simulation.json')    
     sim = Simulation.load_from_file(sim_json_filepath)
     evo = Evolution.load_from_file(evo_json_filepath, folder_path=dir)
     genotype = evo.population[genotype_idx]
@@ -662,7 +672,7 @@ def obtain_trial_data(dir, generation, genotype_idx,
         assert ghost_index in [0,1], 'ghost_index must be 0 or 1'        
         # get original results without ghost condition and no random
         func_arguments['ghost_index'] = None
-        func_arguments['random_position'] = False
+        # func_arguments['random_position'] = False
         func_arguments['initial_distance'] = None
         func_arguments['write_data'] = None
         _, _, original_data_record = obtain_trial_data(**func_arguments) 
@@ -706,7 +716,7 @@ def get_argparse():
 
     parser.add_argument('--dir', type=str, help='Directory path')
     parser.add_argument('--generation', type=int, help='number of generation to load')
-    parser.add_argument('--genotype_idx', type=int, help='Index of agent in population to load')
+    parser.add_argument('--genotype_idx', type=int, default=0, help='Index of agent in population to load')
     parser.add_argument('--random_pos_angle', action='store_true', help='Whether to randomize initial pos and angle')
     parser.add_argument('--entropy_type', type=str, choices=['shannon', 'transfer', 'sample'], default=None, help='Whether to change the entropy_type')
     parser.add_argument('--entropy_target_value', type=str, default=None, help='To change the entropy_target_value')    
