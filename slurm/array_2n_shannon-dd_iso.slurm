@@ -3,8 +3,8 @@
 #SBATCH --time=4:00:00
 #SBATCH --job-name=dyadic_exp
 #SBATCH --output=slurm_%A-%a.out
-#SBATCH --mem=500G
-#SBATCH --cpus-per-task=128
+#SBATCH --mem=100G
+#SBATCH --cpus-per-task=100
 #SBATCH --array=1-10%10
 
 # load python module
@@ -14,12 +14,12 @@ module load java-jdk/14
 
 # create a temporary directory for this job and save the name
 seed_dir=${SLURM_JOB_ID}_`printf "%03d" ${SLURM_ARRAY_TASK_ID}`
-tempdir=/flash/FroeseU/georgina/${seed_dir}
+tempdir=/flash/FroeseU/fede/${seed_dir}
 mkdir ${tempdir}
 
 # Start 'myprog' with input from bucket,
 # and output to our temporary directory
-cd ~/gitlab/dyadic_interaction
+cd ~/Code/dyadic_interaction
 source env/bin/activate
 
 # ruse
@@ -28,7 +28,7 @@ python -m dyadic_interaction.main \
 --entropy_type shannon-dd \
 --entropy_target_value neural \
 --concatenate off \
---isolation off \
+--isolation on \
 --collision_type edge \
 --cores 96 \
 --seed ${SLURM_ARRAY_TASK_ID} \
@@ -39,7 +39,7 @@ python -m dyadic_interaction.main \
 
 # copy our result back to Bucket. We use "scp" to copy the data 
 # back  as bucket isn't writable directly from the compute nodes.
-rsync -avq $tempdir/* deigo:/bucket/FroeseU/georgina/gitlab
+rsync -avq $tempdir/* deigo:/bucket/FroeseU/fede/dyadic_interaction
 
 # Clean up by removing our temporary directory
 rm -r $tempdir
