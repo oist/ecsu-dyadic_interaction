@@ -147,6 +147,35 @@ def plot_neural_states_scatter(data_record):
             ax.plot(brain_states[-100:, 0], brain_states[-100:, 1], '-+', zorder=0) # brain_output[:, 2]
     plt.show()
 
+def plot_data_time(data_record, key, trial='all', label='data', log=False, isolated=False):
+    """
+    Line plot of simulation run for a specific key over simulation time steps.
+    """
+    exp_data = data_record[key]
+    num_trials = len(exp_data) if trial == 'all' else 1
+    fig = plt.figure(figsize=(10, 6))
+    title = key.replace('_', ' ').title() + " (Time)"
+    fig.suptitle(title)
+    for t in range(num_trials):
+        trial_data = exp_data[t] if trial == 'all' else exp_data[trial - 1]
+        if len(trial_data) <= 2:
+        # if type(trial_data) in (list, np.ndarray):
+            num_agents = 1 if isolated else len(trial_data)
+            for a in range(num_agents):
+                ax = fig.add_subplot(num_agents, num_trials, (a * num_trials) + t + 1)
+                if log: ax.set_yscale('log')
+                agent_trial_data = trial_data[a]
+                for n in range(agent_trial_data.shape[1]):
+                    ax.plot(agent_trial_data[:, n], label=f'{label} {n+1}')
+                    handles, labels = ax.get_legend_handles_labels()
+                    fig.legend(handles, labels, loc='upper right')
+        else:
+            ax = fig.add_subplot(1, num_trials, t + 1)
+            if log: ax.set_yscale('log')
+            ax.plot(trial_data)
+
+    plt.show()
+
 def plot_neural_activity(data_record, trial='all'):
     num_cols = num_trials = 4
     if trial == 'all':
@@ -335,7 +364,11 @@ def plot_results(evo, sim, data_record, trial='all'):
     # plot_neural_activity_scatter(data_record)
     # plot_genotype_similarity(evo, sim)
     plot_neural_states_scatter(data_record)
-    plot_neural_activity(data_record, trial)    
+    
+    # plot_neural_activity(data_record, trial)    
+    plot_data_time(data_record, 'brain_output', trial, isolated=sim.isolation, label='neuron')
+    
+    
     plot_angles(data_record)
     plot_distances(data_record, trial)
     # plot_norm_pos_x(data_record, trial)
@@ -382,34 +415,3 @@ def detect_escape():
     # Collect events until released    
     with keyboard.Listener(on_release=on_release) as listener:
         listener.join()
-
-if __name__ == "__main__":    
-    from dyadic_interaction.simulation import get_argparse, run_simulation_from_dir
-
-    # import threading
-    # threading.Thread(target=detect_escape, args=()).start()
-    
-    parser = get_argparse()
-    parser.add_argument('--sim_num', type=int, default=1, help='Index of agent in population to load')
-    parser.add_argument('--trial_num', type=int, choices=[1,2,3,4], default=None, help='Trial index')        
-    args = parser.parse_args()
-
-    args_dict = vars(args) # return __dict__ attribute of object 'args'
-    trial_index = 'all' if args_dict['trial_num'] is None else args_dict['trial_num'] - 1
-    sim_index = args_dict['sim_num'] - 1
-    del args_dict['trial_num']
-    del args_dict['sim_num']
-
-    args = parser.parse_args()
-    evo, sim, data_record_list = run_simulation_from_dir(**args_dict)
-    
-    for s in range(len(data_record_list)):
-        sim_performance = data_record_list[s]['summary']['performance_sim']
-        trial_performances = data_record_list[s]['summary']['performance_trials']
-        marker = ' <--' if s == sim_index else ''
-        print("Sim #{} performance: {}{}".format(s+1, sim_performance, marker))
-        print("  Trials performances: {}".format(trial_performances))
-
-    data_record = data_record_list[sim_index]    
-    plot_results(evo, sim, data_record, trial_index)
-

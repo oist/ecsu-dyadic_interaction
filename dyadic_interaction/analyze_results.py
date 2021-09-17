@@ -6,7 +6,7 @@ import sys
 
 def get_last_entropies_runs(base_dir, plot=True):    
     # base_dir = 'data/transfer_entropy/MAX'
-    exp_dirs = sorted(os.listdir(base_dir))
+    exp_dirs = sorted([d for d in os.listdir(base_dir) if d.startswith('seed_')])
     best_exp_performance = []
     last_evo_file = None
     seeds = []
