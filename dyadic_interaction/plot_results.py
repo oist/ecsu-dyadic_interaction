@@ -415,34 +415,3 @@ def detect_escape():
     # Collect events until released    
     with keyboard.Listener(on_release=on_release) as listener:
         listener.join()
-
-if __name__ == "__main__":    
-    from dyadic_interaction.simulation import get_argparse, run_simulation_from_dir
-
-    # import threading
-    # threading.Thread(target=detect_escape, args=()).start()
-    
-    parser = get_argparse()
-    parser.add_argument('--sim_num', type=int, default=1, help='Index of agent in population to load')
-    parser.add_argument('--trial_num', type=int, choices=[1,2,3,4], default=None, help='Trial index')        
-    args = parser.parse_args()
-
-    args_dict = vars(args) # return __dict__ attribute of object 'args'
-    trial_index = 'all' if args_dict['trial_num'] is None else args_dict['trial_num'] - 1
-    sim_index = args_dict['sim_num'] - 1
-    del args_dict['trial_num']
-    del args_dict['sim_num']
-
-    args = parser.parse_args()
-    evo, sim, data_record_list = run_simulation_from_dir(**args_dict)
-    
-    for s in range(len(data_record_list)):
-        sim_performance = data_record_list[s]['summary']['performance_sim']
-        trial_performances = data_record_list[s]['summary']['performance_trials']
-        marker = ' <--' if s == sim_index else ''
-        print("Sim #{} performance: {}{}".format(s+1, sim_performance, marker))
-        print("  Trials performances: {}".format(trial_performances))
-
-    data_record = data_record_list[sim_index]    
-    plot_results(evo, sim, data_record, trial_index)
-

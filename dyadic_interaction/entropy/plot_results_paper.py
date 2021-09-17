@@ -349,7 +349,7 @@ def plot_random_simulation_results():
 
 if __name__ == "__main__":
 
-    from dyadic_interaction.simulation import get_argparse, run_simulation_from_dir
+    from dyadic_interaction.run_from_dir import get_argparse, run_simulation_from_dir
     
     parser = get_argparse()
 
