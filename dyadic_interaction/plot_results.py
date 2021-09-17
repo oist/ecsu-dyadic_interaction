@@ -147,6 +147,35 @@ def plot_neural_states_scatter(data_record):
             ax.plot(brain_states[-100:, 0], brain_states[-100:, 1], '-+', zorder=0) # brain_output[:, 2]
     plt.show()
 
+def plot_data_time(data_record, key, trial='all', label='data', log=False, isolated=False):
+    """
+    Line plot of simulation run for a specific key over simulation time steps.
+    """
+    exp_data = data_record[key]
+    num_trials = len(exp_data) if trial == 'all' else 1
+    fig = plt.figure(figsize=(10, 6))
+    title = key.replace('_', ' ').title() + " (Time)"
+    fig.suptitle(title)
+    for t in range(num_trials):
+        trial_data = exp_data[t] if trial == 'all' else exp_data[trial - 1]
+        if len(trial_data) <= 2:
+        # if type(trial_data) in (list, np.ndarray):
+            num_agents = 1 if isolated else len(trial_data)
+            for a in range(num_agents):
+                ax = fig.add_subplot(num_agents, num_trials, (a * num_trials) + t + 1)
+                if log: ax.set_yscale('log')
+                agent_trial_data = trial_data[a]
+                for n in range(agent_trial_data.shape[1]):
+                    ax.plot(agent_trial_data[:, n], label=f'{label} {n+1}')
+                    handles, labels = ax.get_legend_handles_labels()
+                    fig.legend(handles, labels, loc='upper right')
+        else:
+            ax = fig.add_subplot(1, num_trials, t + 1)
+            if log: ax.set_yscale('log')
+            ax.plot(trial_data)
+
+    plt.show()
+
 def plot_neural_activity(data_record, trial='all'):
     num_cols = num_trials = 4
     if trial == 'all':
@@ -335,7 +364,11 @@ def plot_results(evo, sim, data_record, trial='all'):
     # plot_neural_activity_scatter(data_record)
     # plot_genotype_similarity(evo, sim)
     plot_neural_states_scatter(data_record)
-    plot_neural_activity(data_record, trial)    
+    
+    # plot_neural_activity(data_record, trial)    
+    plot_data_time(data_record, 'brain_output', trial, isolated=sim.isolation, label='neuron')
+    
+    
     plot_angles(data_record)
     plot_distances(data_record, trial)
     # plot_norm_pos_x(data_record, trial)

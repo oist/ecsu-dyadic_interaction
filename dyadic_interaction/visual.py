@@ -31,7 +31,7 @@ kb_motor_increment = 0.2
 
 class Visualization:
 
-    def __init__(self, simulation=None):
+    def __init__(self, simulation=None, video_path=None):
 
         self.simulation = simulation or Simulation()
 
@@ -49,8 +49,16 @@ class Visualization:
         #     agent_sensors_divergence_angle=self.agent_sensors_divergence_angle
         # )
 
+        self.video_path = video_path
+        self.video_mode = self.video_path is not None        
+
         pygame.init()
-        self.main_surface = pygame.display.set_mode((MAX_CANVAS_SIZE, MAX_CANVAS_SIZE))
+
+        if self.video_mode:
+            self.video_tmp_dir = tempfile.mkdtemp(dir=os.path.dirname(self.video_path))
+            self.main_surface = pygame.Surface((MAX_CANVAS_SIZE, MAX_CANVAS_SIZE))
+        else:
+            self.main_surface = pygame.display.set_mode((MAX_CANVAS_SIZE, MAX_CANVAS_SIZE))
 
 
     def draw_agent(self, a_index, center_shift):
@@ -115,7 +123,7 @@ class Visualization:
             center_shift = - self.agents_pair_body[0].position if SHIFT_CENTER_TO_FIRST_AGENT else 0
 
             # draw agents
-            for a in range(2):                
+            for a in range(2): 
                 self.draw_agent(a, center_shift)
 
             for a in range(2):
@@ -156,16 +164,21 @@ class Visualization:
         agent_pair_angle = data_record['angle'][trial_index]
 
         i = 0
+        num_zeros = int(np.ceil(np.log10(self.simulation.num_data_points)))
+
+        if self.video_mode:
+            pbar = tqdm(total=self.simulation.num_data_points)
 
         while running and i<duration:
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    running = False
-                elif event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.quit()
-                        return
+            if not self.video_mode:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        running = False
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            pygame.quit()
+                            return
 
             # reset canvas
             self.main_surface.fill(black)
@@ -174,18 +187,30 @@ class Visualization:
 
             # draw agents
             for a in range(2):
+                if self.simulation.isolation and a==1:
+                    break                               
                 agent = self.agents_pair_body[a]                 
                 agent.set_position_and_angle(agent_pair_pos[a][i], agent_pair_angle[a][i])
                 self.draw_agent(a, center_shift)
 
             # final traformations
             self.final_tranform_main_surface()
-            pygame.display.update()
 
-            clock.tick(REFRESH_RATE)
+            if self.video_mode:
+                step = str(i+1).zfill(num_zeros)
+                filepath = os.path.join(self.video_tmp_dir, f"{step}.png")
+                pygame.image.save(self.main_surface, filepath)
+                pbar.update()
+            else:                
+                pygame.display.update()
+                clock.tick(REFRESH_RATE)
 
             i += 1
 
+        if self.video_mode:
+            self.export_video()
+        
+        pygame.quit()
 
     def final_tranform_main_surface(self):
         '''
@@ -195,6 +220,17 @@ class Visualization:
         '''
         self.main_surface.blit(pygame.transform.flip(self.main_surface, False, True), dest=(0, 0))
 
+    def export_video(self):
+        import ffmpeg
+        import shutil
+        (
+            ffmpeg
+            .input(f'{self.video_tmp_dir}/*.png', pattern_type='glob', framerate=REFRESH_RATE)
+            .output(self.video_path, pix_fmt='yuv420p')
+            .overwrite_output()
+            .run(quiet=True)
+        )        
+        shutil.rmtree(self.video_tmp_dir)
 
 def draw_line(surface, x1y1, theta, length):
     x2y2 = (
