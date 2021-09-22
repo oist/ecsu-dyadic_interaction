@@ -17,7 +17,7 @@ def run_simulation_from_dir(dir, generation, genotype_idx, **kwargs):
     collision_type = kwargs.get('collision_type', None)
     ghost_index = kwargs.get('ghost_index', None)
     initial_distance = kwargs.get('initial_distance', None)
-    isolation = kwargs.get('isolation', False)
+    isolation = kwargs.get('isolation', None)
     write_data = kwargs.get('write_data', None)
 
 
@@ -64,7 +64,7 @@ def run_simulation_from_dir(dir, generation, genotype_idx, **kwargs):
         sim.init_agents_pair()
         print("Forcing collision_type: {}".format(sim.collision_type))
 
-    if isolation != sim.isolation:
+    if isolation is not None:
         sim.isolation = isolation
         print("Forcing isolation to: {}".format(isolation))
     
@@ -139,7 +139,7 @@ def get_argparse():
     parser.add_argument('--collision_type', choices=['none', 'overlapping', 'edge'], default=None, help='To change the type of collison')
     parser.add_argument('--initial_distance', type=int, default=None, help='Initial distance (must be >=0 or else it will be set as in simulation default)')    
     parser.add_argument('--ghost_index', type=int, default=None, help='Ghost index (must be 0 or 1 or else ghost condition will not be enabled)')    
-    parser.add_argument('--isolation', action='store_true', help='Whether simulation runs on single agents (as if second agent does not exits) or two agents')
+    parser.add_argument('--isolation', action='store_true', default=None, help='Whether simulation runs on single agents (as if second agent does not exits) or two agents')
     parser.add_argument('--write_data', action='store_true', help='Whether to output data (same directory as input)')
 
     # additional args (viz, plot)
