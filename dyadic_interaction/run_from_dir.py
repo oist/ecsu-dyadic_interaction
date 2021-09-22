@@ -2,10 +2,9 @@ import os
 from numpy.random import RandomState
 from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import utils
-from dyadic_interaction.visual import Visualization
 from dyadic_interaction.plot_results import plot_results
 
-def run_simulation_from_dir(dir, generation, genotype_idx, **kwargs):    
+def run_simulation_from_dir(dir, generation=None, genotype_idx=0, **kwargs):    
     ''' 
     utitity function to get data from a simulation
     '''
@@ -172,6 +171,7 @@ if __name__ == "__main__":
         plot_results(evo, sim, data_record, trial_index)
 
     if args.viz:
+        from dyadic_interaction.visual import Visualization
         trial_index = args.trial - 1 if args.trial is not None else 1 # np.argmax(trials_perfs)
         
         vis = Visualization(sim)
