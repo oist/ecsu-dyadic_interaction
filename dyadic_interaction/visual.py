@@ -2,13 +2,17 @@
 TODO: Missing module docstring
 """
 
+import os
+import tempfile
 import numpy as np
 from numpy.random import RandomState
 import pygame
+from tqdm import tqdm
 from dyadic_interaction.simulation import Simulation
 from dyadic_interaction import gen_structure
 from dyadic_interaction import utils
 from pyevolver.evolution import Evolution
+
 
 MAX_CANVAS_SIZE = 500
 ZOOM_FACTOR = 2

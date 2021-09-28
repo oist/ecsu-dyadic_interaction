@@ -145,6 +145,7 @@ def get_argparse():
     parser.add_argument('--plot', action='store_true', help='Plot')
     parser.add_argument('--sim_num', type=int, default=1, help='Index of agent in population to load')
     parser.add_argument('--viz', action='store_true', help='Visualize trial')    
+    parser.add_argument('--mp4', type=str, help='Output file for visualization')    
     parser.add_argument('--trial', type=int, choices=[1,2,3,4], help='Visualize Trial (1-index)')    
     parser.add_argument('--plot_trial_num', type=int, choices=[1,2,3,4], help='Plot Trial index (1-index)')    
 
@@ -174,7 +175,7 @@ if __name__ == "__main__":
         from dyadic_interaction.visual import Visualization
         trial_index = args.trial - 1 if args.trial is not None else 1 # np.argmax(trials_perfs)
         
-        vis = Visualization(sim)
+        vis = Visualization(sim, video_path=args.mp4)
 
         data_record = data_record_list[sim_index]    
         vis.start_simulation_from_data(trial_index, data_record)
