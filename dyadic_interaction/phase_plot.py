@@ -1,3 +1,4 @@
+from dyadic_interaction.agent_network import AgentNetwork
 from dyadic_interaction.run_from_dir import run_simulation_from_dir
 import numpy as np
 import matplotlib.pyplot as plt
@@ -133,26 +134,47 @@ def plot_3n_iso(dir, agent_idx, trial_idx, animation):
     evo, sim, data_record_list = run_simulation_from_dir(dir)
     genotype_evo = evo.population[0]
     genotype_sim = np.array(sim.genotype_population[0])
+    # genotypes_agent = np.array_split(genotype_sim, 2)[0] # paired genotype
     assert np.all(genotype_evo==genotype_sim)
     agent_ctrnn = sim.agents_pair_net[agent_idx].brain
     
     brain_state_trial = np.array(data_record_list[0]['brain_state'][trial_idx][agent_idx])
-    # shape: (2000, 3)
+    num_steps, num_neurons = brain_state_trial.shape # (2000, 3)
+
+    brain_state_trial_recomputed = np.zeros_like(brain_state_trial)
+    # agent = AgentNetwork(num_neurons, sim.brain_step_size, sim.genotype_structure)
+    # agent.genotype_to_phenotype(genotypes_agent)
+    agent = sim.agents_pair_net[0]
+    
+    signal_strength = np.zeros(2)
+    agent_brain = agent.brain
+
+    agent.init_params(
+        brain_states = np.zeros(num_neurons)
+    )
+    
+    # agent_ctrnn.states = np.zeros(num_neurons)
+    # agent_ctrnn.input = np.zeros(num_neurons)
+    # agent_ctrnn.dy_dt = np.zeros(num_neurons)    
+    
+    for i in range(num_steps):
+        brain_state_trial_recomputed[i] = agent_brain.states
+        # signal_strength = np.random.random_sample(2) * 5
+        agent.compute_brain_input(signal_strength)        
+        agent_brain.euler_step()
 
     plot_phase_space_3N(agent_ctrnn, brain_state_trial, animation)    
-
-
-
+    # plot_phase_space_3N(agent_ctrnn, brain_state_trial_recomputed, animation)    
 
 
 
 if __name__ == "__main__":
-    # plot_3n_iso(
-    #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_005',
-    #     agent_idx = 0,
-    #     trial_idx = 0,
-    #     animation=False
-    # )
+    plot_3n_iso(
+        dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_005',
+        agent_idx = 0,
+        trial_idx = 0,
+        animation=False
+    )
     # plot_3n_iso(
     #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_social_coll-edge/seed_001',
     #     agent_idx = 0,
@@ -164,8 +186,8 @@ if __name__ == "__main__":
     #     agent_idx = 0s,
     #     trial_idx = 0
     # )
-    plot_2n(
-        dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_iso_coll-edge/seed_006',
-        agent_idx = 0,
-        trial_idx = 0
-    )
+    # plot_2n(
+    #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_iso_coll-edge/seed_006',
+    #     agent_idx = 0,
+    #     trial_idx = 0
+    # )
