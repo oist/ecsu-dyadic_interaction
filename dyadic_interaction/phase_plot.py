@@ -53,7 +53,7 @@ def plot_phase_space_2N(ctrnn_brain, states_series):
     plt.title('Phase portrait and a single trajectory', fontsize=16)
     plt.show()
 
-def plot_phase_space_3N(ctrnn_brain, states_series, animation=False):
+def plot_phase_space_3N(ctrnn_brain, states_series, render_animation=False):
     """ Plot the phase portrait
     We'll use matplotlib quiver function, which wants as arguments the grid of x and y coordinates,
     and the derivatives of these coordinates.
@@ -109,11 +109,11 @@ def plot_phase_space_3N(ctrnn_brain, states_series, animation=False):
         ax.view_init(elev=10., azim=i)
         return fig,    
     
-    if animation:
+    if render_animation:
         anim = animation.FuncAnimation(fig, animate, init_func=init,
                                 frames=360, interval=20, blit=True)
 
-        anim.save('basic_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
+        anim.save('state_plot_animation.mp4', fps=30, extra_args=['-vcodec', 'libx264'])
     else:
         init()
         plt.show()
@@ -130,7 +130,7 @@ def plot_2n(dir, agent_idx, trial_idx):
 
     plot_phase_space_2N(agent_ctrnn, brain_state_trial)    
 
-def plot_3n_iso(dir, agent_idx, trial_idx, animation):    
+def plot_3n_iso(dir, agent_idx, trial_idx, render_animation):    
     evo, sim, data_record_list = run_simulation_from_dir(dir)
     genotype_evo = evo.population[0]
     genotype_sim = np.array(sim.genotype_population[0])
@@ -151,6 +151,7 @@ def plot_3n_iso(dir, agent_idx, trial_idx, animation):
 
     agent.init_params(
         brain_states = np.zeros(num_neurons)
+        # brain_states = np.array([2.,2.,2.])
     )
     
     # agent_ctrnn.states = np.zeros(num_neurons)
@@ -163,23 +164,23 @@ def plot_3n_iso(dir, agent_idx, trial_idx, animation):
         agent.compute_brain_input(signal_strength)        
         agent_brain.euler_step()
 
-    plot_phase_space_3N(agent_ctrnn, brain_state_trial, animation)    
-    # plot_phase_space_3N(agent_ctrnn, brain_state_trial_recomputed, animation)    
+    # plot_phase_space_3N(agent_ctrnn, brain_state_trial, render_animation)    
+    plot_phase_space_3N(agent_ctrnn, brain_state_trial_recomputed, render_animation)    
 
 
 
 if __name__ == "__main__":
     plot_3n_iso(
-        dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_005',
+        dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_004',
         agent_idx = 0,
         trial_idx = 0,
-        animation=False
+        render_animation=False
     )
     # plot_3n_iso(
     #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_social_coll-edge/seed_001',
     #     agent_idx = 0,
     #     trial_idx = 0,
-    #     animation=False
+    #     render_animation=False
     # )    
     # plot_2n(
     #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_social_coll-edge/seed_004',
