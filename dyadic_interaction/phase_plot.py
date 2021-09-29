@@ -42,14 +42,16 @@ def plot_phase_space_2N(agent_brain, states_multi_series):
     plt.figure(figsize=(10,6))
     plt.quiver(Y1, Y2, changes_y1, changes_y2, color='black', alpha=.75)
 
-    for i in range(len(states_multi_series)):
+    num_traj = len(states_multi_series)
+    num_traj_str = 'single' if num_traj == 1 else 'multi'
+    for i in range(num_traj):
         states_series = states_multi_series[i]
         plt.plot(states_series[:, 0], states_series[:, 1]) # , marker=".", markersize=5
 
     # plt.plot(states_series[0][0], states_series[0][1], marker='x', color='orange', zorder=1)
     plt.xlabel('y1', fontsize=14)
     plt.ylabel('y2', fontsize=14)
-    plt.title('Phase portrait and a single trajectory', fontsize=16)
+    plt.title(f'Phase portrait and a {num_traj_str} trajectory', fontsize=16)
     plt.show()
 
 
@@ -112,13 +114,16 @@ def plot_phase_space_3N(agent_brain, states_multi_series, render_animation=False
     fig = plt.figure()
     ax = Axes3D(fig)
     ax.quiver(Y1, Y2, Y3, changes_y1, changes_y2, changes_y3, color='gray', alpha=.75)
+
+    num_traj = len(states_multi_series)
+    num_traj_str = 'single' if num_traj == 1 else 'multi'
     
     def init():        
-        for i in range(len(states_multi_series)):
+        for i in range(num_traj):
             states_series = states_multi_series[i]
             ax.plot(states_series[:, 0], states_series[:, 1], states_series[:, 2]) # , marker=".", markersize=5
 
-        ax.set_title('Phase portrait and multi trajectory', fontsize=16)
+        ax.set_title(f'Phase portrait and {num_traj_str} trajectory', fontsize=16)
         return fig,
     
     def animate(i):
@@ -161,7 +166,7 @@ def plot_phase_traj_3N(states_multi_series, render_animation=False):
         init()
         plt.show()
 
-def plot_2n(dir, agent_idx, trial_idx):
+def plot_2n(dir, agent_idx, trial_idx, trim=None):
     evo, sim, data_record_list = run_simulation_from_dir(dir)
     genotype_evo = evo.population[0]
     genotype_sim = np.array(sim.genotype_population[0])
@@ -204,14 +209,15 @@ def plot_2n(dir, agent_idx, trial_idx):
     states_multi_series.append(brain_state_trial)
     
     # trim last part
-    states_multi_series = [
-        series[-50:,:] for series in states_multi_series
-    ]
+    if trim is not None:
+        states_multi_series = [
+            series[-1*trim:,:] for series in states_multi_series
+        ]
 
     plot_phase_space_2N(agent_brain, states_multi_series)    
     # plot_phase_traj_2N(states_multi_series)
 
-def plot_3n(dir, agent_idx, trial_idx, render_animation):    
+def plot_3n(dir, agent_idx, trial_idx, trim=None, render_animation=False):    
     evo, sim, data_record_list = run_simulation_from_dir(dir)
     genotype_evo = evo.population[0]
     genotype_sim = np.array(sim.genotype_population[0])
@@ -253,9 +259,10 @@ def plot_3n(dir, agent_idx, trial_idx, render_animation):
     states_multi_series.append(brain_state_trial)
 
     # trim last part
-    states_multi_series = [
-        series[-500:,:] for series in states_multi_series
-    ]
+    if trim is not None:
+        states_multi_series = [
+            series[-1*trim:,:] for series in states_multi_series
+        ]
     
     plot_phase_space_3N(agent_brain, states_multi_series, render_animation)    
     # plot_phase_traj_3N(states_multi_series, render_animation)
@@ -267,21 +274,25 @@ if __name__ == "__main__":
     #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_004',
     #     agent_idx = 0,
     #     trial_idx = 0,
-    #     render_animation=False
+    #     trim=100,
+    #     render_animation=True
     # )
     # plot_3n(
     #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_social_coll-edge/seed_001',
     #     agent_idx = 0,
     #     trial_idx = 0,
+    #     trim=30,
     #     render_animation=False
     # )    
-    plot_2n(
-        dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_social_coll-edge/seed_004',
-        agent_idx = 0,
-        trial_idx = 0
-    )
     # plot_2n(
-    #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_iso_coll-edge/seed_006',
+    #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_social_coll-edge/seed_004',
     #     agent_idx = 0,
+    #     trim=30,
     #     trial_idx = 0
     # )
+    plot_2n(
+        dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_iso_coll-edge/seed_006',
+        agent_idx = 0,
+        trim=100,    
+        trial_idx = 0
+    )
