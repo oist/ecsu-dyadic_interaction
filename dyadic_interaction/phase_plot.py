@@ -116,7 +116,7 @@ def plot_phase_space_3N(agent_brain, states_multi_series, render_animation=False
     def init():        
         for i in range(len(states_multi_series)):
             states_series = states_multi_series[i]
-            ax.plot(states_series[:, 0], states_series[:, 1]) # , marker=".", markersize=5
+            ax.plot(states_series[:, 0], states_series[:, 1], states_series[:, 2]) # , marker=".", markersize=5
 
         ax.set_title('Phase portrait and multi trajectory', fontsize=16)
         return fig,
@@ -203,6 +203,11 @@ def plot_2n(dir, agent_idx, trial_idx):
     brain_state_trial = np.array(data_record_list[0]['brain_state'][trial_idx][agent_idx])
     states_multi_series.append(brain_state_trial)
     
+    # trim last part
+    states_multi_series = [
+        series[-50:,:] for series in states_multi_series
+    ]
+
     plot_phase_space_2N(agent_brain, states_multi_series)    
     # plot_phase_traj_2N(states_multi_series)
 
@@ -246,6 +251,11 @@ def plot_3n(dir, agent_idx, trial_idx, render_animation):
 
     brain_state_trial = np.array(data_record_list[0]['brain_state'][trial_idx][agent_idx])
     states_multi_series.append(brain_state_trial)
+
+    # trim last part
+    states_multi_series = [
+        series[-500:,:] for series in states_multi_series
+    ]
     
     plot_phase_space_3N(agent_brain, states_multi_series, render_animation)    
     # plot_phase_traj_3N(states_multi_series, render_animation)
@@ -253,23 +263,23 @@ def plot_3n(dir, agent_idx, trial_idx, render_animation):
 
 
 if __name__ == "__main__":
-    plot_3n(
-        dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_004',
-        agent_idx = 0,
-        trial_idx = 0,
-        render_animation=True
-    )
+    # plot_3n(
+    #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_iso_coll-edge/seed_004',
+    #     agent_idx = 0,
+    #     trial_idx = 0,
+    #     render_animation=False
+    # )
     # plot_3n(
     #     dir = 'data/frontiers_paper_new/3n_rp-0_shannon-dd_neural_social_coll-edge/seed_001',
     #     agent_idx = 0,
     #     trial_idx = 0,
     #     render_animation=False
     # )    
-    # plot_2n(
-    #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_social_coll-edge/seed_004',
-    #     agent_idx = 0,
-    #     trial_idx = 0
-    # )
+    plot_2n(
+        dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_social_coll-edge/seed_004',
+        agent_idx = 0,
+        trial_idx = 0
+    )
     # plot_2n(
     #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_iso_coll-edge/seed_006',
     #     agent_idx = 0,
