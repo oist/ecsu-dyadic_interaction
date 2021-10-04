@@ -166,7 +166,7 @@ def plot_phase_traj_3N(states_multi_series, render_animation=False):
         init()
         plt.show()
 
-def plot_2n(dir, agent_idx, trial_idx, trim=None):
+def plot_2n(dir, agent_idx, trial_idx, trim=None, random_strength=False):
     evo, sim, data_record_list = run_simulation_from_dir(dir)
     genotype_evo = evo.population[0]
     genotype_sim = np.array(sim.genotype_population[0])
@@ -179,16 +179,22 @@ def plot_2n(dir, agent_idx, trial_idx, trim=None):
 
     def compute_brain_states(init_brain_states):
         brain_state_trial_recomputed = np.zeros_like(brain_state_trial)
-        signal_strength = np.zeros(2)
+        
+        if random_strength:
+            signal_strength = np.random.random_sample(2)
+        else:
+            signal_strength = np.zeros(2)
 
         agent_brain.states = init_brain_states
+        
         agent.compute_brain_input(signal_strength)        
         agent_brain.compute_output()
         
         for i in range(num_steps):
             brain_state_trial_recomputed[i] = agent_brain.states
-            # signal_strength = np.random.random_sample(2) * 5            
             agent_brain.euler_step()
+            if random_strength:
+                agent.compute_brain_input(signal_strength)
 
         return brain_state_trial_recomputed
 
@@ -287,12 +293,13 @@ if __name__ == "__main__":
     # plot_2n(
     #     dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_social_coll-edge/seed_004',
     #     agent_idx = 0,
+    #     trial_idx = 0,
     #     trim=30,
-    #     trial_idx = 0
     # )
     plot_2n(
         dir = 'data/frontiers_paper_new/2n_rp-0_shannon-dd_neural_iso_coll-edge/seed_006',
         agent_idx = 0,
-        trim=100,    
-        trial_idx = 0
+        trial_idx = 0,
+        trim=None, # 100
+        random_strength = True
     )
