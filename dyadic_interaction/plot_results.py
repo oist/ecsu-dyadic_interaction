@@ -24,7 +24,7 @@ def plot_performances(evo):
     plt.show()
 
 
-def plot_behavior(data_record, trial='all'):
+def plot_behavior(sim, data_record, trial='all'):
     agent_pos = [
         [x[0].transpose(), x[1].transpose()]
         for x in data_record['position']
@@ -38,6 +38,8 @@ def plot_behavior(data_record, trial='all'):
         for t in range(num_trials):
             ax = fig.add_subplot(1, num_cols, t + 1)
             for a in range(2):
+                if sim.isolation and a==1:
+                    break
                 ax.scatter(agent_pos[t][a][0][0],
                            agent_pos[t][a][1][0], label='Tracker start',
                            color='orange')
@@ -54,6 +56,8 @@ def plot_behavior(data_record, trial='all'):
         fig = plt.figure(figsize=(6, 5))
         # fig.suptitle("Agents behavior")
         for a in range(2):
+            if sim.isolation and a==1:
+                    break
             plt.scatter(agent_pos[trial - 1][a][0][0],
                         agent_pos[trial - 1][a][1][0], label='Tracker start',
                         color='orange')
@@ -372,7 +376,7 @@ def plot_results(evo, sim, data_record, trial='all'):
     plot_angles(data_record)
     plot_distances(data_record, trial)
     # plot_norm_pos_x(data_record, trial)
-    plot_behavior(data_record, trial)    
+    plot_behavior(sim, data_record, trial)    
     plot_emitters(data_record)
     plot_perceived_signal_strength(data_record)
     plot_inputs(data_record)
