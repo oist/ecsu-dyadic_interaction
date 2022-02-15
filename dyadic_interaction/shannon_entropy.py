@@ -106,7 +106,7 @@ def get_shannon_entropy_dd_simplified(data, min_v=0., max_v=1.):
 
 def test_1d():
     # a = np.array([1.1, 2.2, 3.3, 4.4])
-    a = np.random.random(1000)
+    a = np.random.random(1000) # pylint: disable-msg=no-member
     # print(a)
     distance_entropy = get_shannon_entropy_1d(a, min_v=0., max_v=1.)
     print(distance_entropy)
@@ -127,7 +127,7 @@ def test_dd():
     print(norm_entropy)
 
 def test_dd_simple():
-    data = np.random.random((100,5))
+    data = np.random.random((100,5)) # pylint: disable-msg=no-member
     # entropy_dd = get_shannon_entropy_dd(data)
     entropy_dd_simple = get_shannon_entropy_dd_simplified(data)
     # print('entropy_dd: {}'.format(entropy_dd))
